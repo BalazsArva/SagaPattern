@@ -8,7 +8,7 @@ using SagaDemo.InventoryAPI.Utilities.Extensions;
 
 namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 {
-    public class AddProductRequestsCommandHandler
+    public class AddProductRequestsCommandHandler : IAddProductRequestsCommandHandler
     {
         private readonly IDocumentStore _documentStore;
 
