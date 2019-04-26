@@ -40,7 +40,9 @@ namespace SagaDemo.LoyaltyPointsAPI.Extensions
         public static IServiceCollection AddValidators(this IServiceCollection services)
         {
             return services
-                .AddSingleton<IValidator<ConsumePointsCommand>, ConsumePointsCommandValidator>();
+                .AddSingleton<IValidator<ConsumePointsCommand>, ConsumePointsCommandValidator>()
+                .AddSingleton<IValidator<RefundPointsCommand>, RefundPointsCommandValidator>()
+                .AddSingleton<IValidator<EarnPointsCommand>, EarnPointsCommandValidator>();
         }
     }
 }
