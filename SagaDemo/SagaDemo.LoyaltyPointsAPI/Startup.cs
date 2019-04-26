@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SagaDemo.Common.AspNetCore.Extensions;
 using SagaDemo.LoyaltyPointsAPI.Extensions;
 
 namespace SagaDemo.LoyaltyPointsAPI
@@ -18,7 +19,12 @@ namespace SagaDemo.LoyaltyPointsAPI
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services
+                .AddMvc(opts =>
+                {
+                    opts.AddCommonFilters();
+                })
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddLoyaltyDb(Configuration);
             services.AddHandlers();

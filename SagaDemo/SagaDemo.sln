@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SagaDemo.DeliveryAPI", "Sag
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SagaDemo.LoyaltyPointsAPI", "SagaDemo.LoyaltyPointsAPI\SagaDemo.LoyaltyPointsAPI.csproj", "{67909C05-9475-4234-8C53-FA96E94E7EF7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SagaDemo.Common.AspNetCore", "SagaDemo.Common.AspNetCore\SagaDemo.Common.AspNetCore.csproj", "{093292D3-1F0F-4594-8640-0E5AD2F50676}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{67909C05-9475-4234-8C53-FA96E94E7EF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{67909C05-9475-4234-8C53-FA96E94E7EF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{67909C05-9475-4234-8C53-FA96E94E7EF7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{093292D3-1F0F-4594-8640-0E5AD2F50676}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{093292D3-1F0F-4594-8640-0E5AD2F50676}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{093292D3-1F0F-4594-8640-0E5AD2F50676}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{093292D3-1F0F-4594-8640-0E5AD2F50676}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
