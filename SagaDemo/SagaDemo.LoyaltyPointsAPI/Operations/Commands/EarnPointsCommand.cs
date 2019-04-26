@@ -1,11 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace SagaDemo.LoyaltyPointsAPI.Operations.Commands
+﻿namespace SagaDemo.LoyaltyPointsAPI.Operations.Commands
 {
     public class EarnPointsCommand
     {
+        public EarnPointsCommand(int points, int userId)
+        {
+            Points = points;
+            UserId = userId;
+        }
+
+        public int Points { get; }
+
+        public int UserId { get; }
     }
 }

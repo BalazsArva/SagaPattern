@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SagaDemo.LoyaltyPointsAPI.DataAccess;
+using SagaDemo.LoyaltyPointsAPI.Handlers.CommandHandlers;
+using SagaDemo.LoyaltyPointsAPI.Operations.Commands;
 
 namespace SagaDemo.LoyaltyPointsAPI.Extensions
 {
@@ -23,6 +25,12 @@ namespace SagaDemo.LoyaltyPointsAPI.Extensions
             });
 
             return services;
+        }
+
+        public static IServiceCollection AddHandlers(this IServiceCollection services)
+        {
+            return services
+                .AddSingleton<ICommandHandler<EarnPointsCommand>, EarnPointsCommandHandler>();
         }
     }
 }
