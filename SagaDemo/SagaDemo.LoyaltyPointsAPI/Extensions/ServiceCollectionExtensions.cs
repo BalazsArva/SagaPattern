@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SagaDemo.LoyaltyPointsAPI.DataAccess;
 using SagaDemo.LoyaltyPointsAPI.Handlers.CommandHandlers;
 using SagaDemo.LoyaltyPointsAPI.Operations.Commands;
+using SagaDemo.LoyaltyPointsAPI.Validation;
 
 namespace SagaDemo.LoyaltyPointsAPI.Extensions
 {
@@ -33,6 +35,12 @@ namespace SagaDemo.LoyaltyPointsAPI.Extensions
                 .AddSingleton<ICommandHandler<EarnPointsCommand>, EarnPointsCommandHandler>()
                 .AddSingleton<ICommandHandler<ConsumePointsCommand>, ConsumePointsCommandHandler>()
                 .AddSingleton<ICommandHandler<RefundPointsCommand>, RefundPointsCommandHandler>();
+        }
+
+        public static IServiceCollection AddValidators(this IServiceCollection services)
+        {
+            return services
+                .AddSingleton<IValidator<ConsumePointsCommand>, ConsumePointsCommandValidator>();
         }
     }
 }

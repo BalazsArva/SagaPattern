@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+using FluentValidation;
 using SagaDemo.LoyaltyPointsAPI.DataAccess;
 using SagaDemo.LoyaltyPointsAPI.DataAccess.Entities;
 using SagaDemo.LoyaltyPointsAPI.Operations.Commands;
@@ -13,23 +13,20 @@ namespace SagaDemo.LoyaltyPointsAPI.Handlers.CommandHandlers
         private const string ConsumePointsReason = "ConsumePoints";
 
         private readonly ILoyaltyDbContextFactory dbContextFactory;
+        private readonly IValidator<ConsumePointsCommand> commandValidator;
 
-        public ConsumePointsCommandHandler(ILoyaltyDbContextFactory dbContextFactory)
+        public ConsumePointsCommandHandler(ILoyaltyDbContextFactory dbContextFactory, IValidator<ConsumePointsCommand> commandValidator)
         {
             this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
+            this.commandValidator = commandValidator ?? throw new ArgumentNullException(nameof(commandValidator));
         }
 
         public async Task HandleAsync(ConsumePointsCommand command, CancellationToken cancellationToken)
         {
+            await commandValidator.ValidateAndThrowAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
+
             using (var context = dbContextFactory.CreateDbContext())
             {
-                var totalPoints = await context.PointsChangedEvents.SumAsync(evt => evt.PointChange).ConfigureAwait(false);
-
-                if (totalPoints < command.Points)
-                {
-                    // TODO: Create and throw custom error
-                }
-
                 context.PointsChangedEvents.Add(new PointsChangedEvent
                 {
                     PointChange = -command.Points,

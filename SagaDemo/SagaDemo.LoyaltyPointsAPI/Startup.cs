@@ -28,6 +28,7 @@ namespace SagaDemo.LoyaltyPointsAPI
 
             services.AddLoyaltyDb(Configuration);
             services.AddHandlers();
+            services.AddValidators();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
