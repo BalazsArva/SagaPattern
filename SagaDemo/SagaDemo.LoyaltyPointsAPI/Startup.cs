@@ -21,6 +21,7 @@ namespace SagaDemo.LoyaltyPointsAPI
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddLoyaltyDb(Configuration);
+            services.AddHandlers();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

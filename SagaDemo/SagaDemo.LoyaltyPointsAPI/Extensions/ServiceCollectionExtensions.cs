@@ -30,7 +30,9 @@ namespace SagaDemo.LoyaltyPointsAPI.Extensions
         public static IServiceCollection AddHandlers(this IServiceCollection services)
         {
             return services
-                .AddSingleton<ICommandHandler<EarnPointsCommand>, EarnPointsCommandHandler>();
+                .AddSingleton<ICommandHandler<EarnPointsCommand>, EarnPointsCommandHandler>()
+                .AddSingleton<ICommandHandler<ConsumePointsCommand>, ConsumePointsCommandHandler>()
+                .AddSingleton<ICommandHandler<RefundPointsCommand>, RefundPointsCommandHandler>();
         }
     }
 }
