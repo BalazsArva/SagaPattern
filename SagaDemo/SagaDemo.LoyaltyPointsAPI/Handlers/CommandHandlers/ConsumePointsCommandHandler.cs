@@ -35,7 +35,8 @@ namespace SagaDemo.LoyaltyPointsAPI.Handlers.CommandHandlers
                     PointChange = -command.Points,
                     Reason = ConsumePointsReason,
                     UtcDateTimeRecorded = DateTime.UtcNow,
-                    UserId = command.UserId
+                    UserId = command.UserId,
+                    TransactionId = command.TransactionId
                 });
 
                 // Assume optimistic concurrency so that points aren't changed between retrieving the sum and adding the consume record.

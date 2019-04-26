@@ -27,7 +27,8 @@ namespace SagaDemo.LoyaltyPointsAPI.Handlers.CommandHandlers
                     PointChange = command.Points,
                     Reason = Reason,
                     UtcDateTimeRecorded = DateTime.UtcNow,
-                    UserId = command.UserId
+                    UserId = command.UserId,
+                    TransactionId = command.TransactionId
                 });
 
                 await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

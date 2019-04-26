@@ -13,5 +13,7 @@ namespace SagaDemo.LoyaltyPointsAPI.DataAccess.Entities
         public DateTime UtcDateTimeRecorded { get; set; }
 
         public string Reason { get; set; }
+
+        public string TransactionId { get; set; }
     }
 }

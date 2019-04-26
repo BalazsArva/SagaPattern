@@ -28,6 +28,11 @@ namespace SagaDemo.LoyaltyPointsAPI.DataAccess
                 .Property(e => e.Reason)
                 .HasMaxLength(256)
                 .IsRequired(true);
+
+            modelBuilder.Entity<PointsChangedEvent>()
+                .Property(e => e.TransactionId)
+                .HasMaxLength(256)
+                .IsRequired(true);
         }
     }
 }
