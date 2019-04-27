@@ -2,6 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using SagaDemo.InventoryAPI.Handlers.CommandHandlers;
+using SagaDemo.InventoryAPI.Operations.Commands;
 
 namespace SagaDemo.InventoryAPI.Controllers
 {
@@ -9,13 +11,24 @@ namespace SagaDemo.InventoryAPI.Controllers
     [ApiController]
     public class CatalogController : ControllerBase
     {
-        [HttpPost]
-        public async Task<IActionResult> CreateItem(CancellationToken cancellationToken)
+        private readonly ICreateProductCommandHandler createProductCommandHandler;
+
+        public CatalogController(ICreateProductCommandHandler createProductCommandHandler)
         {
-            throw new NotImplementedException();
+            this.createProductCommandHandler = createProductCommandHandler ?? throw new ArgumentNullException(nameof(createProductCommandHandler));
         }
 
-        [HttpGet("{id}")]
+        [HttpPost]
+        public async Task<IActionResult> CreateItem(CreateProductCommand command, CancellationToken cancellationToken)
+        {
+            var productId = await createProductCommandHandler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
+
+            // TODO: Retrieve created item and return as response
+            // TODO: Fix ids, currently they will be like "products/1-A, we need int instead.
+            return CreatedAtAction(RouteNames.GetCatalogItem, new { id = productId }, null);
+        }
+
+        [HttpGet("{id}", Name = RouteNames.GetCatalogItem)]
         public async Task<IActionResult> GetItem(int id, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();

@@ -24,6 +24,7 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
                 var productDocument = new Product
                 {
                     Name = command.Name,
+                    PointsCost = command.PointsCost,
                     RequestCount = 0,
                     StockCount = 0
                 };
