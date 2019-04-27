@@ -16,23 +16,37 @@ namespace SagaDemo.LoyaltyPointsAPI.DataAccess
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<PointsChangedEvent>()
+            modelBuilder
+                .Entity<PointsChangedEvent>()
                 .HasKey(e => e.Id)
                 .ForSqlServerIsClustered();
 
-            modelBuilder.Entity<PointsChangedEvent>()
+            modelBuilder
+                .Entity<PointsChangedEvent>()
                 .Property(e => e.Id)
                 .UseSqlServerIdentityColumn();
 
-            modelBuilder.Entity<PointsChangedEvent>()
+            modelBuilder
+                .Entity<PointsChangedEvent>()
                 .Property(e => e.Reason)
                 .HasMaxLength(256)
                 .IsRequired(true);
 
-            modelBuilder.Entity<PointsChangedEvent>()
+            modelBuilder
+                .Entity<PointsChangedEvent>()
                 .Property(e => e.TransactionId)
                 .HasMaxLength(256)
                 .IsRequired(true);
+
+            modelBuilder
+                .Entity<PointsChangedEvent>()
+                .ForSqlServerHasIndex(evt => evt.UserId)
+                .IsUnique(false);
+
+            modelBuilder
+                .Entity<PointsChangedEvent>()
+                .ForSqlServerHasIndex(evt => evt.TransactionId)
+                .IsUnique(false);
         }
     }
 }
