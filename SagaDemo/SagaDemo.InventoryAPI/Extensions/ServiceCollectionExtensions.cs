@@ -11,7 +11,7 @@ namespace SagaDemo.InventoryAPI.Extensions
             return services
                 .AddSingleton<ICreateProductCommandHandler, CreateProductCommandHandler>()
                 .AddSingleton<IAddStocksCommandHandler, AddStocksCommandHandler>()
-                .AddSingleton<IAddProductRequestsCommandHandler, AddProductRequestsCommandHandler>()
+                .AddSingleton<IAddProductReservationsCommandHandler, AddProductReservationsCommandHandler>()
                 .AddSingleton<IGetProductByIdRequestHandler, GetProductByIdRequestHandler>();
         }
     }

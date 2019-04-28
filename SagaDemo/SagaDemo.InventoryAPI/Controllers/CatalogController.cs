@@ -15,11 +15,16 @@ namespace SagaDemo.InventoryAPI.Controllers
     {
         private readonly ICreateProductCommandHandler createProductCommandHandler;
         private readonly IGetProductByIdRequestHandler getProductByIdRequestHandler;
+        private readonly IAddProductReservationsCommandHandler addProductReservationsCommandHandler;
 
-        public CatalogController(ICreateProductCommandHandler createProductCommandHandler, IGetProductByIdRequestHandler getProductByIdRequestHandler)
+        public CatalogController(
+            ICreateProductCommandHandler createProductCommandHandler,
+            IGetProductByIdRequestHandler getProductByIdRequestHandler,
+            IAddProductReservationsCommandHandler addProductReservationsCommandHandler)
         {
             this.createProductCommandHandler = createProductCommandHandler ?? throw new ArgumentNullException(nameof(createProductCommandHandler));
             this.getProductByIdRequestHandler = getProductByIdRequestHandler ?? throw new ArgumentNullException(nameof(getProductByIdRequestHandler));
+            this.addProductReservationsCommandHandler = addProductReservationsCommandHandler ?? throw new ArgumentNullException(nameof(addProductReservationsCommandHandler));
         }
 
         [HttpPost]

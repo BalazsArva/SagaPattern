@@ -28,7 +28,7 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
                     Id = DocumentIdHelper.GetDocumentId<Product>(session, documentId),
                     Name = command.Name,
                     PointsCost = command.PointsCost,
-                    RequestCount = 0,
+                    ReservationCount = 0,
                     StockCount = 0
                 };
 

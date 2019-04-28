@@ -8,20 +8,20 @@ using SagaDemo.InventoryAPI.Utilities.Extensions;
 
 namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 {
-    public class AddProductRequestsCommandHandler : IAddProductRequestsCommandHandler
+    public class AddProductReservationsCommandHandler : IAddProductReservationsCommandHandler
     {
         private readonly IDocumentStore _documentStore;
 
-        public AddProductRequestsCommandHandler(IDocumentStore documentStore)
+        public AddProductReservationsCommandHandler(IDocumentStore documentStore)
         {
             _documentStore = documentStore ?? throw new ArgumentNullException(nameof(documentStore));
         }
 
-        public async Task HandleAsync(AddProductRequestsCommand command, CancellationToken cancellationToken)
+        public async Task HandleAsync(AddProductReservationsCommand command, CancellationToken cancellationToken)
         {
             using (var session = _documentStore.OpenAsyncSession())
             {
-                var productCommandLookup = command.Requests.ToDictionary(s => s.ProductId);
+                var productCommandLookup = command.Reservations.ToDictionary(s => s.ProductId);
                 var productLookup = await session.LoadProductsAsync(productCommandLookup.Keys, cancellationToken).ConfigureAwait(false);
 
                 foreach (var pair in productLookup)
@@ -29,9 +29,14 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
                     var loadedProduct = pair.Value;
 
                     var changeVector = session.Advanced.GetChangeVectorFor(loadedProduct);
-                    var productRequest = productCommandLookup[pair.Key];
+                    var productReservation = productCommandLookup[pair.Key];
 
-                    loadedProduct.RequestCount += productRequest.Quantity;
+                    if (loadedProduct.StockCount - loadedProduct.ReservationCount < productReservation.Quantity)
+                    {
+                        // TODO: Throw custom exception
+                    }
+
+                    loadedProduct.ReservationCount += productReservation.Quantity;
 
                     await session.StoreAsync(loadedProduct, changeVector, loadedProduct.Id, cancellationToken).ConfigureAwait(false);
                 }

@@ -1,8 +1,8 @@
 ﻿namespace SagaDemo.InventoryAPI.Operations.Commands
 {
-    public class AddProductRequestCommand
+    public class AddProductReservationCommand
     {
-        public AddProductRequestCommand(string productId, int quantity)
+        public AddProductReservationCommand(string productId, int quantity)
         {
             ProductId = productId;
             Quantity = quantity;

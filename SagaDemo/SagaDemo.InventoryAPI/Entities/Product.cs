@@ -10,6 +10,6 @@
 
         public int StockCount { get; set; }
 
-        public int RequestCount { get; set; }
+        public int ReservationCount { get; set; }
     }
 }
