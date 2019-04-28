@@ -3,7 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using SagaDemo.InventoryAPI.Handlers.CommandHandlers;
+using SagaDemo.InventoryAPI.Handlers.RequestHandlers;
 using SagaDemo.InventoryAPI.Operations.Commands;
+using SagaDemo.InventoryAPI.Operations.Requests;
 
 namespace SagaDemo.InventoryAPI.Controllers
 {
@@ -12,26 +14,34 @@ namespace SagaDemo.InventoryAPI.Controllers
     public class CatalogController : ControllerBase
     {
         private readonly ICreateProductCommandHandler createProductCommandHandler;
+        private readonly IGetProductByIdRequestHandler getProductByIdRequestHandler;
 
-        public CatalogController(ICreateProductCommandHandler createProductCommandHandler)
+        public CatalogController(ICreateProductCommandHandler createProductCommandHandler, IGetProductByIdRequestHandler getProductByIdRequestHandler)
         {
             this.createProductCommandHandler = createProductCommandHandler ?? throw new ArgumentNullException(nameof(createProductCommandHandler));
+            this.getProductByIdRequestHandler = getProductByIdRequestHandler ?? throw new ArgumentNullException(nameof(getProductByIdRequestHandler));
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateItem(CreateProductCommand command, CancellationToken cancellationToken)
         {
             var productId = await createProductCommandHandler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
+            var response = await getProductByIdRequestHandler.HandleAsync(new GetProductByIdRequest(productId), cancellationToken).ConfigureAwait(false);
 
-            // TODO: Retrieve created item and return as response
-            // TODO: Fix ids, currently they will be like "products/1-A, we need int instead.
-            return CreatedAtAction(RouteNames.GetCatalogItem, new { id = productId }, null);
+            return CreatedAtAction(RouteNames.GetCatalogItem, new { id = productId }, response);
         }
 
         [HttpGet("{id}", Name = RouteNames.GetCatalogItem)]
-        public async Task<IActionResult> GetItem(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetItem(string id, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var response = await getProductByIdRequestHandler.HandleAsync(new GetProductByIdRequest(id), cancellationToken).ConfigureAwait(false);
+
+            if (response == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(response);
         }
 
         [HttpPost("{id}/reservations")]
