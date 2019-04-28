@@ -10,14 +10,14 @@ namespace SagaDemo.InventoryAPI.Utilities.Extensions
 {
     public static class IAsyncDocumentSessionExtensions
     {
-        public static Task<Product> LoadProductAsync(this IAsyncDocumentSession session, int id, CancellationToken cancellationToken)
+        public static Task<Product> LoadProductAsync(this IAsyncDocumentSession session, string id, CancellationToken cancellationToken)
         {
             var internalId = DocumentIdHelper.GetDocumentId<Product>(session, id);
 
             return session.LoadAsync<Product>(internalId, cancellationToken);
         }
 
-        public static async Task<Dictionary<int, Product>> LoadProductsAsync(this IAsyncDocumentSession session, IEnumerable<int> ids, CancellationToken cancellationToken)
+        public static async Task<Dictionary<string, Product>> LoadProductsAsync(this IAsyncDocumentSession session, IEnumerable<string> ids, CancellationToken cancellationToken)
         {
             var internalIds = DocumentIdHelper.GetDocumentIds<Product>(session, ids);
 

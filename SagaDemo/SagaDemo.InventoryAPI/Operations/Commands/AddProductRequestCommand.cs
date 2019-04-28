@@ -2,13 +2,13 @@
 {
     public class AddProductRequestCommand
     {
-        public AddProductRequestCommand(int productId, int quantity)
+        public AddProductRequestCommand(string productId, int quantity)
         {
             ProductId = productId;
             Quantity = quantity;
         }
 
-        public int ProductId { get; }
+        public string ProductId { get; }
 
         public int Quantity { get; }
     }

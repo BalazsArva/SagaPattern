@@ -6,6 +6,6 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 {
     public interface ICreateProductCommandHandler
     {
-        Task<int> HandleAsync(CreateProductCommand command, CancellationToken cancellationToken);
+        Task<string> HandleAsync(CreateProductCommand command, CancellationToken cancellationToken);
     }
 }
