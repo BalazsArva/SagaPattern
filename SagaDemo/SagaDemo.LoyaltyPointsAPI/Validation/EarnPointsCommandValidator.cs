@@ -8,6 +8,10 @@ namespace SagaDemo.LoyaltyPointsAPI.Validation
     {
         public EarnPointsCommandValidator(ILoyaltyDbContextFactory dbContextFactory)
         {
+            RuleFor(cmd => cmd.Points)
+                .GreaterThan(0)
+                .WithMessage(ValidationMessages.PointsMustBePositive);
+
             RuleFor(cmd => cmd.TransactionId)
                 .NotEmpty()
                 .WithMessage(ValidationMessages.CannotBeNullOrEmpty);

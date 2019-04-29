@@ -11,16 +11,22 @@ namespace SagaDemo.LoyaltyPointsAPI.Validation
         public ConsumePointsCommandValidator(ILoyaltyDbContextFactory dbContextFactory)
         {
             RuleFor(cmd => cmd.Points)
-                .MustAsync(async (int points, CancellationToken cancellationToken) =>
+                .GreaterThan(0)
+                .WithMessage(ValidationMessages.PointsMustBePositive)
+                .DependentRules(() =>
                 {
-                    using (var context = dbContextFactory.CreateDbContext())
-                    {
-                        var total = await context.PointsChangedEvents.SumAsync(e => e.PointChange).ConfigureAwait(false);
+                    RuleFor(cmd => cmd.Points)
+                        .MustAsync(async (int points, CancellationToken cancellationToken) =>
+                        {
+                            using (var context = dbContextFactory.CreateDbContext())
+                            {
+                                var total = await context.PointsChangedEvents.SumAsync(e => e.PointChange).ConfigureAwait(false);
 
-                        return total >= points;
-                    }
-                })
-                .WithMessage(ValidationMessages.ConsumedPointsExceedTotal);
+                                return total >= points;
+                            }
+                        })
+                        .WithMessage(ValidationMessages.ConsumedPointsExceedTotal);
+                });
 
             RuleFor(cmd => cmd.TransactionId)
                 .NotEmpty()
