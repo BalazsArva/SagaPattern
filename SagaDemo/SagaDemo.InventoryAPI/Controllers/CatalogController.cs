@@ -19,6 +19,7 @@ namespace SagaDemo.InventoryAPI.Controllers
         private readonly IGetProductByIdRequestHandler getProductByIdRequestHandler;
         private readonly IAddStocksCommandHandler addStocksCommandHandler;
         private readonly ITakeoutItemsCommandHandler takeoutItemsCommandHandler;
+        private readonly IBringbackItemsCommandHandler bringbackItemsCommandHandler;
         private readonly IAddReservationsCommandHandler addProductReservationsCommandHandler;
 
         public CatalogController(
@@ -26,12 +27,14 @@ namespace SagaDemo.InventoryAPI.Controllers
             IGetProductByIdRequestHandler getProductByIdRequestHandler,
             IAddStocksCommandHandler addStocksCommandHandler,
             ITakeoutItemsCommandHandler takeoutItemsCommandHandler,
+            IBringbackItemsCommandHandler bringbackItemsCommandHandler,
             IAddReservationsCommandHandler addProductReservationsCommandHandler)
         {
             this.createProductCommandHandler = createProductCommandHandler ?? throw new ArgumentNullException(nameof(createProductCommandHandler));
             this.getProductByIdRequestHandler = getProductByIdRequestHandler ?? throw new ArgumentNullException(nameof(getProductByIdRequestHandler));
             this.addStocksCommandHandler = addStocksCommandHandler ?? throw new ArgumentNullException(nameof(addStocksCommandHandler));
             this.takeoutItemsCommandHandler = takeoutItemsCommandHandler ?? throw new ArgumentNullException(nameof(takeoutItemsCommandHandler));
+            this.bringbackItemsCommandHandler = bringbackItemsCommandHandler ?? throw new ArgumentNullException(nameof(bringbackItemsCommandHandler));
             this.addProductReservationsCommandHandler = addProductReservationsCommandHandler ?? throw new ArgumentNullException(nameof(addProductReservationsCommandHandler));
         }
 
@@ -91,10 +94,14 @@ namespace SagaDemo.InventoryAPI.Controllers
             return NoContent();
         }
 
-        [HttpPost("{id}/bringback")]
-        public async Task<IActionResult> BringbackItem(int id, CancellationToken cancellationToken)
+        [HttpPost("bringback")]
+        [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(void))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
+        public async Task<IActionResult> BringbackItem(BringbackItemsCommand command, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            await bringbackItemsCommandHandler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
+
+            return NoContent();
         }
     }
 }
