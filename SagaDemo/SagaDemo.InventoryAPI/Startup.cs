@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SagaDemo.Common.DataAccess.RavenDb.Extensions;
 using SagaDemo.InventoryAPI.Extensions;
 using Swashbuckle.AspNetCore.Swagger;
 
@@ -24,6 +25,7 @@ namespace SagaDemo.InventoryAPI
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
+            services.AddRavenDb(Configuration);
             services.AddInventoryServices();
 
             services.AddSwaggerGen(c =>
