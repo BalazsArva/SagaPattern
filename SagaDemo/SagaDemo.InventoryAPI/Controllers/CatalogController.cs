@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SagaDemo.InventoryAPI.Handlers.CommandHandlers;
 using SagaDemo.InventoryAPI.Handlers.RequestHandlers;
 using SagaDemo.InventoryAPI.Operations.Commands;
 using SagaDemo.InventoryAPI.Operations.Requests;
+using SagaDemo.InventoryAPI.Operations.Responses;
 
 namespace SagaDemo.InventoryAPI.Controllers
 {
@@ -28,6 +30,8 @@ namespace SagaDemo.InventoryAPI.Controllers
         }
 
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(GetProductByIdResponse))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
         public async Task<IActionResult> CreateItem(CreateProductCommand command, CancellationToken cancellationToken)
         {
             var productId = await createProductCommandHandler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
@@ -37,6 +41,8 @@ namespace SagaDemo.InventoryAPI.Controllers
         }
 
         [HttpGet("{id}", Name = RouteNames.GetCatalogItem)]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetProductByIdResponse))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(void))]
         public async Task<IActionResult> GetItem(string id, CancellationToken cancellationToken)
         {
             var response = await getProductByIdRequestHandler.HandleAsync(new GetProductByIdRequest(id), cancellationToken).ConfigureAwait(false);

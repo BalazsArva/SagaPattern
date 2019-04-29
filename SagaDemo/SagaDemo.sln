@@ -23,6 +23,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{1B00BE
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API Clients", "API Clients", "{C8C6DD59-19F5-4628-A9F3-14F352BB8A37}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SagaDemo.InventoryAPI.ApiClient", "SagaDemo.InventoryAPI.ApiClient\SagaDemo.InventoryAPI.ApiClient.csproj", "{91BF081C-C596-438B-BF66-C485ECC7A4E3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +59,10 @@ Global
 		{701B3083-3E47-4136-9740-776F6C258ACF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{701B3083-3E47-4136-9740-776F6C258ACF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{701B3083-3E47-4136-9740-776F6C258ACF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91BF081C-C596-438B-BF66-C485ECC7A4E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91BF081C-C596-438B-BF66-C485ECC7A4E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91BF081C-C596-438B-BF66-C485ECC7A4E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91BF081C-C596-438B-BF66-C485ECC7A4E3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -69,6 +75,7 @@ Global
 		{093292D3-1F0F-4594-8640-0E5AD2F50676} = {1B00BE92-52AD-40A8-BB7C-97DBE0DA34DF}
 		{2DF62ED9-A5DD-46B3-821A-65814E993CA5} = {1B00BE92-52AD-40A8-BB7C-97DBE0DA34DF}
 		{701B3083-3E47-4136-9740-776F6C258ACF} = {C8C6DD59-19F5-4628-A9F3-14F352BB8A37}
+		{91BF081C-C596-438B-BF66-C485ECC7A4E3} = {C8C6DD59-19F5-4628-A9F3-14F352BB8A37}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9D101CF8-6113-42E6-98B4-670AE09489AE}
