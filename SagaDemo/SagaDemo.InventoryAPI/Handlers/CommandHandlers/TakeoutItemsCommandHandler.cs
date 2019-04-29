@@ -26,18 +26,18 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 
             using (var session = documentStore.OpenAsyncSession())
             {
-                var productCommandLookup = command.Items.ToDictionary(s => s.ProductId);
-                var productLookup = await session.LoadProductsAsync(productCommandLookup.Keys, cancellationToken).ConfigureAwait(false);
+                var productQuantityLookup = command.Items.ToDictionary(cmd => cmd.ProductId, cmd => cmd.Quantity);
+                var productLookup = await session.LoadProductsAsync(productQuantityLookup.Keys, cancellationToken).ConfigureAwait(false);
 
                 foreach (var pair in productLookup)
                 {
                     var loadedProduct = pair.Value;
-
                     var changeVector = session.Advanced.GetChangeVectorFor(loadedProduct);
-                    var productStockChange = productCommandLookup[pair.Key];
 
-                    loadedProduct.StockCount -= productStockChange.Quantity;
-                    loadedProduct.ReservationCount -= productStockChange.Quantity;
+                    var quantity = productQuantityLookup[pair.Key];
+
+                    loadedProduct.StockCount -= quantity;
+                    loadedProduct.ReservationCount -= quantity;
 
                     await session.StoreAsync(loadedProduct, changeVector, loadedProduct.Id, cancellationToken).ConfigureAwait(false);
                 }

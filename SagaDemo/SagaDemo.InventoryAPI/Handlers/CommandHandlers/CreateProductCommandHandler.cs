@@ -20,6 +20,7 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 
         public async Task<CreateProductResponse> HandleAsync(CreateProductCommand command, CancellationToken cancellationToken)
         {
+            // TODO: Validation
             using (var session = _documentStore.OpenAsyncSession())
             {
                 var documentId = Guid.NewGuid().ToString();
@@ -32,7 +33,7 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
                     StockCount = 0
                 };
 
-                await session.StoreAsync(productDocument, documentId, cancellationToken).ConfigureAwait(false);
+                await session.StoreAsync(productDocument, cancellationToken).ConfigureAwait(false);
                 await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 return new CreateProductResponse(documentId, productDocument.Name, productDocument.PointsCost, productDocument.StockCount);

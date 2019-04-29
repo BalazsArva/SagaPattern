@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using FluentValidation;
 using FluentValidation.Results;
 using Raven.Client.Documents;
-using SagaDemo.InventoryAPI.Entities;
 using SagaDemo.InventoryAPI.Operations.Commands;
+using SagaDemo.InventoryAPI.Utilities.Extensions;
 
 namespace SagaDemo.InventoryAPI.Validation.Validators
 {
@@ -26,8 +26,7 @@ namespace SagaDemo.InventoryAPI.Validation.Validators
         {
             using (var session = documentStore.OpenAsyncSession())
             {
-                var productIds = context.InstanceToValidate.Items.Select(r => r.ProductId).ToList();
-                var productsLookup = await session.LoadAsync<Product>(productIds, cancellationToken).ConfigureAwait(false);
+                var productsLookup = await session.LoadProductsAsync(context.InstanceToValidate.Items.Select(r => r.ProductId), cancellationToken).ConfigureAwait(false);
 
                 context.RootContextData[ValidationContextKeys.Products] = productsLookup;
             }
