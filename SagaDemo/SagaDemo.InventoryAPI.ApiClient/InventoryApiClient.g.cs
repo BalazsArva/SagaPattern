@@ -35,11 +35,11 @@ namespace SagaDemo.InventoryAPI.ApiClient
         System.Threading.Tasks.Task<SwaggerResponse> ReserveItemsAsync(AddReservationsCommand command, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<SwaggerResponse> ReserveItems2Async(AddStocksCommand command);
+        System.Threading.Tasks.Task<SwaggerResponse> AddStocksAsync(AddStocksCommand command);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        System.Threading.Tasks.Task<SwaggerResponse> ReserveItems2Async(AddStocksCommand command, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<SwaggerResponse> AddStocksAsync(AddStocksCommand command, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         System.Threading.Tasks.Task<FileResponse> TakeoutItemAsync(int id);
@@ -345,14 +345,14 @@ namespace SagaDemo.InventoryAPI.ApiClient
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<SwaggerResponse> ReserveItems2Async(AddStocksCommand command)
+        public System.Threading.Tasks.Task<SwaggerResponse> AddStocksAsync(AddStocksCommand command)
         {
-            return ReserveItems2Async(command, System.Threading.CancellationToken.None);
+            return AddStocksAsync(command, System.Threading.CancellationToken.None);
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        public async System.Threading.Tasks.Task<SwaggerResponse> ReserveItems2Async(AddStocksCommand command, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<SwaggerResponse> AddStocksAsync(AddStocksCommand command, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append("api/Catalog/add-to-stock");
