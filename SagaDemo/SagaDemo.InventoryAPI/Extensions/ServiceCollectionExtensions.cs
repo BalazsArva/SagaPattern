@@ -16,13 +16,16 @@ namespace SagaDemo.InventoryAPI.Extensions
                 .AddSingleton<ICreateProductCommandHandler, CreateProductCommandHandler>()
                 .AddSingleton<IAddStocksCommandHandler, AddStocksCommandHandler>()
                 .AddSingleton<IAddReservationsCommandHandler, AddReservationsCommandHandler>()
+                .AddSingleton<ITakeoutItemsCommandHandler, TakeoutItemsCommandHandler>()
                 .AddSingleton<IGetProductByIdRequestHandler, GetProductByIdRequestHandler>();
 
             services
                 .AddSingleton<IValidator<AddReservationCommand>, AddReservationCommandValidator>()
                 .AddSingleton<IValidator<AddReservationsCommand>, AddReservationsCommandValidator>()
                 .AddSingleton<IValidator<AddStocksCommand>, AddStocksCommandValidator>()
-                .AddSingleton<IValidator<AddStockCommand>, AddStockCommandValidator>();
+                .AddSingleton<IValidator<AddStockCommand>, AddStockCommandValidator>()
+                .AddSingleton<IValidator<TakeoutItemCommand>, TakeoutItemCommandValidator>()
+                .AddSingleton<IValidator<TakeoutItemsCommand>, TakeoutItemsCommandValidator>();
 
             return services;
         }
