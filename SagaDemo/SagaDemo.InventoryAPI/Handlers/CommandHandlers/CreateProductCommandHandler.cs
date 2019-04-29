@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Raven.Client.Documents;
 using SagaDemo.InventoryAPI.Entities;
 using SagaDemo.InventoryAPI.Operations.Commands;
+using SagaDemo.InventoryAPI.Operations.Responses;
 using SagaDemo.InventoryAPI.Utilities.Helpers;
 
 namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
@@ -17,12 +18,11 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
             _documentStore = documentStore ?? throw new ArgumentNullException(nameof(documentStore));
         }
 
-        public async Task<string> HandleAsync(CreateProductCommand command, CancellationToken cancellationToken)
+        public async Task<CreateProductResponse> HandleAsync(CreateProductCommand command, CancellationToken cancellationToken)
         {
             using (var session = _documentStore.OpenAsyncSession())
             {
                 var documentId = Guid.NewGuid().ToString();
-
                 var productDocument = new Product
                 {
                     Id = DocumentIdHelper.GetDocumentId<Product>(session, documentId),
@@ -33,10 +33,9 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
                 };
 
                 await session.StoreAsync(productDocument, documentId, cancellationToken).ConfigureAwait(false);
-
                 await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                return documentId;
+                return new CreateProductResponse(documentId, productDocument.Name, productDocument.PointsCost, productDocument.StockCount);
             }
         }
     }

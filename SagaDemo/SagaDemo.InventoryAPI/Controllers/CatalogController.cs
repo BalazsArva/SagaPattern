@@ -30,14 +30,13 @@ namespace SagaDemo.InventoryAPI.Controllers
         }
 
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(GetProductByIdResponse))]
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(CreateProductResponse))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
         public async Task<IActionResult> CreateItem(CreateProductCommand command, CancellationToken cancellationToken)
         {
-            var productId = await createProductCommandHandler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
-            var response = await getProductByIdRequestHandler.HandleAsync(new GetProductByIdRequest(productId), cancellationToken).ConfigureAwait(false);
+            var response = await createProductCommandHandler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
 
-            return CreatedAtAction(RouteNames.GetCatalogItem, new { id = productId }, response);
+            return CreatedAtAction(RouteNames.GetCatalogItem, new { id = response.ProductId }, response);
         }
 
         [HttpGet("{id}", Name = RouteNames.GetCatalogItem)]

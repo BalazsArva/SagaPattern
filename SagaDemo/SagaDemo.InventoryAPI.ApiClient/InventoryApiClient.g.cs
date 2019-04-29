@@ -14,18 +14,18 @@ namespace SagaDemo.InventoryAPI.ApiClient
     public partial interface ICatalogApiClient
     {
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<SwaggerResponse<GetProductByIdResponse>> CreateItemAsync(CreateProductCommand command);
+        System.Threading.Tasks.Task<SwaggerResponse<CreateProductResponse>> CreateItemAsync(CreateProductCommand command);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        System.Threading.Tasks.Task<SwaggerResponse<GetProductByIdResponse>> CreateItemAsync(CreateProductCommand command, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<SwaggerResponse<CreateProductResponse>> CreateItemAsync(CreateProductCommand command, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<FileResponse> GetItemAsync(string id);
+        System.Threading.Tasks.Task<SwaggerResponse<GetProductByIdResponse>> GetItemAsync(string id);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        System.Threading.Tasks.Task<FileResponse> GetItemAsync(string id, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<SwaggerResponse<GetProductByIdResponse>> GetItemAsync(string id, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         System.Threading.Tasks.Task<FileResponse> ReserveItemAsync(int id);
@@ -75,14 +75,14 @@ namespace SagaDemo.InventoryAPI.ApiClient
         partial void ProcessResponse(System.Net.Http.HttpClient client, System.Net.Http.HttpResponseMessage response);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<SwaggerResponse<GetProductByIdResponse>> CreateItemAsync(CreateProductCommand command)
+        public System.Threading.Tasks.Task<SwaggerResponse<CreateProductResponse>> CreateItemAsync(CreateProductCommand command)
         {
             return CreateItemAsync(command, System.Threading.CancellationToken.None);
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        public async System.Threading.Tasks.Task<SwaggerResponse<GetProductByIdResponse>> CreateItemAsync(CreateProductCommand command, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<SwaggerResponse<CreateProductResponse>> CreateItemAsync(CreateProductCommand command, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append("api/Catalog");
@@ -119,11 +119,11 @@ namespace SagaDemo.InventoryAPI.ApiClient
                         if (status_ == "201") 
                         {
                             var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false); 
-                            var result_ = default(GetProductByIdResponse); 
+                            var result_ = default(CreateProductResponse); 
                             try
                             {
-                                result_ = Newtonsoft.Json.JsonConvert.DeserializeObject<GetProductByIdResponse>(responseData_, _settings.Value);
-                                return new SwaggerResponse<GetProductByIdResponse>((int)response_.StatusCode, headers_, result_); 
+                                result_ = Newtonsoft.Json.JsonConvert.DeserializeObject<CreateProductResponse>(responseData_, _settings.Value);
+                                return new SwaggerResponse<CreateProductResponse>((int)response_.StatusCode, headers_, result_); 
                             } 
                             catch (System.Exception exception_) 
                             {
@@ -152,7 +152,7 @@ namespace SagaDemo.InventoryAPI.ApiClient
                             throw new SwaggerException("The HTTP status code of the response was not expected (" + (int)response_.StatusCode + ").", (int)response_.StatusCode, responseData_, headers_, null);
                         }
             
-                        return new SwaggerResponse<GetProductByIdResponse>((int)response_.StatusCode, headers_, default(GetProductByIdResponse)); 
+                        return new SwaggerResponse<CreateProductResponse>((int)response_.StatusCode, headers_, default(CreateProductResponse)); 
                     }
                     finally
                     {
@@ -167,14 +167,14 @@ namespace SagaDemo.InventoryAPI.ApiClient
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<FileResponse> GetItemAsync(string id)
+        public System.Threading.Tasks.Task<SwaggerResponse<GetProductByIdResponse>> GetItemAsync(string id)
         {
             return GetItemAsync(id, System.Threading.CancellationToken.None);
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        public async System.Threading.Tasks.Task<FileResponse> GetItemAsync(string id, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<SwaggerResponse<GetProductByIdResponse>> GetItemAsync(string id, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append("api/Catalog/{id}");
@@ -186,7 +186,7 @@ namespace SagaDemo.InventoryAPI.ApiClient
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
                     request_.Method = new System.Net.Http.HttpMethod("GET");
-                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/octet-stream"));
+                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
     
                     PrepareRequest(client_, request_, urlBuilder_);
                     var url_ = urlBuilder_.ToString();
@@ -206,12 +206,34 @@ namespace SagaDemo.InventoryAPI.ApiClient
                         ProcessResponse(client_, response_);
     
                         var status_ = ((int)response_.StatusCode).ToString();
-                        if (status_ == "200" || status_ == "206") 
+                        if (status_ == "200") 
                         {
-                            var responseStream_ = response_.Content == null ? System.IO.Stream.Null : await response_.Content.ReadAsStreamAsync().ConfigureAwait(false);
-                            var fileResponse_ = new FileResponse((int)response_.StatusCode, headers_, responseStream_, null, response_); 
-                            client_ = null; response_ = null; // response and client are disposed by FileResponse
-                            return fileResponse_;
+                            var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false); 
+                            var result_ = default(GetProductByIdResponse); 
+                            try
+                            {
+                                result_ = Newtonsoft.Json.JsonConvert.DeserializeObject<GetProductByIdResponse>(responseData_, _settings.Value);
+                                return new SwaggerResponse<GetProductByIdResponse>((int)response_.StatusCode, headers_, result_); 
+                            } 
+                            catch (System.Exception exception_) 
+                            {
+                                throw new SwaggerException("Could not deserialize the response body.", (int)response_.StatusCode, responseData_, headers_, exception_);
+                            }
+                        }
+                        else
+                        if (status_ == "404") 
+                        {
+                            var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false); 
+                            var result_ = default(ProblemDetails); 
+                            try
+                            {
+                                result_ = Newtonsoft.Json.JsonConvert.DeserializeObject<ProblemDetails>(responseData_, _settings.Value);
+                            } 
+                            catch (System.Exception exception_) 
+                            {
+                                throw new SwaggerException("Could not deserialize the response body.", (int)response_.StatusCode, responseData_, headers_, exception_);
+                            }
+                            throw new SwaggerException<ProblemDetails>("A server side error occurred.", (int)response_.StatusCode, responseData_, headers_, result_, null);
                         }
                         else
                         if (status_ != "200" && status_ != "204")
@@ -220,7 +242,7 @@ namespace SagaDemo.InventoryAPI.ApiClient
                             throw new SwaggerException("The HTTP status code of the response was not expected (" + (int)response_.StatusCode + ").", (int)response_.StatusCode, responseData_, headers_, null);
                         }
             
-                        return default(FileResponse);
+                        return new SwaggerResponse<GetProductByIdResponse>((int)response_.StatusCode, headers_, default(GetProductByIdResponse)); 
                     }
                     finally
                     {
@@ -489,10 +511,10 @@ namespace SagaDemo.InventoryAPI.ApiClient
     
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.36.0 (Newtonsoft.Json v11.0.0.0)")]
-    public partial class GetProductByIdResponse 
+    public partial class CreateProductResponse 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public GetProductByIdResponse(string @name, int @pointsCost, string @productId, int @stockCount)
+        public CreateProductResponse(string @name, int @pointsCost, string @productId, int @stockCount)
         {
             this.ProductId = @productId;
             this.Name = @name;
@@ -517,9 +539,9 @@ namespace SagaDemo.InventoryAPI.ApiClient
             return Newtonsoft.Json.JsonConvert.SerializeObject(this);
         }
     
-        public static GetProductByIdResponse FromJson(string data)
+        public static CreateProductResponse FromJson(string data)
         {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<GetProductByIdResponse>(data);
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<CreateProductResponse>(data);
         }
     
     }
@@ -631,6 +653,42 @@ namespace SagaDemo.InventoryAPI.ApiClient
         public static CreateProductCommand FromJson(string data)
         {
             return Newtonsoft.Json.JsonConvert.DeserializeObject<CreateProductCommand>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.36.0 (Newtonsoft.Json v11.0.0.0)")]
+    public partial class GetProductByIdResponse 
+    {
+        [Newtonsoft.Json.JsonConstructor]
+        public GetProductByIdResponse(string @name, int @pointsCost, string @productId, int @stockCount)
+        {
+            this.ProductId = @productId;
+            this.Name = @name;
+            this.PointsCost = @pointsCost;
+            this.StockCount = @stockCount;
+        }
+    
+        [Newtonsoft.Json.JsonProperty("productId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string ProductId { get; }
+    
+        [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Name { get; }
+    
+        [Newtonsoft.Json.JsonProperty("pointsCost", Required = Newtonsoft.Json.Required.Always)]
+        public int PointsCost { get; }
+    
+        [Newtonsoft.Json.JsonProperty("stockCount", Required = Newtonsoft.Json.Required.Always)]
+        public int StockCount { get; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static GetProductByIdResponse FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<GetProductByIdResponse>(data);
         }
     
     }
