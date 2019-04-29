@@ -1,10 +1,7 @@
-﻿using Newtonsoft.Json;
-
-namespace SagaDemo.InventoryAPI.Operations.Commands
+﻿namespace SagaDemo.InventoryAPI.Operations.Commands
 {
     public class AddReservationCommand
     {
-        [JsonConstructor]
         public AddReservationCommand(string productId, int quantity)
         {
             ProductId = productId;

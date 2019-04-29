@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SagaDemo.Common.AspNetCore.Extensions;
 using SagaDemo.Common.DataAccess.RavenDb.Extensions;
 using SagaDemo.InventoryAPI.Extensions;
 using Swashbuckle.AspNetCore.Swagger;
@@ -23,7 +24,9 @@ namespace SagaDemo.InventoryAPI
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services
+                .AddMvc(mvcOptions => mvcOptions.AddCommonFilters())
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddRavenDb(Configuration);
             services.AddInventoryServices();

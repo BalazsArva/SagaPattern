@@ -14,11 +14,11 @@ namespace SagaDemo.InventoryAPI.ApiClient
     public partial interface ICatalogApiClient
     {
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<SwaggerResponse<CreateProductResponse>> CreateItemAsync(CreateProductCommand command);
+        System.Threading.Tasks.Task<SwaggerResponse<CreateProductResponse>> CreateItemAsync(CreateProductRequest request);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        System.Threading.Tasks.Task<SwaggerResponse<CreateProductResponse>> CreateItemAsync(CreateProductCommand command, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<SwaggerResponse<CreateProductResponse>> CreateItemAsync(CreateProductRequest request, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         System.Threading.Tasks.Task<SwaggerResponse<GetProductByIdResponse>> GetItemAsync(string id);
@@ -28,32 +28,32 @@ namespace SagaDemo.InventoryAPI.ApiClient
         System.Threading.Tasks.Task<SwaggerResponse<GetProductByIdResponse>> GetItemAsync(string id, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<SwaggerResponse> ReserveItemsAsync(AddReservationsCommand command);
+        System.Threading.Tasks.Task<SwaggerResponse> ReserveItemsAsync(AddReservationsRequest request);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        System.Threading.Tasks.Task<SwaggerResponse> ReserveItemsAsync(AddReservationsCommand command, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<SwaggerResponse> ReserveItemsAsync(AddReservationsRequest request, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<SwaggerResponse> AddStocksAsync(AddStocksCommand command);
-    
-        /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        System.Threading.Tasks.Task<SwaggerResponse> AddStocksAsync(AddStocksCommand command, System.Threading.CancellationToken cancellationToken);
-    
-        /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<SwaggerResponse> TakeoutItemAsync(TakeoutItemsCommand command);
+        System.Threading.Tasks.Task<SwaggerResponse> AddStocksAsync(AddStocksRequest request);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        System.Threading.Tasks.Task<SwaggerResponse> TakeoutItemAsync(TakeoutItemsCommand command, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<SwaggerResponse> AddStocksAsync(AddStocksRequest request, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<SwaggerResponse> BringbackItemAsync(BringbackItemsCommand command);
+        System.Threading.Tasks.Task<SwaggerResponse> TakeoutItemAsync(TakeoutItemsRequest request);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        System.Threading.Tasks.Task<SwaggerResponse> BringbackItemAsync(BringbackItemsCommand command, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<SwaggerResponse> TakeoutItemAsync(TakeoutItemsRequest request, System.Threading.CancellationToken cancellationToken);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<SwaggerResponse> BringbackItemAsync(BringbackItemsRequest request);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        System.Threading.Tasks.Task<SwaggerResponse> BringbackItemAsync(BringbackItemsRequest request, System.Threading.CancellationToken cancellationToken);
     
     }
     
@@ -82,14 +82,14 @@ namespace SagaDemo.InventoryAPI.ApiClient
         partial void ProcessResponse(System.Net.Http.HttpClient client, System.Net.Http.HttpResponseMessage response);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<SwaggerResponse<CreateProductResponse>> CreateItemAsync(CreateProductCommand command)
+        public System.Threading.Tasks.Task<SwaggerResponse<CreateProductResponse>> CreateItemAsync(CreateProductRequest request)
         {
-            return CreateItemAsync(command, System.Threading.CancellationToken.None);
+            return CreateItemAsync(request, System.Threading.CancellationToken.None);
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        public async System.Threading.Tasks.Task<SwaggerResponse<CreateProductResponse>> CreateItemAsync(CreateProductCommand command, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<SwaggerResponse<CreateProductResponse>> CreateItemAsync(CreateProductRequest request, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append("api/Catalog");
@@ -99,7 +99,7 @@ namespace SagaDemo.InventoryAPI.ApiClient
             {
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
-                    var content_ = new System.Net.Http.StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(command, _settings.Value));
+                    var content_ = new System.Net.Http.StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(request, _settings.Value));
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("POST");
@@ -264,14 +264,14 @@ namespace SagaDemo.InventoryAPI.ApiClient
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<SwaggerResponse> ReserveItemsAsync(AddReservationsCommand command)
+        public System.Threading.Tasks.Task<SwaggerResponse> ReserveItemsAsync(AddReservationsRequest request)
         {
-            return ReserveItemsAsync(command, System.Threading.CancellationToken.None);
+            return ReserveItemsAsync(request, System.Threading.CancellationToken.None);
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        public async System.Threading.Tasks.Task<SwaggerResponse> ReserveItemsAsync(AddReservationsCommand command, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<SwaggerResponse> ReserveItemsAsync(AddReservationsRequest request, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append("api/Catalog/reservations");
@@ -281,7 +281,7 @@ namespace SagaDemo.InventoryAPI.ApiClient
             {
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
-                    var content_ = new System.Net.Http.StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(command, _settings.Value));
+                    var content_ = new System.Net.Http.StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(request, _settings.Value));
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("POST");
@@ -345,14 +345,14 @@ namespace SagaDemo.InventoryAPI.ApiClient
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<SwaggerResponse> AddStocksAsync(AddStocksCommand command)
+        public System.Threading.Tasks.Task<SwaggerResponse> AddStocksAsync(AddStocksRequest request)
         {
-            return AddStocksAsync(command, System.Threading.CancellationToken.None);
+            return AddStocksAsync(request, System.Threading.CancellationToken.None);
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        public async System.Threading.Tasks.Task<SwaggerResponse> AddStocksAsync(AddStocksCommand command, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<SwaggerResponse> AddStocksAsync(AddStocksRequest request, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append("api/Catalog/add-to-stock");
@@ -362,7 +362,7 @@ namespace SagaDemo.InventoryAPI.ApiClient
             {
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
-                    var content_ = new System.Net.Http.StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(command, _settings.Value));
+                    var content_ = new System.Net.Http.StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(request, _settings.Value));
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("POST");
@@ -426,14 +426,14 @@ namespace SagaDemo.InventoryAPI.ApiClient
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<SwaggerResponse> TakeoutItemAsync(TakeoutItemsCommand command)
+        public System.Threading.Tasks.Task<SwaggerResponse> TakeoutItemAsync(TakeoutItemsRequest request)
         {
-            return TakeoutItemAsync(command, System.Threading.CancellationToken.None);
+            return TakeoutItemAsync(request, System.Threading.CancellationToken.None);
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        public async System.Threading.Tasks.Task<SwaggerResponse> TakeoutItemAsync(TakeoutItemsCommand command, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<SwaggerResponse> TakeoutItemAsync(TakeoutItemsRequest request, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append("api/Catalog/takeout");
@@ -443,7 +443,7 @@ namespace SagaDemo.InventoryAPI.ApiClient
             {
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
-                    var content_ = new System.Net.Http.StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(command, _settings.Value));
+                    var content_ = new System.Net.Http.StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(request, _settings.Value));
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("POST");
@@ -507,14 +507,14 @@ namespace SagaDemo.InventoryAPI.ApiClient
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<SwaggerResponse> BringbackItemAsync(BringbackItemsCommand command)
+        public System.Threading.Tasks.Task<SwaggerResponse> BringbackItemAsync(BringbackItemsRequest request)
         {
-            return BringbackItemAsync(command, System.Threading.CancellationToken.None);
+            return BringbackItemAsync(request, System.Threading.CancellationToken.None);
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        public async System.Threading.Tasks.Task<SwaggerResponse> BringbackItemAsync(BringbackItemsCommand command, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<SwaggerResponse> BringbackItemAsync(BringbackItemsRequest request, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append("api/Catalog/bringback");
@@ -524,7 +524,7 @@ namespace SagaDemo.InventoryAPI.ApiClient
             {
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
-                    var content_ = new System.Net.Http.StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(command, _settings.Value));
+                    var content_ = new System.Net.Http.StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(request, _settings.Value));
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("POST");
@@ -745,10 +745,10 @@ namespace SagaDemo.InventoryAPI.ApiClient
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.36.0 (Newtonsoft.Json v11.0.0.0)")]
-    public partial class CreateProductCommand 
+    public partial class CreateProductRequest 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public CreateProductCommand(string @name, int @pointsCost)
+        public CreateProductRequest(string @name, int @pointsCost)
         {
             this.Name = @name;
             this.PointsCost = @pointsCost;
@@ -765,9 +765,9 @@ namespace SagaDemo.InventoryAPI.ApiClient
             return Newtonsoft.Json.JsonConvert.SerializeObject(this);
         }
     
-        public static CreateProductCommand FromJson(string data)
+        public static CreateProductRequest FromJson(string data)
         {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<CreateProductCommand>(data);
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<CreateProductRequest>(data);
         }
     
     }
@@ -809,34 +809,34 @@ namespace SagaDemo.InventoryAPI.ApiClient
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.36.0 (Newtonsoft.Json v11.0.0.0)")]
-    public partial class AddReservationsCommand 
+    public partial class AddReservationsRequest 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public AddReservationsCommand(System.Collections.Generic.ICollection<AddReservationCommand> @items)
+        public AddReservationsRequest(System.Collections.Generic.ICollection<AddReservationRequest> @items)
         {
             this.Items = @items;
         }
     
         [Newtonsoft.Json.JsonProperty("items", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Collections.Generic.ICollection<AddReservationCommand> Items { get; }
+        public System.Collections.Generic.ICollection<AddReservationRequest> Items { get; }
     
         public string ToJson() 
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this);
         }
     
-        public static AddReservationsCommand FromJson(string data)
+        public static AddReservationsRequest FromJson(string data)
         {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<AddReservationsCommand>(data);
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<AddReservationsRequest>(data);
         }
     
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.36.0 (Newtonsoft.Json v11.0.0.0)")]
-    public partial class AddReservationCommand 
+    public partial class AddReservationRequest 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public AddReservationCommand(string @productId, int @quantity)
+        public AddReservationRequest(string @productId, int @quantity)
         {
             this.ProductId = @productId;
             this.Quantity = @quantity;
@@ -853,42 +853,42 @@ namespace SagaDemo.InventoryAPI.ApiClient
             return Newtonsoft.Json.JsonConvert.SerializeObject(this);
         }
     
-        public static AddReservationCommand FromJson(string data)
+        public static AddReservationRequest FromJson(string data)
         {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<AddReservationCommand>(data);
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<AddReservationRequest>(data);
         }
     
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.36.0 (Newtonsoft.Json v11.0.0.0)")]
-    public partial class AddStocksCommand 
+    public partial class AddStocksRequest 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public AddStocksCommand(System.Collections.Generic.ICollection<AddStockCommand> @items)
+        public AddStocksRequest(System.Collections.Generic.ICollection<AddStockRequest> @items)
         {
             this.Items = @items;
         }
     
         [Newtonsoft.Json.JsonProperty("items", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Collections.Generic.ICollection<AddStockCommand> Items { get; }
+        public System.Collections.Generic.ICollection<AddStockRequest> Items { get; }
     
         public string ToJson() 
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this);
         }
     
-        public static AddStocksCommand FromJson(string data)
+        public static AddStocksRequest FromJson(string data)
         {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<AddStocksCommand>(data);
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<AddStocksRequest>(data);
         }
     
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.36.0 (Newtonsoft.Json v11.0.0.0)")]
-    public partial class AddStockCommand 
+    public partial class AddStockRequest 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public AddStockCommand(string @productId, int @quantity)
+        public AddStockRequest(string @productId, int @quantity)
         {
             this.ProductId = @productId;
             this.Quantity = @quantity;
@@ -905,42 +905,42 @@ namespace SagaDemo.InventoryAPI.ApiClient
             return Newtonsoft.Json.JsonConvert.SerializeObject(this);
         }
     
-        public static AddStockCommand FromJson(string data)
+        public static AddStockRequest FromJson(string data)
         {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<AddStockCommand>(data);
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<AddStockRequest>(data);
         }
     
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.36.0 (Newtonsoft.Json v11.0.0.0)")]
-    public partial class TakeoutItemsCommand 
+    public partial class TakeoutItemsRequest 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public TakeoutItemsCommand(System.Collections.Generic.ICollection<TakeoutItemCommand> @items)
+        public TakeoutItemsRequest(System.Collections.Generic.ICollection<TakeoutItemRequest> @items)
         {
             this.Items = @items;
         }
     
         [Newtonsoft.Json.JsonProperty("items", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Collections.Generic.ICollection<TakeoutItemCommand> Items { get; }
+        public System.Collections.Generic.ICollection<TakeoutItemRequest> Items { get; }
     
         public string ToJson() 
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this);
         }
     
-        public static TakeoutItemsCommand FromJson(string data)
+        public static TakeoutItemsRequest FromJson(string data)
         {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<TakeoutItemsCommand>(data);
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<TakeoutItemsRequest>(data);
         }
     
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.36.0 (Newtonsoft.Json v11.0.0.0)")]
-    public partial class TakeoutItemCommand 
+    public partial class TakeoutItemRequest 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public TakeoutItemCommand(string @productId, int @quantity)
+        public TakeoutItemRequest(string @productId, int @quantity)
         {
             this.ProductId = @productId;
             this.Quantity = @quantity;
@@ -957,42 +957,42 @@ namespace SagaDemo.InventoryAPI.ApiClient
             return Newtonsoft.Json.JsonConvert.SerializeObject(this);
         }
     
-        public static TakeoutItemCommand FromJson(string data)
+        public static TakeoutItemRequest FromJson(string data)
         {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<TakeoutItemCommand>(data);
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<TakeoutItemRequest>(data);
         }
     
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.36.0 (Newtonsoft.Json v11.0.0.0)")]
-    public partial class BringbackItemsCommand 
+    public partial class BringbackItemsRequest 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public BringbackItemsCommand(System.Collections.Generic.ICollection<BringbackItemCommand> @items)
+        public BringbackItemsRequest(System.Collections.Generic.ICollection<BringbackItemRequest> @items)
         {
             this.Items = @items;
         }
     
         [Newtonsoft.Json.JsonProperty("items", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Collections.Generic.ICollection<BringbackItemCommand> Items { get; }
+        public System.Collections.Generic.ICollection<BringbackItemRequest> Items { get; }
     
         public string ToJson() 
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this);
         }
     
-        public static BringbackItemsCommand FromJson(string data)
+        public static BringbackItemsRequest FromJson(string data)
         {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<BringbackItemsCommand>(data);
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<BringbackItemsRequest>(data);
         }
     
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.36.0 (Newtonsoft.Json v11.0.0.0)")]
-    public partial class BringbackItemCommand 
+    public partial class BringbackItemRequest 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public BringbackItemCommand(string @productId, int @quantity)
+        public BringbackItemRequest(string @productId, int @quantity)
         {
             this.ProductId = @productId;
             this.Quantity = @quantity;
@@ -1009,9 +1009,9 @@ namespace SagaDemo.InventoryAPI.ApiClient
             return Newtonsoft.Json.JsonConvert.SerializeObject(this);
         }
     
-        public static BringbackItemCommand FromJson(string data)
+        public static BringbackItemRequest FromJson(string data)
         {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<BringbackItemCommand>(data);
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<BringbackItemRequest>(data);
         }
     
     }

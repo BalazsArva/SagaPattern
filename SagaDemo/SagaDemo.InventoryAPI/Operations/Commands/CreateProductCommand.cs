@@ -1,10 +1,7 @@
-﻿using Newtonsoft.Json;
-
-namespace SagaDemo.InventoryAPI.Operations.Commands
+﻿namespace SagaDemo.InventoryAPI.Operations.Commands
 {
     public class CreateProductCommand
     {
-        [JsonConstructor]
         public CreateProductCommand(string name, int pointsCost)
         {
             Name = name;
