@@ -1,16 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace SagaDemo.InventoryAPI.Operations.Commands
 {
     public class AddReservationsCommand
     {
-        public AddReservationsCommand(IEnumerable<AddReservationCommand> subcommands)
+        [JsonConstructor]
+        public AddReservationsCommand(IEnumerable<AddReservationCommand> items)
         {
-            Reservations = subcommands?.ToList() ?? throw new ArgumentNullException(nameof(subcommands));
+            Items = items?.ToList() ?? Enumerable.Empty<AddReservationCommand>();
         }
 
-        public IEnumerable<AddReservationCommand> Reservations { get; }
+        public IEnumerable<AddReservationCommand> Items { get; }
     }
 }

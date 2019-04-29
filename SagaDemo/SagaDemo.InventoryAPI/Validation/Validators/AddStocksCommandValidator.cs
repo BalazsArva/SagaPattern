@@ -18,7 +18,7 @@ namespace SagaDemo.InventoryAPI.Validation.Validators
         {
             this.documentStore = documentStore ?? throw new ArgumentNullException(nameof(documentStore));
 
-            RuleForEach(x => x.Stocks)
+            RuleForEach(x => x.Items)
                 .SetValidator(childItemValidator);
         }
 
@@ -26,7 +26,7 @@ namespace SagaDemo.InventoryAPI.Validation.Validators
         {
             using (var session = documentStore.OpenAsyncSession())
             {
-                var productIds = context.InstanceToValidate.Stocks.Select(r => r.ProductId).ToList();
+                var productIds = context.InstanceToValidate.Items.Select(r => r.ProductId).ToList();
                 var productsLookup = await session.LoadAsync<Product>(productIds, cancellationToken).ConfigureAwait(false);
 
                 context.RootContextData[ValidationContextKeys.Products] = productsLookup;

@@ -1,16 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace SagaDemo.InventoryAPI.Operations.Commands
 {
     public class AddStocksCommand
     {
-        public AddStocksCommand(IEnumerable<AddStockCommand> subcommands)
+        [JsonConstructor]
+        public AddStocksCommand(IEnumerable<AddStockCommand> items)
         {
-            Stocks = subcommands?.ToList() ?? throw new ArgumentNullException(nameof(subcommands));
+            Items = items?.ToList() ?? Enumerable.Empty<AddStockCommand>();
         }
 
-        public IEnumerable<AddStockCommand> Stocks { get; }
+        public IEnumerable<AddStockCommand> Items { get; }
     }
 }

@@ -26,7 +26,7 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 
             using (var session = documentStore.OpenAsyncSession())
             {
-                var productCommandLookup = command.Reservations.ToDictionary(s => s.ProductId);
+                var productCommandLookup = command.Items.ToDictionary(s => s.ProductId);
                 var productLookup = await session.LoadProductsAsync(productCommandLookup.Keys, cancellationToken).ConfigureAwait(false);
 
                 foreach (var pair in productLookup)

@@ -812,13 +812,13 @@ namespace SagaDemo.InventoryAPI.ApiClient
     public partial class AddReservationsCommand 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public AddReservationsCommand(System.Collections.Generic.ICollection<AddReservationCommand> @reservations)
+        public AddReservationsCommand(System.Collections.Generic.ICollection<AddReservationCommand> @items)
         {
-            this.Reservations = @reservations;
+            this.Items = @items;
         }
     
-        [Newtonsoft.Json.JsonProperty("reservations", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Collections.Generic.ICollection<AddReservationCommand> Reservations { get; }
+        [Newtonsoft.Json.JsonProperty("items", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.ICollection<AddReservationCommand> Items { get; }
     
         public string ToJson() 
         {
@@ -864,13 +864,13 @@ namespace SagaDemo.InventoryAPI.ApiClient
     public partial class AddStocksCommand 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public AddStocksCommand(System.Collections.Generic.ICollection<AddStockCommand> @stocks)
+        public AddStocksCommand(System.Collections.Generic.ICollection<AddStockCommand> @items)
         {
-            this.Stocks = @stocks;
+            this.Items = @items;
         }
     
-        [Newtonsoft.Json.JsonProperty("stocks", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Collections.Generic.ICollection<AddStockCommand> Stocks { get; }
+        [Newtonsoft.Json.JsonProperty("items", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.ICollection<AddStockCommand> Items { get; }
     
         public string ToJson() 
         {
@@ -916,13 +916,13 @@ namespace SagaDemo.InventoryAPI.ApiClient
     public partial class TakeoutItemsCommand 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public TakeoutItemsCommand(System.Collections.Generic.ICollection<TakeoutItemCommand> @takeouts)
+        public TakeoutItemsCommand(System.Collections.Generic.ICollection<TakeoutItemCommand> @items)
         {
-            this.Takeouts = @takeouts;
+            this.Items = @items;
         }
     
-        [Newtonsoft.Json.JsonProperty("takeouts", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Collections.Generic.ICollection<TakeoutItemCommand> Takeouts { get; }
+        [Newtonsoft.Json.JsonProperty("items", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.ICollection<TakeoutItemCommand> Items { get; }
     
         public string ToJson() 
         {

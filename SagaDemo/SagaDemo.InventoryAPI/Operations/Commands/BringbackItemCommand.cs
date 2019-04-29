@@ -1,7 +1,10 @@
-﻿namespace SagaDemo.InventoryAPI.Operations.Commands
+﻿using Newtonsoft.Json;
+
+namespace SagaDemo.InventoryAPI.Operations.Commands
 {
     public class BringbackItemCommand
     {
+        [JsonConstructor]
         public BringbackItemCommand(string productId, int quantity)
         {
             ProductId = productId;
