@@ -20,7 +20,9 @@ namespace SagaDemo.InventoryAPI.Extensions
 
             services
                 .AddSingleton<IValidator<AddReservationCommand>, AddReservationCommandValidator>()
-                .AddSingleton<IValidator<AddReservationsCommand>, AddReservationsCommandValidator>();
+                .AddSingleton<IValidator<AddReservationsCommand>, AddReservationsCommandValidator>()
+                .AddSingleton<IValidator<AddStocksCommand>, AddStocksCommandValidator>()
+                .AddSingleton<IValidator<AddStockCommand>, AddStockCommandValidator>();
 
             return services;
         }

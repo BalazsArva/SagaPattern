@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentValidation;
 using Raven.Client.Documents;
 using SagaDemo.InventoryAPI.Operations.Commands;
 using SagaDemo.InventoryAPI.Utilities.Extensions;
@@ -10,16 +11,20 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 {
     public class AddStocksCommandHandler : IAddStocksCommandHandler
     {
-        private readonly IDocumentStore _documentStore;
+        private readonly IDocumentStore documentStore;
+        private readonly IValidator<AddStocksCommand> requestValidator;
 
-        public AddStocksCommandHandler(IDocumentStore documentStore)
+        public AddStocksCommandHandler(IDocumentStore documentStore, IValidator<AddStocksCommand> requestValidator)
         {
-            _documentStore = documentStore ?? throw new ArgumentNullException(nameof(documentStore));
+            this.documentStore = documentStore ?? throw new ArgumentNullException(nameof(documentStore));
+            this.requestValidator = requestValidator ?? throw new ArgumentNullException(nameof(requestValidator));
         }
 
         public async Task HandleAsync(AddStocksCommand command, CancellationToken cancellationToken)
         {
-            using (var session = _documentStore.OpenAsyncSession())
+            await requestValidator.ValidateAndThrowAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
+
+            using (var session = documentStore.OpenAsyncSession())
             {
                 var productCommandLookup = command.Stocks.ToDictionary(s => s.ProductId);
                 var productLookup = await session.LoadProductsAsync(productCommandLookup.Keys, cancellationToken).ConfigureAwait(false);
