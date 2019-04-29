@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SagaDemo.LoyaltyPointsAPI.Handlers.CommandHandlers;
 using SagaDemo.LoyaltyPointsAPI.Operations.Commands;
@@ -26,6 +27,8 @@ namespace SagaDemo.LoyaltyPointsAPI.Controllers
         }
 
         [HttpPost("earn")]
+        [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(void))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
         public async Task<IActionResult> EarnPoints(EarnPointsCommand command, CancellationToken cancellationToken)
         {
             await earnPointsCommandHandler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
@@ -34,6 +37,8 @@ namespace SagaDemo.LoyaltyPointsAPI.Controllers
         }
 
         [HttpPost("refund")]
+        [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(void))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
         public async Task<IActionResult> RefundPoints(RefundPointsCommand command, CancellationToken cancellationToken)
         {
             await refundPointsCommandHandler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
@@ -42,6 +47,8 @@ namespace SagaDemo.LoyaltyPointsAPI.Controllers
         }
 
         [HttpPost("consume")]
+        [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(void))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
         public async Task<IActionResult> ConsumePoints(ConsumePointsCommand command, CancellationToken cancellationToken)
         {
             await consumePointsCommandHandler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
