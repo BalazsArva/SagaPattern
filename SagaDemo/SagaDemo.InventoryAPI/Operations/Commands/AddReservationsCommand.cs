@@ -4,13 +4,13 @@ using System.Linq;
 
 namespace SagaDemo.InventoryAPI.Operations.Commands
 {
-    public class AddProductReservationsCommand
+    public class AddReservationsCommand
     {
-        public AddProductReservationsCommand(IEnumerable<AddProductReservationCommand> subcommands)
+        public AddReservationsCommand(IEnumerable<AddReservationCommand> subcommands)
         {
             Reservations = subcommands?.ToList() ?? throw new ArgumentNullException(nameof(subcommands));
         }
 
-        public IEnumerable<AddProductReservationCommand> Reservations { get; }
+        public IEnumerable<AddReservationCommand> Reservations { get; }
     }
 }

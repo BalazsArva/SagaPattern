@@ -4,8 +4,8 @@ using SagaDemo.InventoryAPI.Operations.Commands;
 
 namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 {
-    public interface IAddProductReservationsCommandHandler
+    public interface IAddReservationsCommandHandler
     {
-        Task HandleAsync(AddProductReservationsCommand command, CancellationToken cancellationToken);
+        Task HandleAsync(AddReservationsCommand command, CancellationToken cancellationToken);
     }
 }

@@ -2,24 +2,29 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentValidation;
 using Raven.Client.Documents;
 using SagaDemo.InventoryAPI.Operations.Commands;
 using SagaDemo.InventoryAPI.Utilities.Extensions;
 
 namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 {
-    public class AddProductReservationsCommandHandler : IAddProductReservationsCommandHandler
+    public class AddReservationsCommandHandler : IAddReservationsCommandHandler
     {
-        private readonly IDocumentStore _documentStore;
+        private readonly IDocumentStore documentStore;
+        private readonly IValidator<AddReservationsCommand> requestValidator;
 
-        public AddProductReservationsCommandHandler(IDocumentStore documentStore)
+        public AddReservationsCommandHandler(IDocumentStore documentStore, IValidator<AddReservationsCommand> requestValidator)
         {
-            _documentStore = documentStore ?? throw new ArgumentNullException(nameof(documentStore));
+            this.documentStore = documentStore ?? throw new ArgumentNullException(nameof(documentStore));
+            this.requestValidator = requestValidator ?? throw new ArgumentNullException(nameof(requestValidator));
         }
 
-        public async Task HandleAsync(AddProductReservationsCommand command, CancellationToken cancellationToken)
+        public async Task HandleAsync(AddReservationsCommand command, CancellationToken cancellationToken)
         {
-            using (var session = _documentStore.OpenAsyncSession())
+            await requestValidator.ValidateAndThrowAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
+
+            using (var session = documentStore.OpenAsyncSession())
             {
                 var productCommandLookup = command.Reservations.ToDictionary(s => s.ProductId);
                 var productLookup = await session.LoadProductsAsync(productCommandLookup.Keys, cancellationToken).ConfigureAwait(false);
@@ -30,11 +35,6 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 
                     var changeVector = session.Advanced.GetChangeVectorFor(loadedProduct);
                     var productReservation = productCommandLookup[pair.Key];
-
-                    if (loadedProduct.StockCount - loadedProduct.ReservationCount < productReservation.Quantity)
-                    {
-                        // TODO: Throw custom exception
-                    }
 
                     loadedProduct.ReservationCount += productReservation.Quantity;
 

@@ -17,12 +17,12 @@ namespace SagaDemo.InventoryAPI.Controllers
     {
         private readonly ICreateProductCommandHandler createProductCommandHandler;
         private readonly IGetProductByIdRequestHandler getProductByIdRequestHandler;
-        private readonly IAddProductReservationsCommandHandler addProductReservationsCommandHandler;
+        private readonly IAddReservationsCommandHandler addProductReservationsCommandHandler;
 
         public CatalogController(
             ICreateProductCommandHandler createProductCommandHandler,
             IGetProductByIdRequestHandler getProductByIdRequestHandler,
-            IAddProductReservationsCommandHandler addProductReservationsCommandHandler)
+            IAddReservationsCommandHandler addProductReservationsCommandHandler)
         {
             this.createProductCommandHandler = createProductCommandHandler ?? throw new ArgumentNullException(nameof(createProductCommandHandler));
             this.getProductByIdRequestHandler = getProductByIdRequestHandler ?? throw new ArgumentNullException(nameof(getProductByIdRequestHandler));
@@ -54,10 +54,14 @@ namespace SagaDemo.InventoryAPI.Controllers
             return Ok(response);
         }
 
-        [HttpPost("{id}/reservations")]
-        public async Task<IActionResult> ReserveItem(int id, CancellationToken cancellationToken)
+        [HttpPost("reservations")]
+        [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(void))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
+        public async Task<IActionResult> ReserveItems(AddReservationsCommand command, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            await addProductReservationsCommandHandler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
+
+            return NoContent();
         }
 
         [HttpPost("{id}/takeout")]

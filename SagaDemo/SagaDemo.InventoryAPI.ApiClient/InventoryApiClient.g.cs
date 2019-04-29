@@ -28,11 +28,11 @@ namespace SagaDemo.InventoryAPI.ApiClient
         System.Threading.Tasks.Task<SwaggerResponse<GetProductByIdResponse>> GetItemAsync(string id, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<FileResponse> ReserveItemAsync(int id);
+        System.Threading.Tasks.Task<SwaggerResponse> ReserveItemsAsync(AddReservationsCommand command);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        System.Threading.Tasks.Task<FileResponse> ReserveItemAsync(int id, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<SwaggerResponse> ReserveItemsAsync(AddReservationsCommand command, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         System.Threading.Tasks.Task<FileResponse> TakeoutItemAsync(int id);
@@ -257,30 +257,27 @@ namespace SagaDemo.InventoryAPI.ApiClient
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<FileResponse> ReserveItemAsync(int id)
+        public System.Threading.Tasks.Task<SwaggerResponse> ReserveItemsAsync(AddReservationsCommand command)
         {
-            return ReserveItemAsync(id, System.Threading.CancellationToken.None);
+            return ReserveItemsAsync(command, System.Threading.CancellationToken.None);
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        public async System.Threading.Tasks.Task<FileResponse> ReserveItemAsync(int id, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<SwaggerResponse> ReserveItemsAsync(AddReservationsCommand command, System.Threading.CancellationToken cancellationToken)
         {
-            if (id == null)
-                throw new System.ArgumentNullException("id");
-    
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append("api/Catalog/{id}/reservations");
-            urlBuilder_.Replace("{id}", System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
+            urlBuilder_.Append("api/Catalog/reservations");
     
             var client_ = _httpClient;
             try
             {
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
-                    request_.Content = new System.Net.Http.StringContent(string.Empty, System.Text.Encoding.UTF8, "application/octet-stream");
+                    var content_ = new System.Net.Http.StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(command, _settings.Value));
+                    content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
+                    request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("POST");
-                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/octet-stream"));
     
                     PrepareRequest(client_, request_, urlBuilder_);
                     var url_ = urlBuilder_.ToString();
@@ -300,12 +297,24 @@ namespace SagaDemo.InventoryAPI.ApiClient
                         ProcessResponse(client_, response_);
     
                         var status_ = ((int)response_.StatusCode).ToString();
-                        if (status_ == "200" || status_ == "206") 
+                        if (status_ == "204") 
                         {
-                            var responseStream_ = response_.Content == null ? System.IO.Stream.Null : await response_.Content.ReadAsStreamAsync().ConfigureAwait(false);
-                            var fileResponse_ = new FileResponse((int)response_.StatusCode, headers_, responseStream_, null, response_); 
-                            client_ = null; response_ = null; // response and client are disposed by FileResponse
-                            return fileResponse_;
+                            return new SwaggerResponse((int)response_.StatusCode, headers_);
+                        }
+                        else
+                        if (status_ == "400") 
+                        {
+                            var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false); 
+                            var result_ = default(ValidationProblemDetails); 
+                            try
+                            {
+                                result_ = Newtonsoft.Json.JsonConvert.DeserializeObject<ValidationProblemDetails>(responseData_, _settings.Value);
+                            } 
+                            catch (System.Exception exception_) 
+                            {
+                                throw new SwaggerException("Could not deserialize the response body.", (int)response_.StatusCode, responseData_, headers_, exception_);
+                            }
+                            throw new SwaggerException<ValidationProblemDetails>("A server side error occurred.", (int)response_.StatusCode, responseData_, headers_, result_, null);
                         }
                         else
                         if (status_ != "200" && status_ != "204")
@@ -313,8 +322,8 @@ namespace SagaDemo.InventoryAPI.ApiClient
                             var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false); 
                             throw new SwaggerException("The HTTP status code of the response was not expected (" + (int)response_.StatusCode + ").", (int)response_.StatusCode, responseData_, headers_, null);
                         }
-            
-                        return default(FileResponse);
+    
+                        return new SwaggerResponse((int)response_.StatusCode, headers_); 
                     }
                     finally
                     {
@@ -689,6 +698,58 @@ namespace SagaDemo.InventoryAPI.ApiClient
         public static GetProductByIdResponse FromJson(string data)
         {
             return Newtonsoft.Json.JsonConvert.DeserializeObject<GetProductByIdResponse>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.36.0 (Newtonsoft.Json v11.0.0.0)")]
+    public partial class AddReservationsCommand 
+    {
+        [Newtonsoft.Json.JsonConstructor]
+        public AddReservationsCommand(System.Collections.Generic.ICollection<AddReservationCommand> @reservations)
+        {
+            this.Reservations = @reservations;
+        }
+    
+        [Newtonsoft.Json.JsonProperty("reservations", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.ICollection<AddReservationCommand> Reservations { get; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static AddReservationsCommand FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<AddReservationsCommand>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.36.0 (Newtonsoft.Json v11.0.0.0)")]
+    public partial class AddReservationCommand 
+    {
+        [Newtonsoft.Json.JsonConstructor]
+        public AddReservationCommand(string @productId, int @quantity)
+        {
+            this.ProductId = @productId;
+            this.Quantity = @quantity;
+        }
+    
+        [Newtonsoft.Json.JsonProperty("productId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string ProductId { get; }
+    
+        [Newtonsoft.Json.JsonProperty("quantity", Required = Newtonsoft.Json.Required.Always)]
+        public int Quantity { get; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static AddReservationCommand FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<AddReservationCommand>(data);
         }
     
     }
