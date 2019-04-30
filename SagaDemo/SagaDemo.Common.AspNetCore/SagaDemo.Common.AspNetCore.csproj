@@ -9,4 +9,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SagaDemo.Common.Errors\SagaDemo.Common.Errors.csproj" />
+  </ItemGroup>
+
 </Project>

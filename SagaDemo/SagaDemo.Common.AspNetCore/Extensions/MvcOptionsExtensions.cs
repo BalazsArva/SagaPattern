@@ -8,6 +8,7 @@ namespace SagaDemo.Common.AspNetCore.Extensions
         public static MvcOptions AddCommonFilters(this MvcOptions options)
         {
             options.Filters.Add<ValidationExceptionFilterAttribute>();
+            options.Filters.Add<EntityNotFoundExceptionFilterAttribute>();
 
             return options;
         }

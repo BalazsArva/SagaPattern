@@ -2,6 +2,7 @@
 using System.Linq;
 using FluentValidation;
 using FluentValidation.Results;
+using SagaDemo.Common.Errors;
 using SagaDemo.DeliveryAPI.Entities;
 using SagaDemo.DeliveryAPI.Operations.Commands;
 
@@ -23,12 +24,7 @@ namespace SagaDemo.DeliveryAPI.Validation.Validators
         {
             if (deliveryDocument == null)
             {
-                var failures = new[]
-                {
-                    new ValidationFailure(nameof(IDeliveryCommand.TransactionId), ValidationMessages.DeliveryDoesNotExist)
-                };
-
-                throw new ValidationException(failures);
+                throw new EntityNotFoundException(ValidationMessages.DeliveryDoesNotExist);
             }
 
             var currentStatus = deliveryDocument.Status;

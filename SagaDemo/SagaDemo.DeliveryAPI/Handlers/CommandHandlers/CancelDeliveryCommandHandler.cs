@@ -25,14 +25,15 @@ namespace SagaDemo.DeliveryAPI.Handlers.CommandHandlers
             using (var session = documentStore.OpenAsyncSession())
             {
                 var deliveryDocument = await session.LoadDeliveryAsync(command.TransactionId, cancellationToken).ConfigureAwait(false);
-                var changeVector = session.Advanced.GetChangeVectorFor(deliveryDocument);
+
+                requestValidator.ValidateAndThrow(command, deliveryDocument);
 
                 if (deliveryDocument.Status == DeliveryStatus.Cancelled)
                 {
                     return;
                 }
 
-                requestValidator.ValidateAndThrow(command, deliveryDocument);
+                var changeVector = session.Advanced.GetChangeVectorFor(deliveryDocument);
 
                 deliveryDocument.Status = DeliveryStatus.Cancelled;
 

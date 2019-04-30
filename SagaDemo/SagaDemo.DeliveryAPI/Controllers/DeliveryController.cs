@@ -30,7 +30,6 @@ namespace SagaDemo.DeliveryAPI.Controllers
             this.cancelDeliveryCommandHandler = cancelDeliveryCommandHandler ?? throw new ArgumentNullException(nameof(cancelDeliveryCommandHandler));
         }
 
-        // TODO: 404s for each endpoint, handle not found documents in command handlers
         [HttpPost("{transactionId}")]
         [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(void))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
@@ -46,6 +45,7 @@ namespace SagaDemo.DeliveryAPI.Controllers
         [HttpPost("{transactionId}/delivery-attempts")]
         [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(void))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         public async Task<IActionResult> RegisterDeliveryAttempt(string transactionId, CancellationToken cancellationToken)
         {
             var command = new RegisterDeliveryAttemptCommand(transactionId);
@@ -58,6 +58,7 @@ namespace SagaDemo.DeliveryAPI.Controllers
         [HttpPost("{transactionId}/complete")]
         [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(void))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         public async Task<IActionResult> CompleteDelivery(string transactionId, CancellationToken cancellationToken)
         {
             var command = new CompleteDeliveryCommand(transactionId);
@@ -70,6 +71,7 @@ namespace SagaDemo.DeliveryAPI.Controllers
         [HttpPost("{transactionId}/cancel")]
         [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(void))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         public async Task<IActionResult> CancelDelivery(string transactionId, CancellationToken cancellationToken)
         {
             var command = new CancelDeliveryCommand(transactionId);
