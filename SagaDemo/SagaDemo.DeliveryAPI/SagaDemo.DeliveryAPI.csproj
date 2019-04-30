@@ -12,6 +12,7 @@
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Api.Analyzers" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.3" />
     <PackageReference Include="RavenDB.Client" Version="4.1.5" />
     <PackageReference Include="RavenDB.Client" Version="4.1.5" />
     <PackageReference Include="NSwag.MSBuild" Version="12.2.4">
@@ -19,10 +20,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="4.0.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Controllers\" />
   </ItemGroup>
 
   <Target Name="NSwag" AfterTargets="Build" Condition="$(Configuration) == 'Debug'">
@@ -34,6 +31,10 @@
   <ItemGroup>
     <ProjectReference Include="..\SagaDemo.Common.AspNetCore\SagaDemo.Common.AspNetCore.csproj" />
     <ProjectReference Include="..\SagaDemo.Common.DataAccess.RavenDb\SagaDemo.Common.DataAccess.RavenDb.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Contracts\Requests\" />
   </ItemGroup>
 
 </Project>
