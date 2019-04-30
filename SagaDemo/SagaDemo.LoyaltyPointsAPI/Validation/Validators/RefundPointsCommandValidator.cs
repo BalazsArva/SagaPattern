@@ -3,11 +3,11 @@ using SagaDemo.Common.Validation;
 using SagaDemo.LoyaltyPointsAPI.DataAccess;
 using SagaDemo.LoyaltyPointsAPI.Operations.Commands;
 
-namespace SagaDemo.LoyaltyPointsAPI.Validation
+namespace SagaDemo.LoyaltyPointsAPI.Validation.Validators
 {
-    public class EarnPointsCommandValidator : AbstractValidator<EarnPointsCommand>
+    public class RefundPointsCommandValidator : AbstractValidator<RefundPointsCommand>
     {
-        public EarnPointsCommandValidator(ILoyaltyDbContextFactory dbContextFactory)
+        public RefundPointsCommandValidator(ILoyaltyDbContextFactory dbContextFactory)
         {
             RuleFor(cmd => cmd.Points)
                 .GreaterThan(0)

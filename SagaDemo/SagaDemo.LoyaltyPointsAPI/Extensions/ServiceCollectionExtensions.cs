@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SagaDemo.LoyaltyPointsAPI.DataAccess;
 using SagaDemo.LoyaltyPointsAPI.Handlers.CommandHandlers;
 using SagaDemo.LoyaltyPointsAPI.Operations.Commands;
-using SagaDemo.LoyaltyPointsAPI.Validation;
+using SagaDemo.LoyaltyPointsAPI.Validation.Validators;
 
 namespace SagaDemo.LoyaltyPointsAPI.Extensions
 {

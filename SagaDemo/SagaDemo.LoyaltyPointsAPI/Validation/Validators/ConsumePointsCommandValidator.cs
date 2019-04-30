@@ -5,7 +5,7 @@ using SagaDemo.Common.Validation;
 using SagaDemo.LoyaltyPointsAPI.DataAccess;
 using SagaDemo.LoyaltyPointsAPI.Operations.Commands;
 
-namespace SagaDemo.LoyaltyPointsAPI.Validation
+namespace SagaDemo.LoyaltyPointsAPI.Validation.Validators
 {
     public class ConsumePointsCommandValidator : AbstractValidator<ConsumePointsCommand>
     {
