@@ -20,9 +20,9 @@ namespace SagaDemo.DeliveryAPI.Extensions
             services
                 .AddSingleton<IValidator<Address>, AddressValidator>()
                 .AddSingleton<IValidator<CreateDeliveryRequestCommand>, CreateDeliveryRequestCommandValidator>()
-                .AddSingleton<IValidator<RegisterDeliveryAttemptCommand>, RegisterDeliveryAttemptCommandValidator>()
-                .AddSingleton<IValidator<CompleteDeliveryCommand>, CompleteDeliveryCommandValidator>()
-                .AddSingleton<IValidator<CancelDeliveryCommand>, CancelDeliveryCommandValidator>();
+                .AddSingleton<IDeliveryCommandValidator<RegisterDeliveryAttemptCommand>, RegisterDeliveryAttemptCommandValidator>()
+                .AddSingleton<IDeliveryCommandValidator<CompleteDeliveryCommand>, CompleteDeliveryCommandValidator>()
+                .AddSingleton<IDeliveryCommandValidator<CancelDeliveryCommand>, CancelDeliveryCommandValidator>();
 
             return services;
         }

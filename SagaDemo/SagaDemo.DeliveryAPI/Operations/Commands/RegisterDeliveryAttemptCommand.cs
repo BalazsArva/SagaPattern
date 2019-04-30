@@ -1,6 +1,6 @@
 ﻿namespace SagaDemo.DeliveryAPI.Operations.Commands
 {
-    public class RegisterDeliveryAttemptCommand
+    public class RegisterDeliveryAttemptCommand : IDeliveryCommand
     {
         public RegisterDeliveryAttemptCommand(string transactionId)
         {

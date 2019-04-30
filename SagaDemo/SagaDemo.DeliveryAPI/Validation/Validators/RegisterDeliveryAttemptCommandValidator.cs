@@ -1,10 +1,12 @@
-﻿using FluentValidation;
+﻿using System.Collections.Generic;
+using FluentValidation;
 using SagaDemo.Common.Validation;
+using SagaDemo.DeliveryAPI.Entities;
 using SagaDemo.DeliveryAPI.Operations.Commands;
 
 namespace SagaDemo.DeliveryAPI.Validation.Validators
 {
-    public class RegisterDeliveryAttemptCommandValidator : AbstractValidator<RegisterDeliveryAttemptCommand>
+    public class RegisterDeliveryAttemptCommandValidator : DeliveryCommandValidatorBase<RegisterDeliveryAttemptCommand>
     {
         public RegisterDeliveryAttemptCommandValidator()
         {
@@ -12,5 +14,8 @@ namespace SagaDemo.DeliveryAPI.Validation.Validators
                 .NotEmpty()
                 .WithMessage(CommonValidationMessages.CannotBeNullOrEmpty);
         }
+
+        // Allow in progress statuses as well to support idempotence
+        public override IEnumerable<DeliveryStatus> AllowedOriginStatuses { get; } = new[] { DeliveryStatus.Created, DeliveryStatus.InProgress };
     }
 }

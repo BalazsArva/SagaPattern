@@ -1,6 +1,6 @@
 ﻿namespace SagaDemo.DeliveryAPI.Operations.Commands
 {
-    public class CompleteDeliveryCommand
+    public class CompleteDeliveryCommand : IDeliveryCommand
     {
         public CompleteDeliveryCommand(string transactionId)
         {

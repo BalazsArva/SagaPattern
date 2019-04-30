@@ -1,6 +1,6 @@
 ﻿namespace SagaDemo.DeliveryAPI.Operations.Commands
 {
-    public class CancelDeliveryCommand
+    public class CancelDeliveryCommand : IDeliveryCommand
     {
         public CancelDeliveryCommand(string transactionId)
         {
