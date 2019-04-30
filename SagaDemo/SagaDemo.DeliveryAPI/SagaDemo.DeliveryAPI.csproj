@@ -31,6 +31,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SagaDemo.Common.AspNetCore\SagaDemo.Common.AspNetCore.csproj" />
     <ProjectReference Include="..\SagaDemo.Common.DataAccess.RavenDb\SagaDemo.Common.DataAccess.RavenDb.csproj" />
+    <ProjectReference Include="..\SagaDemo.Common.Validation\SagaDemo.Common.Validation.csproj" />
   </ItemGroup>
 
   <ItemGroup>
