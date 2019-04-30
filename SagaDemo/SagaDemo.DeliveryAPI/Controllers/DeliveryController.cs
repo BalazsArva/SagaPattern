@@ -15,15 +15,19 @@ namespace SagaDemo.DeliveryAPI.Controllers
     {
         private readonly ICreateDeliveryRequestCommandHandler createDeliveryRequestCommandHandler;
         private readonly IRegisterDeliveryAttemptCommandHandler registerDeliveryAttemptCommandHandler;
+        private readonly ICompleteDeliveryCommandHandler completeDeliveryCommandHandler;
 
         public DeliveryController(
             ICreateDeliveryRequestCommandHandler createDeliveryRequestCommandHandler,
-            IRegisterDeliveryAttemptCommandHandler registerDeliveryAttemptCommandHandler)
+            IRegisterDeliveryAttemptCommandHandler registerDeliveryAttemptCommandHandler,
+            ICompleteDeliveryCommandHandler completeDeliveryCommandHandler)
         {
             this.createDeliveryRequestCommandHandler = createDeliveryRequestCommandHandler ?? throw new ArgumentNullException(nameof(createDeliveryRequestCommandHandler));
             this.registerDeliveryAttemptCommandHandler = registerDeliveryAttemptCommandHandler ?? throw new ArgumentNullException(nameof(registerDeliveryAttemptCommandHandler));
+            this.completeDeliveryCommandHandler = completeDeliveryCommandHandler ?? throw new ArgumentNullException(nameof(completeDeliveryCommandHandler));
         }
 
+        // TODO: 404s for each endpoint, handle not found documents in command handlers
         [HttpPost("{transactionId}")]
         [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(void))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
@@ -44,6 +48,18 @@ namespace SagaDemo.DeliveryAPI.Controllers
             var command = new RegisterDeliveryAttemptCommand(transactionId);
 
             await registerDeliveryAttemptCommandHandler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
+
+            return NoContent();
+        }
+
+        [HttpPost("{transactionId}/complete")]
+        [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(void))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
+        public async Task<IActionResult> CompleteDelivery(string transactionId, CancellationToken cancellationToken)
+        {
+            var command = new CompleteDeliveryCommand(transactionId);
+
+            await completeDeliveryCommandHandler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
 
             return NoContent();
         }
