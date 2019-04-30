@@ -46,6 +46,7 @@ namespace SagaDemo.DeliveryAPI.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(void))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(void))]
         public async Task<IActionResult> RegisterDeliveryAttempt(string transactionId, CancellationToken cancellationToken)
         {
             var command = new RegisterDeliveryAttemptCommand(transactionId);
@@ -59,6 +60,7 @@ namespace SagaDemo.DeliveryAPI.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(void))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(void))]
         public async Task<IActionResult> CompleteDelivery(string transactionId, CancellationToken cancellationToken)
         {
             var command = new CompleteDeliveryCommand(transactionId);
@@ -72,6 +74,7 @@ namespace SagaDemo.DeliveryAPI.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(void))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(void))]
         public async Task<IActionResult> CancelDelivery(string transactionId, CancellationToken cancellationToken)
         {
             var command = new CancelDeliveryCommand(transactionId);

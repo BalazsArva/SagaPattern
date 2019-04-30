@@ -9,6 +9,7 @@ namespace SagaDemo.Common.AspNetCore.Extensions
         {
             options.Filters.Add<ValidationExceptionFilterAttribute>();
             options.Filters.Add<EntityNotFoundExceptionFilterAttribute>();
+            options.Filters.Add<ConcurrentUpdateExceptionFilterAttribute>();
 
             return options;
         }

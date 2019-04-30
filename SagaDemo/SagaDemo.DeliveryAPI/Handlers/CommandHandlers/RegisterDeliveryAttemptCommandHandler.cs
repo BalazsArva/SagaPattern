@@ -2,6 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Raven.Client.Documents;
+using Raven.Client.Exceptions;
+using SagaDemo.Common.Errors;
 using SagaDemo.DeliveryAPI.Entities;
 using SagaDemo.DeliveryAPI.Extensions;
 using SagaDemo.DeliveryAPI.Operations.Commands;
@@ -22,23 +24,30 @@ namespace SagaDemo.DeliveryAPI.Handlers.CommandHandlers
 
         public async Task HandleAsync(RegisterDeliveryAttemptCommand command, CancellationToken cancellationToken)
         {
-            using (var session = documentStore.OpenAsyncSession())
+            try
             {
-                var deliveryDocument = await session.LoadDeliveryAsync(command.TransactionId, cancellationToken).ConfigureAwait(false);
-
-                requestValidator.ValidateAndThrow(command, deliveryDocument);
-
-                if (deliveryDocument.Status == DeliveryStatus.InProgress)
+                using (var session = documentStore.OpenAsyncSession())
                 {
-                    return;
+                    var deliveryDocument = await session.LoadDeliveryAsync(command.TransactionId, cancellationToken).ConfigureAwait(false);
+
+                    requestValidator.ValidateAndThrow(command, deliveryDocument);
+
+                    if (deliveryDocument.Status == DeliveryStatus.InProgress)
+                    {
+                        return;
+                    }
+
+                    var changeVector = session.Advanced.GetChangeVectorFor(deliveryDocument);
+
+                    deliveryDocument.Status = DeliveryStatus.InProgress;
+
+                    await session.StoreAsync(deliveryDocument, changeVector, deliveryDocument.Id, cancellationToken).ConfigureAwait(false);
+                    await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
-
-                var changeVector = session.Advanced.GetChangeVectorFor(deliveryDocument);
-
-                deliveryDocument.Status = DeliveryStatus.InProgress;
-
-                await session.StoreAsync(deliveryDocument, changeVector, deliveryDocument.Id, cancellationToken).ConfigureAwait(false);
-                await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (ConcurrencyException ce)
+            {
+                throw new ConcurrentUpdateException("The entity requested for modification has been modified by another client since it was loaded.", ce);
             }
         }
     }
