@@ -12,11 +12,13 @@ namespace SagaDemo.DeliveryAPI.Extensions
         public static IServiceCollection AddDeliveryServices(this IServiceCollection services)
         {
             services
-                .AddSingleton<ICreateDeliveryRequestCommandHandler, CreateDeliveryRequestCommandHandler>();
+                .AddSingleton<ICreateDeliveryRequestCommandHandler, CreateDeliveryRequestCommandHandler>()
+                .AddSingleton<IRegisterDeliveryAttemptCommandHandler, RegisterDeliveryAttemptCommandHandler>();
 
             services
                 .AddSingleton<IValidator<Address>, AddressValidator>()
-                .AddSingleton<IValidator<CreateDeliveryRequestCommand>, CreateDeliveryRequestCommandValidator>();
+                .AddSingleton<IValidator<CreateDeliveryRequestCommand>, CreateDeliveryRequestCommandValidator>()
+                .AddSingleton<IValidator<RegisterDeliveryAttemptCommand>, RegisterDeliveryAttemptCommandValidator>();
 
             return services;
         }
