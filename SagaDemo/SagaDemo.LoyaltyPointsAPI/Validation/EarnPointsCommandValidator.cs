@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using SagaDemo.Common.Validation;
 using SagaDemo.LoyaltyPointsAPI.DataAccess;
 using SagaDemo.LoyaltyPointsAPI.Operations.Commands;
 
@@ -14,11 +15,11 @@ namespace SagaDemo.LoyaltyPointsAPI.Validation
 
             RuleFor(cmd => cmd.TransactionId)
                 .NotEmpty()
-                .WithMessage(ValidationMessages.CannotBeNullOrEmpty);
+                .WithMessage(CommonValidationMessages.CannotBeNullOrEmpty);
 
             RuleFor(cmd => cmd.UserId)
                 .NotEmpty()
-                .WithMessage(ValidationMessages.CannotBeNullOrEmpty);
+                .WithMessage(CommonValidationMessages.CannotBeNullOrEmpty);
         }
     }
 }
