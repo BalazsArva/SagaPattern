@@ -2,10 +2,10 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Raven.Client.Documents;
+using SagaDemo.Common.DataAccess.RavenDb.Utilities;
 using SagaDemo.InventoryAPI.Entities;
 using SagaDemo.InventoryAPI.Operations.Requests;
 using SagaDemo.InventoryAPI.Operations.Responses;
-using SagaDemo.InventoryAPI.Utilities.Helpers;
 
 namespace SagaDemo.InventoryAPI.Handlers.RequestHandlers
 {

@@ -4,8 +4,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation;
 using Raven.Client.Documents;
+using SagaDemo.InventoryAPI.Extensions;
 using SagaDemo.InventoryAPI.Operations.Commands;
-using SagaDemo.InventoryAPI.Utilities.Extensions;
 
 namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 {

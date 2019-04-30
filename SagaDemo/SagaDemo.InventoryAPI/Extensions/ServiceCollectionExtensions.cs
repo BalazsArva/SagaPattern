@@ -11,7 +11,6 @@ namespace SagaDemo.InventoryAPI.Extensions
     {
         public static IServiceCollection AddInventoryServices(this IServiceCollection services)
         {
-            // TODO: Add IDocumentStore
             services
                 .AddSingleton<ICreateProductCommandHandler, CreateProductCommandHandler>()
                 .AddSingleton<IAddStocksCommandHandler, AddStocksCommandHandler>()
