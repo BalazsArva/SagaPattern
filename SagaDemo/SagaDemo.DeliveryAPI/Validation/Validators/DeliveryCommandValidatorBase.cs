@@ -13,11 +13,6 @@ namespace SagaDemo.DeliveryAPI.Validation.Validators
     {
         public const string ObjectRootPath = "";
 
-        public override ValidationResult Validate(ValidationContext<TCommand> context)
-        {
-            return base.Validate(context);
-        }
-
         public abstract IEnumerable<DeliveryStatus> AllowedOriginStatuses { get; }
 
         public virtual void ValidateAndThrow(TCommand command, Delivery deliveryDocument)
