@@ -20,6 +20,7 @@ namespace SagaDemo.InventoryAPI.Extensions
                 .AddSingleton<IGetProductByIdRequestHandler, GetProductByIdRequestHandler>();
 
             services
+                .AddSingleton<IValidator<CreateProductCommand>, CreateProductCommandValidator>()
                 .AddSingleton<IValidator<AddReservationCommand>, AddReservationCommandValidator>()
                 .AddSingleton<IValidator<AddReservationsCommand>, AddReservationsCommandValidator>()
                 .AddSingleton<IValidator<AddStocksCommand>, AddStocksCommandValidator>()

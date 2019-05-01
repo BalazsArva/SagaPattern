@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentValidation;
 using Raven.Client.Documents;
 using SagaDemo.Common.DataAccess.RavenDb.Utilities;
 using SagaDemo.InventoryAPI.Entities;
@@ -11,17 +12,20 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 {
     public class CreateProductCommandHandler : ICreateProductCommandHandler
     {
-        private readonly IDocumentStore _documentStore;
+        private readonly IDocumentStore documentStore;
+        private readonly IValidator<CreateProductCommand> requestValidator;
 
-        public CreateProductCommandHandler(IDocumentStore documentStore)
+        public CreateProductCommandHandler(IDocumentStore documentStore, IValidator<CreateProductCommand> requestValidator)
         {
-            _documentStore = documentStore ?? throw new ArgumentNullException(nameof(documentStore));
+            this.documentStore = documentStore ?? throw new ArgumentNullException(nameof(documentStore));
+            this.requestValidator = requestValidator ?? throw new ArgumentNullException(nameof(requestValidator));
         }
 
         public async Task<CreateProductResponse> HandleAsync(CreateProductCommand command, CancellationToken cancellationToken)
         {
-            // TODO: Validation
-            using (var session = _documentStore.OpenAsyncSession())
+            requestValidator.ValidateAndThrow(command);
+
+            using (var session = documentStore.OpenAsyncSession())
             {
                 var documentId = Guid.NewGuid().ToString();
                 var productDocument = new Product
