@@ -23,7 +23,7 @@ namespace SagaDemo.InventoryAPI.Extensions
                 .AddSingleton<IValidator<CreateProductCommand>, CreateProductCommandValidator>()
                 .AddSingleton<IValidator<AddReservationCommand>, AddReservationCommandValidator>()
                 .AddSingleton<IInventoryBatchCommandValidator<AddReservationsCommand>, AddReservationsCommandValidator>()
-                .AddSingleton<IValidator<AddStocksCommand>, AddStocksCommandValidator>()
+                .AddSingleton<IInventoryBatchCommandValidator<AddStocksCommand>, AddStocksCommandValidator>()
                 .AddSingleton<IValidator<AddStockCommand>, AddStockCommandValidator>()
                 .AddSingleton<IValidator<TakeoutItemCommand>, TakeoutItemCommandValidator>()
                 .AddSingleton<IValidator<TakeoutItemsCommand>, TakeoutItemsCommandValidator>()

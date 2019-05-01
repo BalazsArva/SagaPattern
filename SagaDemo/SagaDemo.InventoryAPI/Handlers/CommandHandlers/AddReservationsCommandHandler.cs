@@ -33,7 +33,7 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
                 }
                 catch (ConcurrencyException)
                 {
-                    // Ignore, retry until either successfully reserved or validation detects that there are not enough unreserved stocks.
+                    // Ignore, retry until either successfully updated or validation detects that there are not enough unreserved stocks.
                 }
             }
         }
