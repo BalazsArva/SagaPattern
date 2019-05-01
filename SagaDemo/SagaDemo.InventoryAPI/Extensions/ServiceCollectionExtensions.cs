@@ -26,7 +26,7 @@ namespace SagaDemo.InventoryAPI.Extensions
                 .AddSingleton<IInventoryBatchCommandValidator<AddStocksCommand>, AddStocksCommandValidator>()
                 .AddSingleton<IValidator<AddStockCommand>, AddStockCommandValidator>()
                 .AddSingleton<IValidator<TakeoutItemCommand>, TakeoutItemCommandValidator>()
-                .AddSingleton<IValidator<TakeoutItemsCommand>, TakeoutItemsCommandValidator>()
+                .AddSingleton<IInventoryBatchCommandValidator<TakeoutItemsCommand>, TakeoutItemsCommandValidator>()
                 .AddSingleton<IValidator<BringbackItemCommand>, BringbackItemCommandValidator>()
                 .AddSingleton<IInventoryBatchCommandValidator<BringbackItemsCommand>, BringbackItemsCommandValidator>();
 
