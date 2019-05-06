@@ -5,8 +5,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SagaDemo.Common.AspNetCore;
 using SagaDemo.DeliveryAPI.Handlers.CommandHandlers;
+using SagaDemo.DeliveryAPI.Handlers.QueryHandlers;
 using SagaDemo.DeliveryAPI.Mappers;
 using SagaDemo.DeliveryAPI.Operations.Commands;
+using SagaDemo.DeliveryAPI.Operations.Queries;
+using SagaDemo.DeliveryAPI.Operations.Results;
 
 namespace SagaDemo.DeliveryAPI.Controllers
 {
@@ -18,17 +21,38 @@ namespace SagaDemo.DeliveryAPI.Controllers
         private readonly IRegisterDeliveryAttemptCommandHandler registerDeliveryAttemptCommandHandler;
         private readonly ICompleteDeliveryCommandHandler completeDeliveryCommandHandler;
         private readonly ICancelDeliveryCommandHandler cancelDeliveryCommandHandler;
+        private readonly IGetDeliveryByIdQueryHandler getDeliveryByIdQueryHandler;
 
         public DeliveryController(
             ICreateDeliveryRequestCommandHandler createDeliveryRequestCommandHandler,
             IRegisterDeliveryAttemptCommandHandler registerDeliveryAttemptCommandHandler,
             ICompleteDeliveryCommandHandler completeDeliveryCommandHandler,
-            ICancelDeliveryCommandHandler cancelDeliveryCommandHandler)
+            ICancelDeliveryCommandHandler cancelDeliveryCommandHandler,
+            IGetDeliveryByIdQueryHandler getDeliveryByIdQueryHandler)
         {
             this.createDeliveryRequestCommandHandler = createDeliveryRequestCommandHandler ?? throw new ArgumentNullException(nameof(createDeliveryRequestCommandHandler));
             this.registerDeliveryAttemptCommandHandler = registerDeliveryAttemptCommandHandler ?? throw new ArgumentNullException(nameof(registerDeliveryAttemptCommandHandler));
             this.completeDeliveryCommandHandler = completeDeliveryCommandHandler ?? throw new ArgumentNullException(nameof(completeDeliveryCommandHandler));
             this.cancelDeliveryCommandHandler = cancelDeliveryCommandHandler ?? throw new ArgumentNullException(nameof(cancelDeliveryCommandHandler));
+            this.getDeliveryByIdQueryHandler = getDeliveryByIdQueryHandler ?? throw new ArgumentNullException(nameof(getDeliveryByIdQueryHandler));
+        }
+
+        [HttpGet("{transactionId}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetDeliveryByIdQueryResult))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        public async Task<IActionResult> GetDeliveryDetails(string transactionId, CancellationToken cancellationToken)
+        {
+            var query = new GetDeliveryByIdQuery(transactionId);
+
+            var result = await getDeliveryByIdQueryHandler.HandleAsync(query, cancellationToken).ConfigureAwait(false);
+
+            if (result == null)
+            {
+                return NotFound();
+            }
+
+            // TODO: Include document version in the response (header)
+            return Ok(result);
         }
 
         [HttpPost("{transactionId}")]
