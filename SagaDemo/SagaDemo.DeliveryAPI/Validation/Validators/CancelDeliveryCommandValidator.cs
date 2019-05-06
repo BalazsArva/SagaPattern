@@ -13,6 +13,10 @@ namespace SagaDemo.DeliveryAPI.Validation.Validators
             RuleFor(x => x.TransactionId)
                 .NotEmpty()
                 .WithMessage(CommonValidationMessages.CannotBeNullOrEmpty);
+
+            RuleFor(x => x.DocumentVersion)
+                .NotEmpty()
+                .WithMessage(CommonValidationMessages.CannotBeNullOrEmpty);
         }
 
         // Allow cancelled statuses as well to support idempotence

@@ -2,11 +2,14 @@
 {
     public class CompleteDeliveryCommand : IDeliveryCommand
     {
-        public CompleteDeliveryCommand(string transactionId)
+        public CompleteDeliveryCommand(string transactionId, string documentVersion)
         {
             TransactionId = transactionId;
+            DocumentVersion = documentVersion;
         }
 
         public string TransactionId { get; }
+
+        public string DocumentVersion { get; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using FluentValidation;
 using FluentValidation.Results;
@@ -9,7 +10,7 @@ using SagaDemo.DeliveryAPI.Operations.Commands;
 namespace SagaDemo.DeliveryAPI.Validation.Validators
 {
     public abstract class DeliveryCommandValidatorBase<TCommand> : AbstractValidator<TCommand>, IDeliveryCommandValidator<TCommand>
-        where TCommand : IDeliveryCommand
+        where TCommand : class, IDeliveryCommand
     {
         public const string ObjectRootPath = "";
 
@@ -17,6 +18,11 @@ namespace SagaDemo.DeliveryAPI.Validation.Validators
 
         public virtual void ValidateAndThrow(TCommand command, Delivery deliveryDocument)
         {
+            if (command == null)
+            {
+                throw new ArgumentNullException(nameof(command));
+            }
+
             if (deliveryDocument == null)
             {
                 throw new EntityNotFoundException(ValidationMessages.DeliveryDoesNotExist);

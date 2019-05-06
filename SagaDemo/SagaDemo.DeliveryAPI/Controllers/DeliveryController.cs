@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SagaDemo.Common.AspNetCore;
 using SagaDemo.DeliveryAPI.Handlers.CommandHandlers;
 using SagaDemo.DeliveryAPI.Mappers;
 using SagaDemo.DeliveryAPI.Operations.Commands;
@@ -47,9 +48,9 @@ namespace SagaDemo.DeliveryAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(void))]
-        public async Task<IActionResult> RegisterDeliveryAttempt(string transactionId, CancellationToken cancellationToken)
+        public async Task<IActionResult> RegisterDeliveryAttempt(string transactionId, [FromHeader(Name = CustomHttpHeaderKeys.EntityVersion)]string documentVersion, CancellationToken cancellationToken)
         {
-            var command = new RegisterDeliveryAttemptCommand(transactionId);
+            var command = new RegisterDeliveryAttemptCommand(transactionId, documentVersion);
 
             await registerDeliveryAttemptCommandHandler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
 
@@ -61,9 +62,9 @@ namespace SagaDemo.DeliveryAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(void))]
-        public async Task<IActionResult> CompleteDelivery(string transactionId, CancellationToken cancellationToken)
+        public async Task<IActionResult> CompleteDelivery(string transactionId, [FromHeader(Name = CustomHttpHeaderKeys.EntityVersion)]string documentVersion, CancellationToken cancellationToken)
         {
-            var command = new CompleteDeliveryCommand(transactionId);
+            var command = new CompleteDeliveryCommand(transactionId, documentVersion);
 
             await completeDeliveryCommandHandler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
 
@@ -75,9 +76,9 @@ namespace SagaDemo.DeliveryAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(void))]
-        public async Task<IActionResult> CancelDelivery(string transactionId, CancellationToken cancellationToken)
+        public async Task<IActionResult> CancelDelivery(string transactionId, [FromHeader(Name = CustomHttpHeaderKeys.EntityVersion)]string documentVersion, CancellationToken cancellationToken)
         {
-            var command = new CancelDeliveryCommand(transactionId);
+            var command = new CancelDeliveryCommand(transactionId, documentVersion);
 
             await cancelDeliveryCommandHandler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
 

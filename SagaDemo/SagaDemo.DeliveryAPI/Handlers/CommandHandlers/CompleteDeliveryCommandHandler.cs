@@ -37,11 +37,9 @@ namespace SagaDemo.DeliveryAPI.Handlers.CommandHandlers
                         return;
                     }
 
-                    var changeVector = session.Advanced.GetChangeVectorFor(deliveryDocument);
-
                     deliveryDocument.Status = DeliveryStatus.Finished;
 
-                    await session.StoreAsync(deliveryDocument, changeVector, deliveryDocument.Id, cancellationToken).ConfigureAwait(false);
+                    await session.StoreAsync(deliveryDocument, command.DocumentVersion, deliveryDocument.Id, cancellationToken).ConfigureAwait(false);
                     await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
             }

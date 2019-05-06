@@ -21,25 +21,25 @@ namespace SagaDemo.DeliveryAPI.ApiClient
         System.Threading.Tasks.Task<SwaggerResponse> CreateDeliveryRequestAsync(string transactionId, Address address, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<SwaggerResponse> RegisterDeliveryAttemptAsync(string transactionId);
+        System.Threading.Tasks.Task<SwaggerResponse> RegisterDeliveryAttemptAsync(string transactionId, string x_Entity_Version);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        System.Threading.Tasks.Task<SwaggerResponse> RegisterDeliveryAttemptAsync(string transactionId, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<SwaggerResponse> RegisterDeliveryAttemptAsync(string transactionId, string x_Entity_Version, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<SwaggerResponse> CompleteDeliveryAsync(string transactionId);
-    
-        /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        System.Threading.Tasks.Task<SwaggerResponse> CompleteDeliveryAsync(string transactionId, System.Threading.CancellationToken cancellationToken);
-    
-        /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<SwaggerResponse> CancelDeliveryAsync(string transactionId);
+        System.Threading.Tasks.Task<SwaggerResponse> CompleteDeliveryAsync(string transactionId, string x_Entity_Version);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        System.Threading.Tasks.Task<SwaggerResponse> CancelDeliveryAsync(string transactionId, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<SwaggerResponse> CompleteDeliveryAsync(string transactionId, string x_Entity_Version, System.Threading.CancellationToken cancellationToken);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<SwaggerResponse> CancelDeliveryAsync(string transactionId, string x_Entity_Version);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        System.Threading.Tasks.Task<SwaggerResponse> CancelDeliveryAsync(string transactionId, string x_Entity_Version, System.Threading.CancellationToken cancellationToken);
     
     }
     
@@ -150,14 +150,14 @@ namespace SagaDemo.DeliveryAPI.ApiClient
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<SwaggerResponse> RegisterDeliveryAttemptAsync(string transactionId)
+        public System.Threading.Tasks.Task<SwaggerResponse> RegisterDeliveryAttemptAsync(string transactionId, string x_Entity_Version)
         {
-            return RegisterDeliveryAttemptAsync(transactionId, System.Threading.CancellationToken.None);
+            return RegisterDeliveryAttemptAsync(transactionId, x_Entity_Version, System.Threading.CancellationToken.None);
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        public async System.Threading.Tasks.Task<SwaggerResponse> RegisterDeliveryAttemptAsync(string transactionId, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<SwaggerResponse> RegisterDeliveryAttemptAsync(string transactionId, string x_Entity_Version, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append("api/Delivery/{transactionId}/delivery-attempts");
@@ -168,6 +168,8 @@ namespace SagaDemo.DeliveryAPI.ApiClient
             {
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
+                    if (x_Entity_Version != null)
+                        request_.Headers.TryAddWithoutValidation("X-Entity-Version", ConvertToString(x_Entity_Version, System.Globalization.CultureInfo.InvariantCulture));
                     request_.Content = new System.Net.Http.StringContent(string.Empty, System.Text.Encoding.UTF8, "application/json");
                     request_.Method = new System.Net.Http.HttpMethod("POST");
     
@@ -260,14 +262,14 @@ namespace SagaDemo.DeliveryAPI.ApiClient
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<SwaggerResponse> CompleteDeliveryAsync(string transactionId)
+        public System.Threading.Tasks.Task<SwaggerResponse> CompleteDeliveryAsync(string transactionId, string x_Entity_Version)
         {
-            return CompleteDeliveryAsync(transactionId, System.Threading.CancellationToken.None);
+            return CompleteDeliveryAsync(transactionId, x_Entity_Version, System.Threading.CancellationToken.None);
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        public async System.Threading.Tasks.Task<SwaggerResponse> CompleteDeliveryAsync(string transactionId, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<SwaggerResponse> CompleteDeliveryAsync(string transactionId, string x_Entity_Version, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append("api/Delivery/{transactionId}/complete");
@@ -278,6 +280,8 @@ namespace SagaDemo.DeliveryAPI.ApiClient
             {
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
+                    if (x_Entity_Version != null)
+                        request_.Headers.TryAddWithoutValidation("X-Entity-Version", ConvertToString(x_Entity_Version, System.Globalization.CultureInfo.InvariantCulture));
                     request_.Content = new System.Net.Http.StringContent(string.Empty, System.Text.Encoding.UTF8, "application/json");
                     request_.Method = new System.Net.Http.HttpMethod("POST");
     
@@ -370,14 +374,14 @@ namespace SagaDemo.DeliveryAPI.ApiClient
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<SwaggerResponse> CancelDeliveryAsync(string transactionId)
+        public System.Threading.Tasks.Task<SwaggerResponse> CancelDeliveryAsync(string transactionId, string x_Entity_Version)
         {
-            return CancelDeliveryAsync(transactionId, System.Threading.CancellationToken.None);
+            return CancelDeliveryAsync(transactionId, x_Entity_Version, System.Threading.CancellationToken.None);
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        public async System.Threading.Tasks.Task<SwaggerResponse> CancelDeliveryAsync(string transactionId, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<SwaggerResponse> CancelDeliveryAsync(string transactionId, string x_Entity_Version, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append("api/Delivery/{transactionId}/cancel");
@@ -388,6 +392,8 @@ namespace SagaDemo.DeliveryAPI.ApiClient
             {
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
+                    if (x_Entity_Version != null)
+                        request_.Headers.TryAddWithoutValidation("X-Entity-Version", ConvertToString(x_Entity_Version, System.Globalization.CultureInfo.InvariantCulture));
                     request_.Content = new System.Net.Http.StringContent(string.Empty, System.Text.Encoding.UTF8, "application/json");
                     request_.Method = new System.Net.Http.HttpMethod("POST");
     

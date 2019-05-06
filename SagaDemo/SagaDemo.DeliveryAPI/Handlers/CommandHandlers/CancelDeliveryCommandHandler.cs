@@ -26,7 +26,6 @@ namespace SagaDemo.DeliveryAPI.Handlers.CommandHandlers
         {
             try
             {
-                // TODO: Should receive the change vector known to the called and verify that for concurrency reasons as well.
                 using (var session = documentStore.OpenAsyncSession())
                 {
                     var deliveryDocument = await session.LoadDeliveryAsync(command.TransactionId, cancellationToken).ConfigureAwait(false);
@@ -38,11 +37,9 @@ namespace SagaDemo.DeliveryAPI.Handlers.CommandHandlers
                         return;
                     }
 
-                    var changeVector = session.Advanced.GetChangeVectorFor(deliveryDocument);
-
                     deliveryDocument.Status = DeliveryStatus.Cancelled;
 
-                    await session.StoreAsync(deliveryDocument, changeVector, deliveryDocument.Id, cancellationToken).ConfigureAwait(false);
+                    await session.StoreAsync(deliveryDocument, command.DocumentVersion, deliveryDocument.Id, cancellationToken).ConfigureAwait(false);
                     await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
