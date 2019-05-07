@@ -21,5 +21,23 @@
 
             return new Operations.DataStructures.Address(address.Country, address.State, address.City, address.Zip, address.Street, address.House);
         }
+
+        public static Contracts.DataStructures.Address ToApiContract(Operations.DataStructures.Address address)
+        {
+            if (address == null)
+            {
+                return null;
+            }
+
+            return new Contracts.DataStructures.Address
+            {
+                Country = address.Country,
+                State = address.State,
+                City = address.City,
+                Zip = address.Zip,
+                Street = address.Street,
+                House = address.House
+            };
+        }
     }
 }

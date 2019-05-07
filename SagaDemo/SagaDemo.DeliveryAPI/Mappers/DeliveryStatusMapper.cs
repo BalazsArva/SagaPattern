@@ -24,5 +24,26 @@ namespace SagaDemo.DeliveryAPI.Mappers
                     throw new ArgumentOutOfRangeException(nameof(status), $"The value of the {nameof(status)} is not among the acceptable values.");
             }
         }
+
+        public static Contracts.DataStructures.DeliveryStatus ToApiContract(Operations.DataStructures.DeliveryStatus status)
+        {
+            switch (status)
+            {
+                case Operations.DataStructures.DeliveryStatus.Cancelled:
+                    return Contracts.DataStructures.DeliveryStatus.Cancelled;
+
+                case Operations.DataStructures.DeliveryStatus.Created:
+                    return Contracts.DataStructures.DeliveryStatus.Created;
+
+                case Operations.DataStructures.DeliveryStatus.Finished:
+                    return Contracts.DataStructures.DeliveryStatus.Finished;
+
+                case Operations.DataStructures.DeliveryStatus.InProgress:
+                    return Contracts.DataStructures.DeliveryStatus.InProgress;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(status), $"The value of the {nameof(status)} is not among the acceptable values.");
+            }
+        }
     }
 }

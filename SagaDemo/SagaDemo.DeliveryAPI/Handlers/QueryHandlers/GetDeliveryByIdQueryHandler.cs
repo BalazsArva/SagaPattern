@@ -30,7 +30,7 @@ namespace SagaDemo.DeliveryAPI.Handlers.QueryHandlers
                 }
 
                 var changeVector = session.Advanced.GetChangeVectorFor(deliveryDocument);
-                var delivery = DeliveryMapper.ToServiceContract(deliveryDocument);
+                var delivery = DeliveryMapper.ToServiceContract(session, deliveryDocument);
 
                 return new GetDeliveryByIdQueryResult(delivery, changeVector);
             }

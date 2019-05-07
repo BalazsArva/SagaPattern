@@ -4,12 +4,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SagaDemo.Common.AspNetCore;
+using SagaDemo.DeliveryAPI.Contracts.DataStructures;
 using SagaDemo.DeliveryAPI.Handlers.CommandHandlers;
 using SagaDemo.DeliveryAPI.Handlers.QueryHandlers;
 using SagaDemo.DeliveryAPI.Mappers;
 using SagaDemo.DeliveryAPI.Operations.Commands;
 using SagaDemo.DeliveryAPI.Operations.Queries;
-using SagaDemo.DeliveryAPI.Operations.Results;
 
 namespace SagaDemo.DeliveryAPI.Controllers
 {
@@ -38,7 +38,7 @@ namespace SagaDemo.DeliveryAPI.Controllers
         }
 
         [HttpGet("{transactionId}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetDeliveryByIdQueryResult))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Delivery))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         public async Task<IActionResult> GetDeliveryDetails(string transactionId, CancellationToken cancellationToken)
         {
@@ -53,7 +53,9 @@ namespace SagaDemo.DeliveryAPI.Controllers
 
             Response.Headers.Add(CustomHttpHeaderKeys.EntityVersion, result.DocumentVersion);
 
-            return Ok(result.Delivery);
+            var response = DeliveryMapper.ToApiContract(result.Delivery);
+
+            return Ok(response);
         }
 
         [HttpPost("{transactionId}")]
