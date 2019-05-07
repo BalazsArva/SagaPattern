@@ -2,6 +2,7 @@
 
 namespace SagaDemo.DeliveryAPI.Mappers
 {
+    // TODO: Rename to match convention (<EntityName>Mapper)
     public static class ApiContractMapper
     {
         public static CreateDeliveryRequestCommand ToServiceCommand(string transactionId, Contracts.DataStructures.Address address)

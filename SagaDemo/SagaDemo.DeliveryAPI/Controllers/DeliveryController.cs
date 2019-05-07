@@ -51,8 +51,9 @@ namespace SagaDemo.DeliveryAPI.Controllers
                 return NotFound();
             }
 
-            // TODO: Include document version in the response (header)
-            return Ok(result);
+            Response.Headers.Add(CustomHttpHeaderKeys.EntityVersion, result.DocumentVersion);
+
+            return Ok(result.Delivery);
         }
 
         [HttpPost("{transactionId}")]

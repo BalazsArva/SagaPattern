@@ -21,11 +21,11 @@ namespace SagaDemo.DeliveryAPI.ApiClient
         System.Threading.Tasks.Task<SwaggerResponse<GetDeliveryByIdQueryResult>> GetDeliveryDetailsAsync(string transactionId, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<SwaggerResponse> CreateDeliveryRequestAsync(string transactionId, Address address);
+        System.Threading.Tasks.Task<SwaggerResponse> CreateDeliveryRequestAsync(string transactionId, Address2 address);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        System.Threading.Tasks.Task<SwaggerResponse> CreateDeliveryRequestAsync(string transactionId, Address address, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<SwaggerResponse> CreateDeliveryRequestAsync(string transactionId, Address2 address, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         System.Threading.Tasks.Task<SwaggerResponse> RegisterDeliveryAttemptAsync(string transactionId, string x_Entity_Version);
@@ -165,14 +165,14 @@ namespace SagaDemo.DeliveryAPI.ApiClient
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<SwaggerResponse> CreateDeliveryRequestAsync(string transactionId, Address address)
+        public System.Threading.Tasks.Task<SwaggerResponse> CreateDeliveryRequestAsync(string transactionId, Address2 address)
         {
             return CreateDeliveryRequestAsync(transactionId, address, System.Threading.CancellationToken.None);
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        public async System.Threading.Tasks.Task<SwaggerResponse> CreateDeliveryRequestAsync(string transactionId, Address address, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<SwaggerResponse> CreateDeliveryRequestAsync(string transactionId, Address2 address, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append("api/Delivery/{transactionId}");
@@ -624,9 +624,17 @@ namespace SagaDemo.DeliveryAPI.ApiClient
     public partial class GetDeliveryByIdQueryResult 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public GetDeliveryByIdQueryResult()
+        public GetDeliveryByIdQueryResult(Delivery @delivery, string @documentVersion)
         {
+            this.Delivery = @delivery;
+            this.DocumentVersion = @documentVersion;
         }
+    
+        [Newtonsoft.Json.JsonProperty("delivery", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public Delivery Delivery { get; }
+    
+        [Newtonsoft.Json.JsonProperty("documentVersion", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string DocumentVersion { get; }
     
         public string ToJson() 
         {
@@ -637,6 +645,95 @@ namespace SagaDemo.DeliveryAPI.ApiClient
         {
             return Newtonsoft.Json.JsonConvert.DeserializeObject<GetDeliveryByIdQueryResult>(data);
         }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.36.0 (Newtonsoft.Json v11.0.0.0)")]
+    public partial class Delivery 
+    {
+        [Newtonsoft.Json.JsonConstructor]
+        public Delivery(Address @address, string @id, DeliveryStatus @status)
+        {
+            this.Id = @id;
+            this.Address = @address;
+            this.Status = @status;
+        }
+    
+        [Newtonsoft.Json.JsonProperty("id", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Id { get; }
+    
+        [Newtonsoft.Json.JsonProperty("address", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public Address Address { get; }
+    
+        [Newtonsoft.Json.JsonProperty("status", Required = Newtonsoft.Json.Required.Always)]
+        public DeliveryStatus Status { get; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static Delivery FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<Delivery>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.36.0 (Newtonsoft.Json v11.0.0.0)")]
+    public partial class Address 
+    {
+        [Newtonsoft.Json.JsonConstructor]
+        public Address(string @city, string @country, string @house, string @state, string @street, string @zip)
+        {
+            this.Country = @country;
+            this.State = @state;
+            this.City = @city;
+            this.Zip = @zip;
+            this.Street = @street;
+            this.House = @house;
+        }
+    
+        [Newtonsoft.Json.JsonProperty("country", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Country { get; }
+    
+        [Newtonsoft.Json.JsonProperty("state", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string State { get; }
+    
+        [Newtonsoft.Json.JsonProperty("city", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string City { get; }
+    
+        [Newtonsoft.Json.JsonProperty("zip", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Zip { get; }
+    
+        [Newtonsoft.Json.JsonProperty("street", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Street { get; }
+    
+        [Newtonsoft.Json.JsonProperty("house", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string House { get; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static Address FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<Address>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.36.0 (Newtonsoft.Json v11.0.0.0)")]
+    public enum DeliveryStatus
+    {
+        Created = 0,
+    
+        InProgress = 1,
+    
+        Finished = 2,
+    
+        Cancelled = 3,
     
     }
     
@@ -724,10 +821,10 @@ namespace SagaDemo.DeliveryAPI.ApiClient
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.36.0 (Newtonsoft.Json v11.0.0.0)")]
-    public partial class Address 
+    public partial class Address2 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public Address(string @city, string @country, string @house, string @state, string @street, string @zip)
+        public Address2(string @city, string @country, string @house, string @state, string @street, string @zip)
         {
             this.Country = @country;
             this.State = @state;
@@ -760,9 +857,9 @@ namespace SagaDemo.DeliveryAPI.ApiClient
             return Newtonsoft.Json.JsonConvert.SerializeObject(this);
         }
     
-        public static Address FromJson(string data)
+        public static Address2 FromJson(string data)
         {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<Address>(data);
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<Address2>(data);
         }
     
     }
