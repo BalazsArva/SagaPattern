@@ -61,7 +61,7 @@ namespace SagaDemo.DeliveryAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
         public async Task<IActionResult> CreateDeliveryRequest(string transactionId, Contracts.DataStructures.Address address, CancellationToken cancellationToken)
         {
-            var command = ApiContractMapper.ToServiceCommand(transactionId, address);
+            var command = CommandMapper.ToServiceCommand(transactionId, address);
 
             await createDeliveryRequestCommandHandler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
 
