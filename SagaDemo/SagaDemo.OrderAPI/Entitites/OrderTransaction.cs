@@ -12,35 +12,4 @@
 
         public StepDetails DeliveryCreationStepDetails { get; set; }
     }
-
-    public enum StepStatus
-    {
-        NotStarted,
-
-        Completed,
-
-        RolledBack,
-
-        TemporarFailure,
-
-        PermanentFailure
-    }
-
-    public enum TransactionStatus
-    {
-        NotStarted,
-
-        Completed,
-
-        RolledBack,
-
-        InProgress
-    }
-
-    public class StepDetails
-    {
-        public StepStatus StepStatus { get; set; }
-
-        public int Attempts { get; set; }
-    }
 }
