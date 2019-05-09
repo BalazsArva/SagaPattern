@@ -8,10 +8,19 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
+    <PackageReference Include="RavenDB.Client" Version="4.1.5" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Controllers\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SagaDemo.Common.AspNetCore\SagaDemo.Common.AspNetCore.csproj" />
+    <ProjectReference Include="..\SagaDemo.Common.DataAccess.RavenDb\SagaDemo.Common.DataAccess.RavenDb.csproj" />
+    <ProjectReference Include="..\SagaDemo.DeliveryAPI.ApiClient\SagaDemo.DeliveryAPI.ApiClient.csproj" />
+    <ProjectReference Include="..\SagaDemo.InventoryAPI.ApiClient\SagaDemo.InventoryAPI.ApiClient.csproj" />
+    <ProjectReference Include="..\SagaDemo.LoyaltyPointsAPI.ApiClient\SagaDemo.LoyaltyPointsAPI.ApiClient.csproj" />
   </ItemGroup>
 
 </Project>
