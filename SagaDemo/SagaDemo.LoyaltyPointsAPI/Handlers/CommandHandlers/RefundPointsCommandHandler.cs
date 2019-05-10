@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using SagaDemo.LoyaltyPointsAPI.DataAccess;
 using SagaDemo.LoyaltyPointsAPI.DataAccess.Entities;
 using SagaDemo.LoyaltyPointsAPI.Operations.Commands;
@@ -10,8 +11,6 @@ namespace SagaDemo.LoyaltyPointsAPI.Handlers.CommandHandlers
 {
     public class RefundPointsCommandHandler : ICommandHandler<RefundPointsCommand>
     {
-        private const string Reason = "RefundPoints";
-
         private readonly ILoyaltyDbContextFactory dbContextFactory;
         private readonly IValidator<RefundPointsCommand> commandValidator;
 
@@ -27,12 +26,17 @@ namespace SagaDemo.LoyaltyPointsAPI.Handlers.CommandHandlers
 
             using (var context = dbContextFactory.CreateDbContext())
             {
-                context.PointsChangedEvents.Add(new PointsChangedEvent
+                var consumptionEvent = await context.PointsConsumedEvents.FirstAsync(e => e.TransactionId == command.TransactionId).ConfigureAwait(false);
+
+                var points = consumptionEvent.PointChange;
+                var transactionId = command.TransactionId;
+
+                context.PointsRefundedEvents.Add(new PointsRefundedEvent
                 {
-                    PointChange = command.Points,
-                    Reason = Reason,
+                    PointChange = points,
+                    Reason = $"Refunded {points} points consumed by transaction {transactionId}.",
                     UtcDateTimeRecorded = DateTime.UtcNow,
-                    UserId = command.UserId,
+                    UserId = consumptionEvent.UserId,
                     TransactionId = command.TransactionId
                 });
 

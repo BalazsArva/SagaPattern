@@ -2,7 +2,7 @@
 
 namespace SagaDemo.LoyaltyPointsAPI.DataAccess.Entities
 {
-    public class PointsChangedEvent
+    public class PointsEarnedEvent
     {
         public int Id { get; protected set; }
 

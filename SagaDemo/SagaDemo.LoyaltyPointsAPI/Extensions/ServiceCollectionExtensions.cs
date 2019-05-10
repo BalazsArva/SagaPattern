@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SagaDemo.LoyaltyPointsAPI.DataAccess;
 using SagaDemo.LoyaltyPointsAPI.Handlers.CommandHandlers;
 using SagaDemo.LoyaltyPointsAPI.Operations.Commands;
+using SagaDemo.LoyaltyPointsAPI.Utilities;
 using SagaDemo.LoyaltyPointsAPI.Validation.Validators;
 
 namespace SagaDemo.LoyaltyPointsAPI.Extensions
@@ -43,6 +44,12 @@ namespace SagaDemo.LoyaltyPointsAPI.Extensions
                 .AddSingleton<IValidator<ConsumePointsCommand>, ConsumePointsCommandValidator>()
                 .AddSingleton<IValidator<RefundPointsCommand>, RefundPointsCommandValidator>()
                 .AddSingleton<IValidator<EarnPointsCommand>, EarnPointsCommandValidator>();
+        }
+
+        public static IServiceCollection AddUtilities(this IServiceCollection services)
+        {
+            return services
+                .AddSingleton<IPointsBalanceCalculator, PointsBalanceCalculator>();
         }
     }
 }

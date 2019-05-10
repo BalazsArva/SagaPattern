@@ -1,15 +1,14 @@
 ﻿using System.Threading;
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
 using SagaDemo.Common.Validation;
-using SagaDemo.LoyaltyPointsAPI.DataAccess;
 using SagaDemo.LoyaltyPointsAPI.Operations.Commands;
+using SagaDemo.LoyaltyPointsAPI.Utilities;
 
 namespace SagaDemo.LoyaltyPointsAPI.Validation.Validators
 {
     public class ConsumePointsCommandValidator : AbstractValidator<ConsumePointsCommand>
     {
-        public ConsumePointsCommandValidator(ILoyaltyDbContextFactory dbContextFactory)
+        public ConsumePointsCommandValidator(IPointsBalanceCalculator pointsBalanceCalculator)
         {
             RuleFor(cmd => cmd.Points)
                 .GreaterThan(0)
@@ -17,14 +16,11 @@ namespace SagaDemo.LoyaltyPointsAPI.Validation.Validators
                 .DependentRules(() =>
                 {
                     RuleFor(cmd => cmd.Points)
-                        .MustAsync(async (int points, CancellationToken cancellationToken) =>
+                        .MustAsync(async (ConsumePointsCommand command, int points, CancellationToken cancellationToken) =>
                         {
-                            using (var context = dbContextFactory.CreateDbContext())
-                            {
-                                var total = await context.PointsChangedEvents.SumAsync(e => e.PointChange).ConfigureAwait(false);
+                            var total = await pointsBalanceCalculator.CalculateTotalAsync(command.UserId, cancellationToken).ConfigureAwait(false);
 
-                                return total >= points;
-                            }
+                            return total >= points;
                         })
                         .WithMessage(ValidationMessages.ConsumedPointsExceedTotal);
                 });

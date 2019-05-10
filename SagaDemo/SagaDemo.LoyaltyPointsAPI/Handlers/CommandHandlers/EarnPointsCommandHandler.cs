@@ -23,11 +23,11 @@ namespace SagaDemo.LoyaltyPointsAPI.Handlers.CommandHandlers
 
         public async Task HandleAsync(EarnPointsCommand command, CancellationToken cancellationToken)
         {
-            await commandValidator.ValidateAndThrowAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
+            commandValidator.ValidateAndThrow(command);
 
             using (var context = dbContextFactory.CreateDbContext())
             {
-                context.PointsChangedEvents.Add(new PointsChangedEvent
+                context.PointsEarnedEvents.Add(new PointsEarnedEvent
                 {
                     PointChange = command.Points,
                     Reason = EarnPointsReason,

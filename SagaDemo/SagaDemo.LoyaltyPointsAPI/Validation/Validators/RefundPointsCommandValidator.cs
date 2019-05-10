@@ -1,4 +1,6 @@
-﻿using FluentValidation;
+﻿using System.Threading;
+using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using SagaDemo.Common.Validation;
 using SagaDemo.LoyaltyPointsAPI.DataAccess;
 using SagaDemo.LoyaltyPointsAPI.Operations.Commands;
@@ -9,17 +11,25 @@ namespace SagaDemo.LoyaltyPointsAPI.Validation.Validators
     {
         public RefundPointsCommandValidator(ILoyaltyDbContextFactory dbContextFactory)
         {
-            RuleFor(cmd => cmd.Points)
-                .GreaterThan(0)
-                .WithMessage(ValidationMessages.PointsMustBePositive);
-
             RuleFor(cmd => cmd.TransactionId)
                 .NotEmpty()
-                .WithMessage(CommonValidationMessages.CannotBeNullOrEmpty);
+                .WithMessage(CommonValidationMessages.CannotBeNullOrEmpty)
+                .DependentRules(() =>
+                {
+                    RuleFor(cmd => cmd.TransactionId)
+                        .MustAsync(async (string transactionId, CancellationToken cancellationToken) =>
+                        {
+                            using (var context = dbContextFactory.CreateDbContext())
+                            {
+                                var consumptionEvent = await context
+                                    .PointsConsumedEvents
+                                    .FirstOrDefaultAsync(e => e.TransactionId == transactionId).ConfigureAwait(false);
 
-            RuleFor(cmd => cmd.UserId)
-                .NotEmpty()
-                .WithMessage(CommonValidationMessages.CannotBeNullOrEmpty);
+                                return consumptionEvent != null;
+                            }
+                        })
+                        .WithMessage(ValidationMessages.PointsConsumptionNotFound);
+                });
         }
     }
 }

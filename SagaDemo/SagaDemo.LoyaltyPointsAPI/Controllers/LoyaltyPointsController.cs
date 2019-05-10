@@ -41,6 +41,7 @@ namespace SagaDemo.LoyaltyPointsAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
         public async Task<IActionResult> RefundPoints(RefundPointsCommand command, CancellationToken cancellationToken)
         {
+            // TODO: Consider returning 404 instead of 400 when the consume event does not exist.
             await refundPointsCommandHandler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
 
             return NoContent();

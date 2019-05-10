@@ -460,18 +460,10 @@ namespace SagaDemo.LoyaltyPointsAPI.ApiClient
     public partial class RefundPointsCommand 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public RefundPointsCommand(int @points, string @transactionId, int @userId)
+        public RefundPointsCommand(string @transactionId)
         {
-            this.Points = @points;
-            this.UserId = @userId;
             this.TransactionId = @transactionId;
         }
-    
-        [Newtonsoft.Json.JsonProperty("points", Required = Newtonsoft.Json.Required.Always)]
-        public int Points { get; }
-    
-        [Newtonsoft.Json.JsonProperty("userId", Required = Newtonsoft.Json.Required.Always)]
-        public int UserId { get; }
     
         [Newtonsoft.Json.JsonProperty("transactionId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string TransactionId { get; }

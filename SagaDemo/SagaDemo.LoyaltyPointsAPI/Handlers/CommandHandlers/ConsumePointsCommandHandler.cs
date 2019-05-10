@@ -23,17 +23,20 @@ namespace SagaDemo.LoyaltyPointsAPI.Handlers.CommandHandlers
 
         public async Task HandleAsync(ConsumePointsCommand command, CancellationToken cancellationToken)
         {
+            // TODO: Validate against possible duplicate transaction Ids
             await commandValidator.ValidateAndThrowAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
 
             using (var context = dbContextFactory.CreateDbContext())
             {
-                context.PointsChangedEvents.Add(new PointsChangedEvent
+                context.PointsConsumedEvents.Add(new PointsConsumedEvent
                 {
-                    PointChange = -command.Points,
-                    Reason = ConsumePointsReason,
+                    PointChange = command.Points,
                     UtcDateTimeRecorded = DateTime.UtcNow,
                     UserId = command.UserId,
-                    TransactionId = command.TransactionId
+                    TransactionId = command.TransactionId,
+
+                    // TODO: Maybe could remove this as the table itself carries this information
+                    Reason = ConsumePointsReason,
                 });
 
                 // Assume optimistic concurrency so that points aren't changed between retrieving the sum and adding the consume record.
