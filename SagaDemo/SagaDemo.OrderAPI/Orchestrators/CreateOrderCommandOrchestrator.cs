@@ -154,7 +154,8 @@ namespace SagaDemo.OrderAPI.Orchestrators
                 var transactionDocumentId = DocumentIdHelper.GetDocumentId<OrderTransaction>(session, transactionId);
                 var transactionDocument = await session.LoadAsync<OrderTransaction>(transactionDocumentId, cancellationToken).ConfigureAwait(false);
 
-                if (transactionDocument.LoyaltyPointsConsumptionStepDetails.StepStatus == StepStatus.RolledBack)
+                var stepStatus = transactionDocument.LoyaltyPointsConsumptionStepDetails.StepStatus;
+                if (stepStatus == StepStatus.RolledBack || stepStatus == StepStatus.NotStarted)
                 {
                     return;
                 }
@@ -179,7 +180,8 @@ namespace SagaDemo.OrderAPI.Orchestrators
                 var transactionDocumentId = DocumentIdHelper.GetDocumentId<OrderTransaction>(session, transactionId);
                 var transactionDocument = await session.LoadAsync<OrderTransaction>(transactionDocumentId, cancellationToken).ConfigureAwait(false);
 
-                if (transactionDocument.InventoryReservationStepDetails.StepStatus == StepStatus.RolledBack)
+                var stepStatus = transactionDocument.InventoryReservationStepDetails.StepStatus;
+                if (stepStatus == StepStatus.RolledBack || stepStatus == StepStatus.NotStarted)
                 {
                     return;
                 }
@@ -204,7 +206,8 @@ namespace SagaDemo.OrderAPI.Orchestrators
                 var transactionDocumentId = DocumentIdHelper.GetDocumentId<OrderTransaction>(session, transactionId);
                 var transactionDocument = await session.LoadAsync<OrderTransaction>(transactionDocumentId, cancellationToken).ConfigureAwait(false);
 
-                if (transactionDocument.DeliveryCreationStepDetails.StepStatus == StepStatus.RolledBack)
+                var stepStatus = transactionDocument.DeliveryCreationStepDetails.StepStatus;
+                if (stepStatus == StepStatus.RolledBack || stepStatus == StepStatus.NotStarted)
                 {
                     return;
                 }
