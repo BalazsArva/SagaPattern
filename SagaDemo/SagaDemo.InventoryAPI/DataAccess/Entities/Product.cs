@@ -1,4 +1,4 @@
-﻿namespace SagaDemo.InventoryAPI.Entities
+﻿namespace SagaDemo.InventoryAPI.DataAccess.Entities
 {
     public class Product
     {

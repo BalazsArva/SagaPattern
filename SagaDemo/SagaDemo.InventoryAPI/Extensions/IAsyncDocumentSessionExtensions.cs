@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Raven.Client.Documents.Session;
 using SagaDemo.Common.DataAccess.RavenDb.Utilities;
-using SagaDemo.InventoryAPI.Entities;
+using SagaDemo.InventoryAPI.DataAccess.Entities;
 
 namespace SagaDemo.InventoryAPI.Extensions
 {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using FluentValidation.Validators;
-using SagaDemo.InventoryAPI.Entities;
+using SagaDemo.InventoryAPI.DataAccess.Entities;
 using SagaDemo.InventoryAPI.Validation;
 
 namespace SagaDemo.InventoryAPI.Extensions

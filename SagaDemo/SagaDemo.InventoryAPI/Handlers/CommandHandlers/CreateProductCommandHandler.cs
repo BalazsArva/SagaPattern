@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using FluentValidation;
 using Raven.Client.Documents;
 using SagaDemo.Common.DataAccess.RavenDb.Utilities;
-using SagaDemo.InventoryAPI.Entities;
+using SagaDemo.InventoryAPI.DataAccess.Entities;
 using SagaDemo.InventoryAPI.Operations.Commands;
 using SagaDemo.InventoryAPI.Operations.Responses;
 

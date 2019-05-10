@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using FluentValidation;
-using SagaDemo.InventoryAPI.Entities;
+using SagaDemo.InventoryAPI.DataAccess.Entities;
 
 namespace SagaDemo.InventoryAPI.Validation.Validators
 {
