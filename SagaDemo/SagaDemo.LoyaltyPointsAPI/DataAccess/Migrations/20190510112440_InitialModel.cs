@@ -85,7 +85,8 @@ namespace SagaDemo.LoyaltyPointsAPI.DataAccess.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_PointsRefundedEvents_TransactionId",
                 table: "PointsRefundedEvents",
-                column: "TransactionId");
+                column: "TransactionId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_PointsRefundedEvents_UserId",

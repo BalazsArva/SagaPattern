@@ -27,9 +27,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SagaDemo.InventoryAPI.ApiCl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SagaDemo.Common.DataAccess.RavenDb", "SagaDemo.Common.DataAccess.RavenDb\SagaDemo.Common.DataAccess.RavenDb.csproj", "{AEA7AEB9-4C48-4C81-AB62-216C1089E2A6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SagaDemo.DeliveryAPI.ApiClient", "SagaDemo.DeliveryAPI.ApiClient\SagaDemo.DeliveryAPI.ApiClient.csproj", "{BD2F65EE-AE53-47EB-8900-0A9B7340B4E3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SagaDemo.DeliveryAPI.ApiClient", "SagaDemo.DeliveryAPI.ApiClient\SagaDemo.DeliveryAPI.ApiClient.csproj", "{BD2F65EE-AE53-47EB-8900-0A9B7340B4E3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SagaDemo.Common.Validation", "SagaDemo.Common.Validation\SagaDemo.Common.Validation.csproj", "{F4D7E2B9-5795-4AD6-83D5-ADDDF794AA77}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SagaDemo.Common.Validation", "SagaDemo.Common.Validation\SagaDemo.Common.Validation.csproj", "{F4D7E2B9-5795-4AD6-83D5-ADDDF794AA77}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SagaDemo.Common.DataAccess.EntityFrameworkCore", "SagaDemo.Common.DataAccess.EntityFrameworkCore\SagaDemo.Common.DataAccess.EntityFrameworkCore.csproj", "{84B89D87-68F7-47C5-851D-8D2CFEC7B1A8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +83,10 @@ Global
 		{F4D7E2B9-5795-4AD6-83D5-ADDDF794AA77}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F4D7E2B9-5795-4AD6-83D5-ADDDF794AA77}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F4D7E2B9-5795-4AD6-83D5-ADDDF794AA77}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84B89D87-68F7-47C5-851D-8D2CFEC7B1A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84B89D87-68F7-47C5-851D-8D2CFEC7B1A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84B89D87-68F7-47C5-851D-8D2CFEC7B1A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84B89D87-68F7-47C5-851D-8D2CFEC7B1A8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -97,6 +103,7 @@ Global
 		{AEA7AEB9-4C48-4C81-AB62-216C1089E2A6} = {1B00BE92-52AD-40A8-BB7C-97DBE0DA34DF}
 		{BD2F65EE-AE53-47EB-8900-0A9B7340B4E3} = {C8C6DD59-19F5-4628-A9F3-14F352BB8A37}
 		{F4D7E2B9-5795-4AD6-83D5-ADDDF794AA77} = {1B00BE92-52AD-40A8-BB7C-97DBE0DA34DF}
+		{84B89D87-68F7-47C5-851D-8D2CFEC7B1A8} = {1B00BE92-52AD-40A8-BB7C-97DBE0DA34DF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9D101CF8-6113-42E6-98B4-670AE09489AE}

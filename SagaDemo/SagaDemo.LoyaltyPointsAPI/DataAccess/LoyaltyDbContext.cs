@@ -128,7 +128,7 @@ namespace SagaDemo.LoyaltyPointsAPI.DataAccess
             modelBuilder
                 .Entity<PointsRefundedEvent>()
                 .ForSqlServerHasIndex(evt => evt.TransactionId)
-                .IsUnique(false);
+                .IsUnique(true);
         }
     }
 }
