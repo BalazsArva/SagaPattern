@@ -2,6 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
+using SagaDemo.Common.DataAccess.EntityFrameworkCore.Helpers;
 using SagaDemo.LoyaltyPointsAPI.DataAccess;
 using SagaDemo.LoyaltyPointsAPI.DataAccess.Entities;
 using SagaDemo.LoyaltyPointsAPI.Operations.Commands;
@@ -23,24 +25,29 @@ namespace SagaDemo.LoyaltyPointsAPI.Handlers.CommandHandlers
 
         public async Task HandleAsync(ConsumePointsCommand command, CancellationToken cancellationToken)
         {
-            // TODO: Validate against possible duplicate transaction Ids
             await commandValidator.ValidateAndThrowAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
 
-            using (var context = dbContextFactory.CreateDbContext())
+            try
             {
-                context.PointsConsumedEvents.Add(new PointsConsumedEvent
+                using (var context = dbContextFactory.CreateDbContext())
                 {
-                    PointChange = command.Points,
-                    UtcDateTimeRecorded = DateTime.UtcNow,
-                    UserId = command.UserId,
-                    TransactionId = command.TransactionId,
+                    context.PointsConsumedEvents.Add(new PointsConsumedEvent
+                    {
+                        PointChange = command.Points,
+                        UtcDateTimeRecorded = DateTime.UtcNow,
+                        UserId = command.UserId,
+                        TransactionId = command.TransactionId,
+                        Reason = ConsumePointsReason,
+                    });
 
-                    // TODO: Maybe could remove this as the table itself carries this information
-                    Reason = ConsumePointsReason,
-                });
-
-                // Assume optimistic concurrency so that points aren't changed between retrieving the sum and adding the consume record.
-                await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    // Assume optimistic concurrency so that points aren't changed between retrieving the sum and adding the consume record.
+                    await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                }
+            }
+            catch (DbUpdateException ex) when (ex.IsUniqueConstraintViolationError())
+            {
+                // This means this consumption has already been registered, can be ignored.
+                return;
             }
         }
     }

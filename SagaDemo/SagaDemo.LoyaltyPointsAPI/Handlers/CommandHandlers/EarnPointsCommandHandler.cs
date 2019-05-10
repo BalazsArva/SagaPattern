@@ -2,6 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
+using SagaDemo.Common.DataAccess.EntityFrameworkCore.Helpers;
 using SagaDemo.LoyaltyPointsAPI.DataAccess;
 using SagaDemo.LoyaltyPointsAPI.DataAccess.Entities;
 using SagaDemo.LoyaltyPointsAPI.Operations.Commands;
@@ -25,18 +27,26 @@ namespace SagaDemo.LoyaltyPointsAPI.Handlers.CommandHandlers
         {
             commandValidator.ValidateAndThrow(command);
 
-            using (var context = dbContextFactory.CreateDbContext())
+            try
             {
-                context.PointsEarnedEvents.Add(new PointsEarnedEvent
+                using (var context = dbContextFactory.CreateDbContext())
                 {
-                    PointChange = command.Points,
-                    Reason = EarnPointsReason,
-                    UtcDateTimeRecorded = DateTime.UtcNow,
-                    UserId = command.UserId,
-                    TransactionId = command.TransactionId
-                });
+                    context.PointsEarnedEvents.Add(new PointsEarnedEvent
+                    {
+                        PointChange = command.Points,
+                        Reason = EarnPointsReason,
+                        UtcDateTimeRecorded = DateTime.UtcNow,
+                        UserId = command.UserId,
+                        TransactionId = command.TransactionId
+                    });
 
-                await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                }
+            }
+            catch (DbUpdateException ex) when (ex.IsUniqueConstraintViolationError())
+            {
+                // This means this earning has already been registered, can be ignored.
+                return;
             }
         }
     }
