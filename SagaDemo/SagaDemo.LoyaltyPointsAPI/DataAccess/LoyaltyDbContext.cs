@@ -58,7 +58,7 @@ namespace SagaDemo.LoyaltyPointsAPI.DataAccess
             modelBuilder
                 .Entity<PointsEarnedEvent>()
                 .ForSqlServerHasIndex(evt => evt.TransactionId)
-                .IsUnique(false);
+                .IsUnique(true);
         }
 
         private void SetupPointsConsumedEvent(ModelBuilder modelBuilder)
@@ -93,7 +93,7 @@ namespace SagaDemo.LoyaltyPointsAPI.DataAccess
             modelBuilder
                 .Entity<PointsConsumedEvent>()
                 .ForSqlServerHasIndex(evt => evt.TransactionId)
-                .IsUnique(false);
+                .IsUnique(true);
         }
 
         private void SetupPointsRefundedEvent(ModelBuilder modelBuilder)

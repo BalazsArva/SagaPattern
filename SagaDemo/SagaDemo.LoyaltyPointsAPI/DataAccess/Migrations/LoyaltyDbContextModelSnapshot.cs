@@ -42,7 +42,8 @@ namespace SagaDemo.LoyaltyPointsAPI.DataAccess.Migrations
                     b.HasKey("Id")
                         .HasAnnotation("SqlServer:Clustered", true);
 
-                    b.HasIndex("TransactionId");
+                    b.HasIndex("TransactionId")
+                        .IsUnique();
 
                     b.HasIndex("UserId");
 
@@ -72,7 +73,8 @@ namespace SagaDemo.LoyaltyPointsAPI.DataAccess.Migrations
                     b.HasKey("Id")
                         .HasAnnotation("SqlServer:Clustered", true);
 
-                    b.HasIndex("TransactionId");
+                    b.HasIndex("TransactionId")
+                        .IsUnique();
 
                     b.HasIndex("UserId");
 

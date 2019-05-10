@@ -10,7 +10,7 @@ using SagaDemo.LoyaltyPointsAPI.DataAccess;
 namespace SagaDemo.LoyaltyPointsAPI.DataAccess.Migrations
 {
     [DbContext(typeof(LoyaltyDbContext))]
-    [Migration("20190510112440_InitialModel")]
+    [Migration("20190510113636_InitialModel")]
     partial class InitialModel
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -44,7 +44,8 @@ namespace SagaDemo.LoyaltyPointsAPI.DataAccess.Migrations
                     b.HasKey("Id")
                         .HasAnnotation("SqlServer:Clustered", true);
 
-                    b.HasIndex("TransactionId");
+                    b.HasIndex("TransactionId")
+                        .IsUnique();
 
                     b.HasIndex("UserId");
 
@@ -74,7 +75,8 @@ namespace SagaDemo.LoyaltyPointsAPI.DataAccess.Migrations
                     b.HasKey("Id")
                         .HasAnnotation("SqlServer:Clustered", true);
 
-                    b.HasIndex("TransactionId");
+                    b.HasIndex("TransactionId")
+                        .IsUnique();
 
                     b.HasIndex("UserId");
 

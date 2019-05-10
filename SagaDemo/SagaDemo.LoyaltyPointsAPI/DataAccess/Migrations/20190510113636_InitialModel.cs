@@ -65,7 +65,8 @@ namespace SagaDemo.LoyaltyPointsAPI.DataAccess.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_PointsConsumedEvents_TransactionId",
                 table: "PointsConsumedEvents",
-                column: "TransactionId");
+                column: "TransactionId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_PointsConsumedEvents_UserId",
@@ -75,7 +76,8 @@ namespace SagaDemo.LoyaltyPointsAPI.DataAccess.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_PointsEarnedEvents_TransactionId",
                 table: "PointsEarnedEvents",
-                column: "TransactionId");
+                column: "TransactionId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_PointsEarnedEvents_UserId",
