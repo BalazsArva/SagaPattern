@@ -4,10 +4,10 @@
     {
         NotStarted,
 
+        InProgress,
+
         Completed,
 
-        RolledBack,
-
-        InProgress
+        RolledBack
     }
 }

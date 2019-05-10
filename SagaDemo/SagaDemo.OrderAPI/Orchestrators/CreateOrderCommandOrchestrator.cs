@@ -40,7 +40,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
             var transactionId = Guid.NewGuid().ToString();
             var userId = command.UserId;
 
-            await CreateDocumentIfNotExists(transactionId, cancellationToken).ConfigureAwait(false);
+            await CreateDocumentIfNotExistsAsync(transactionId, cancellationToken).ConfigureAwait(false);
 
             // TODO: Create an endpoint in the inventory api to get the cost.
             var totalCost = 100;
@@ -59,7 +59,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
             throw new NotImplementedException();
         }
 
-        private async Task CreateDocumentIfNotExists(string transactionId, CancellationToken cancellationToken)
+        private async Task CreateDocumentIfNotExistsAsync(string transactionId, CancellationToken cancellationToken)
         {
             using (var session = documentStore.OpenAsyncSession())
             {
@@ -73,6 +73,16 @@ namespace SagaDemo.OrderAPI.Orchestrators
                         Id = transactionDocumentId,
                         TransactionStatus = TransactionStatus.NotStarted,
                         LoyaltyPointsConsumptionStepDetails = new StepDetails
+                        {
+                            Attempts = 0,
+                            StepStatus = StepStatus.NotStarted
+                        },
+                        DeliveryCreationStepDetails = new StepDetails
+                        {
+                            Attempts = 0,
+                            StepStatus = StepStatus.NotStarted
+                        },
+                        InventoryReservationStepDetails = new StepDetails
                         {
                             Attempts = 0,
                             StepStatus = StepStatus.NotStarted
@@ -93,6 +103,8 @@ namespace SagaDemo.OrderAPI.Orchestrators
                 var transactionDocument = await session.LoadAsync<OrderTransaction>(transactionDocumentId, cancellationToken).ConfigureAwait(false);
 
                 var changeVector = session.Advanced.GetChangeVectorFor(transactionDocument);
+
+                transactionDocument.LoyaltyPointsConsumptionStepDetails.StepStatus = StepStatus.InProgress;
 
                 try
                 {

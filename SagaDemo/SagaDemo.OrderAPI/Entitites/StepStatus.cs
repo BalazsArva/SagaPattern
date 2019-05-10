@@ -4,6 +4,8 @@
     {
         NotStarted,
 
+        InProgress,
+
         Completed,
 
         RolledBack,
