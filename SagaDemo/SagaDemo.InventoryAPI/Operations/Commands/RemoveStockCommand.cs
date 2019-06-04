@@ -1,8 +1,8 @@
 ﻿namespace SagaDemo.InventoryAPI.Operations.Commands
 {
-    public class TakeoutItemCommand
+    public class RemoveStockCommand
     {
-        public TakeoutItemCommand(int productId, int quantity)
+        public RemoveStockCommand(int productId, int quantity)
         {
             ProductId = productId;
             Quantity = quantity;

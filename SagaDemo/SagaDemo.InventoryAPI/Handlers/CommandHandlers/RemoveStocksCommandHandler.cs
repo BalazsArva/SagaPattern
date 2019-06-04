@@ -11,18 +11,18 @@ using SagaDemo.InventoryAPI.Validation.Validators;
 
 namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 {
-    public class TakeoutItemsCommandHandler : ITakeoutItemsCommandHandler
+    public class RemoveStocksCommandHandler : IRemoveStocksCommandHandler
     {
         private readonly IInventoryDbContextFactory dbContextFactory;
-        private readonly IInventoryBatchCommandValidator<TakeoutItemsCommand> requestValidator;
+        private readonly IRemoveStocksCommandValidator requestValidator;
 
-        public TakeoutItemsCommandHandler(IInventoryDbContextFactory dbContextFactory, IInventoryBatchCommandValidator<TakeoutItemsCommand> requestValidator)
+        public RemoveStocksCommandHandler(IInventoryDbContextFactory dbContextFactory, IRemoveStocksCommandValidator requestValidator)
         {
             this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
             this.requestValidator = requestValidator ?? throw new ArgumentNullException(nameof(requestValidator));
         }
 
-        public async Task HandleAsync(TakeoutItemsCommand command, CancellationToken cancellationToken)
+        public async Task HandleAsync(RemoveStocksCommand command, CancellationToken cancellationToken)
         {
             using (var context = dbContextFactory.CreateDbContext())
             {
@@ -33,7 +33,7 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 
                 foreach (var pair in productLookup)
                 {
-                    context.ProductTakenOutEvents.Add(new ProductTakenOutEvent
+                    context.ProductStockRemovedEvents.Add(new ProductStockRemovedEvent
                     {
                         ProductId = pair.Key,
                         Quantity = productQuantityLookup[pair.Key],
@@ -47,7 +47,7 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
             }
         }
 
-        private static async Task<IDictionary<int, Product>> GetProductLookupAsync(InventoryDbContext context, TakeoutItemsCommand command, CancellationToken cancellationToken)
+        private static async Task<IDictionary<int, Product>> GetProductLookupAsync(InventoryDbContext context, RemoveStocksCommand command, CancellationToken cancellationToken)
         {
             var productIds = command.Items.Select(i => i.ProductId);
 

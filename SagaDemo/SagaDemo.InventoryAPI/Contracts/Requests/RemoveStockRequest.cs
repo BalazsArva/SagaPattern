@@ -1,6 +1,6 @@
 ﻿namespace SagaDemo.InventoryAPI.Contracts.Requests
 {
-    public class TakeoutItemRequest
+    public class RemoveStockRequest
     {
         public int ProductId { get; set; }
 

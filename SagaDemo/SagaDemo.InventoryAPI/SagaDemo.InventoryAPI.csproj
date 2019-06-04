@@ -12,8 +12,10 @@
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Api.Analyzers" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.2.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.2.4" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.3" />
-    <PackageReference Include="RavenDB.Client" Version="4.1.5" />
     <PackageReference Include="NSwag.MSBuild" Version="12.2.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
@@ -29,7 +31,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SagaDemo.Common.AspNetCore\SagaDemo.Common.AspNetCore.csproj" />
-    <ProjectReference Include="..\SagaDemo.Common.DataAccess.RavenDb\SagaDemo.Common.DataAccess.RavenDb.csproj" />
+    <ProjectReference Include="..\SagaDemo.Common.DataAccess.EntityFrameworkCore\SagaDemo.Common.DataAccess.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\SagaDemo.Common.Validation\SagaDemo.Common.Validation.csproj" />
   </ItemGroup>
 

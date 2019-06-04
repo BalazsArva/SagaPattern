@@ -2,13 +2,13 @@
 {
     public class BringbackItemCommand
     {
-        public BringbackItemCommand(string productId, int quantity)
+        public BringbackItemCommand(int productId, int quantity)
         {
             ProductId = productId;
             Quantity = quantity;
         }
 
-        public string ProductId { get; }
+        public int ProductId { get; }
 
         public int Quantity { get; }
     }

@@ -2,7 +2,7 @@
 {
     public class BringbackItemRequest
     {
-        public string ProductId { get; set; }
+        public int ProductId { get; set; }
 
         public int Quantity { get; set; }
     }

@@ -46,6 +46,16 @@ namespace SagaDemo.InventoryAPI.Mappers
             return new AddStocksCommand(apiRequest.Items.Select(r => ToServiceCommand(r)));
         }
 
+        public static RemoveStocksCommand ToServiceCommand(RemoveStocksRequest apiRequest)
+        {
+            if (apiRequest == null)
+            {
+                return null;
+            }
+
+            return new RemoveStocksCommand(apiRequest.Items.Select(r => ToServiceCommand(r)));
+        }
+
         public static AddStockCommand ToServiceCommand(AddStockRequest apiRequest)
         {
             if (apiRequest == null)
@@ -54,6 +64,16 @@ namespace SagaDemo.InventoryAPI.Mappers
             }
 
             return new AddStockCommand(apiRequest.ProductId, apiRequest.Quantity);
+        }
+
+        public static RemoveStockCommand ToServiceCommand(RemoveStockRequest apiRequest)
+        {
+            if (apiRequest == null)
+            {
+                return null;
+            }
+
+            return new RemoveStockCommand(apiRequest.ProductId, apiRequest.Quantity);
         }
 
         public static TakeoutItemsCommand ToServiceCommand(TakeoutItemsRequest apiRequest)

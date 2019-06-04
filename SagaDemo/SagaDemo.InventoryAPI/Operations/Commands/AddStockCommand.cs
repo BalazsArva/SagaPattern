@@ -2,13 +2,13 @@
 {
     public class AddStockCommand
     {
-        public AddStockCommand(string productId, int quantity)
+        public AddStockCommand(int productId, int quantity)
         {
             ProductId = productId;
             Quantity = quantity;
         }
 
-        public string ProductId { get; }
+        public int ProductId { get; }
 
         public int Quantity { get; }
     }
