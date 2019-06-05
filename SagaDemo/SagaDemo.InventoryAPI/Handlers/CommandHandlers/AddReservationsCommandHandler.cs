@@ -33,7 +33,7 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 
                 foreach (var addedReservation in command.Items)
                 {
-                    context.ProductReservationAddedEvents.Add(new ProductReservationAddedEvent
+                    context.ProductReservations.Add(new ProductReservation
                     {
                         ProductId = addedReservation.ProductId,
                         Quantity = addedReservation.Quantity,

@@ -12,9 +12,7 @@ namespace SagaDemo.InventoryAPI.DataAccess
 
         public DbSet<Product> Products { get; set; }
 
-        public DbSet<ProductReservationAddedEvent> ProductReservationAddedEvents { get; set; }
-
-        public DbSet<ProductReservationCancelledEvent> ProductReservationCancelledEvents { get; set; }
+        public DbSet<ProductReservation> ProductReservations { get; set; }
 
         public DbSet<ProductStockAddedEvent> ProductStockAddedEvents { get; set; }
 

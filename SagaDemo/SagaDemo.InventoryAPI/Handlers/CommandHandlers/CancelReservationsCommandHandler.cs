@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using SagaDemo.InventoryAPI.DataAccess;
-using SagaDemo.InventoryAPI.DataAccess.Entities;
 using SagaDemo.InventoryAPI.Operations.Commands;
 
 namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
@@ -25,25 +24,15 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
         {
             using (var context = dbContextFactory.CreateDbContext())
             {
-                // TODO: The validator should check that the reservations actually exist
-                // But also should ensure that this operation is idempotent so multiple cancel attempts should succeed (with duplicated ones being ignored).
                 requestValidator.ValidateAndThrow(command);
 
                 var productReservations = await context
-                    .ProductReservationAddedEvents
+                    .ProductReservations
                     .Where(evt => evt.TransactionId == command.TransactionId)
                     .ToListAsync(cancellationToken)
                     .ConfigureAwait(false);
 
-                foreach (var productReservation in productReservations)
-                {
-                    context.ProductReservationCancelledEvents.Add(new ProductReservationCancelledEvent
-                    {
-                        ProductId = productReservation.ProductId,
-                        Quantity = productReservation.Quantity,
-                        TransactionId = command.TransactionId
-                    });
-                }
+                context.ProductReservations.RemoveRange(productReservations);
 
                 await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }

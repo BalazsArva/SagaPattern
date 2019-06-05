@@ -1,6 +1,6 @@
 ﻿namespace SagaDemo.InventoryAPI.DataAccess.Entities
 {
-    public class ProductReservationAddedEvent
+    public class ProductReservation
     {
         public int Id { get; set; }
 
