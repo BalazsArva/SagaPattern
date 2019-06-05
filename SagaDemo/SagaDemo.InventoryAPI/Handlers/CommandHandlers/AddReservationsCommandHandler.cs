@@ -24,12 +24,19 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 
         public async Task HandleAsync(AddReservationsCommand command, CancellationToken cancellationToken)
         {
-            // TODO: Handle multiple attempts with the same transaction Id idempotently here and everywhere else.
             using (var context = dbContextFactory.CreateDbContext())
             {
                 var productLookup = await GetProductLookupAsync(context, command, cancellationToken).ConfigureAwait(false);
 
                 requestValidator.ValidateAndThrow(command, productLookup);
+
+                // TODO: Handle multiple attempts with the same transaction Id idempotently in other command handlers as well.
+                // For idempotence
+                var alreadyReserved = await context.ProductReservations.AnyAsync(r => r.TransactionId == command.TransactionId, cancellationToken).ConfigureAwait(false);
+                if (alreadyReserved)
+                {
+                    return;
+                }
 
                 foreach (var addedReservation in command.Items)
                 {
