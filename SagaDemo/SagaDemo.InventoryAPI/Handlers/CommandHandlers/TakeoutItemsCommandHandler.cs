@@ -26,20 +26,17 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
         {
             using (var context = dbContextFactory.CreateDbContext())
             {
-                var productQuantityLookup = command.Items.ToDictionary(cmd => cmd.ProductId, cmd => cmd.Quantity);
                 var productLookup = await GetProductLookupAsync(context, command, cancellationToken).ConfigureAwait(false);
 
                 requestValidator.ValidateAndThrow(command, productLookup);
 
-                foreach (var pair in productLookup)
+                foreach (var takenOutItem in command.Items)
                 {
                     context.ProductTakenOutEvents.Add(new ProductTakenOutEvent
                     {
-                        ProductId = pair.Key,
-                        Quantity = productQuantityLookup[pair.Key],
-
-                        // TODO: Set this
-                        //TransactionId =
+                        ProductId = takenOutItem.ProductId,
+                        Quantity = takenOutItem.Quantity,
+                        TransactionId = command.TransactionId
                     });
                 }
 

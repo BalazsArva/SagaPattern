@@ -83,7 +83,7 @@ namespace SagaDemo.InventoryAPI.Mappers
                 return null;
             }
 
-            return new TakeoutItemsCommand(apiRequest.Items.Select(r => ToServiceCommand(r)));
+            return new TakeoutItemsCommand(apiRequest.Items.Select(r => ToServiceCommand(r)), apiRequest.TransactionId);
         }
 
         public static TakeoutItemCommand ToServiceCommand(TakeoutItemRequest apiRequest)
