@@ -35,10 +35,8 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
                     context.ProductStockRemovedEvents.Add(new ProductStockRemovedEvent
                     {
                         ProductId = removedStock.ProductId,
-                        Quantity = removedStock.Quantity
-
-                        // TODO: Set this
-                        //TransactionId =
+                        Quantity = removedStock.Quantity,
+                        TransactionId = command.TransactionId
                     });
                 }
 
