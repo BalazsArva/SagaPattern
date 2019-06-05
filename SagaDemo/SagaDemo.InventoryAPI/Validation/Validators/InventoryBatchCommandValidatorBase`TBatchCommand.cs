@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using FluentValidation;
-using SagaDemo.InventoryAPI.Entities;
+using SagaDemo.InventoryAPI.DataAccess.Entities;
 
 namespace SagaDemo.InventoryAPI.Validation.Validators
 {
     public abstract class InventoryBatchCommandValidatorBase<TBatchCommand> : AbstractValidator<TBatchCommand>, IInventoryBatchCommandValidator<TBatchCommand>
         where TBatchCommand : class
     {
-        public virtual void ValidateAndThrow(TBatchCommand command, IDictionary<string, Product> productLookup)
+        public virtual void ValidateAndThrow(TBatchCommand command, IDictionary<int, Product> productLookup)
         {
             if (command == null)
             {

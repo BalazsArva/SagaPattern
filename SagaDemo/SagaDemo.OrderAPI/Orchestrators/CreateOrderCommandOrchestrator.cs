@@ -47,7 +47,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
 
             await ConsumeLoyaltyPointsAsync(transactionId, totalCost, userId, cancellationToken).ConfigureAwait(false);
 
-            var reservationsRequest = ReservationsMapper.ToReservationsApiContract(command.Order);
+            var reservationsRequest = ReservationsMapper.ToReservationsApiContract(command.Order, transactionId);
 
             // TODO: The endpoint should accept transactionId
             await catalogApiClient.ReserveItemsAsync(reservationsRequest, cancellationToken).ConfigureAwait(false);

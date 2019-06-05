@@ -23,7 +23,7 @@ namespace SagaDemo.InventoryAPI.Mappers
                 return null;
             }
 
-            return new AddReservationsCommand(apiRequest.Items.Select(r => ToServiceCommand(r)));
+            return new AddReservationsCommand(apiRequest.Items.Select(r => ToServiceCommand(r)), apiRequest.TransactionId);
         }
 
         public static AddReservationCommand ToServiceCommand(AddReservationRequest apiRequest)
@@ -43,7 +43,17 @@ namespace SagaDemo.InventoryAPI.Mappers
                 return null;
             }
 
-            return new AddStocksCommand(apiRequest.Items.Select(r => ToServiceCommand(r)));
+            return new AddStocksCommand(apiRequest.Items.Select(r => ToServiceCommand(r)), apiRequest.TransactionId);
+        }
+
+        public static RemoveStocksCommand ToServiceCommand(RemoveStocksRequest apiRequest)
+        {
+            if (apiRequest == null)
+            {
+                return null;
+            }
+
+            return new RemoveStocksCommand(apiRequest.Items.Select(r => ToServiceCommand(r)), apiRequest.TransactionId);
         }
 
         public static AddStockCommand ToServiceCommand(AddStockRequest apiRequest)
@@ -56,6 +66,16 @@ namespace SagaDemo.InventoryAPI.Mappers
             return new AddStockCommand(apiRequest.ProductId, apiRequest.Quantity);
         }
 
+        public static RemoveStockCommand ToServiceCommand(RemoveStockRequest apiRequest)
+        {
+            if (apiRequest == null)
+            {
+                return null;
+            }
+
+            return new RemoveStockCommand(apiRequest.ProductId, apiRequest.Quantity);
+        }
+
         public static TakeoutItemsCommand ToServiceCommand(TakeoutItemsRequest apiRequest)
         {
             if (apiRequest == null)
@@ -63,7 +83,7 @@ namespace SagaDemo.InventoryAPI.Mappers
                 return null;
             }
 
-            return new TakeoutItemsCommand(apiRequest.Items.Select(r => ToServiceCommand(r)));
+            return new TakeoutItemsCommand(apiRequest.Items.Select(r => ToServiceCommand(r)), apiRequest.TransactionId);
         }
 
         public static TakeoutItemCommand ToServiceCommand(TakeoutItemRequest apiRequest)
@@ -83,7 +103,7 @@ namespace SagaDemo.InventoryAPI.Mappers
                 return null;
             }
 
-            return new BringbackItemsCommand(apiRequest.Items.Select(r => ToServiceCommand(r)));
+            return new BringbackItemsCommand(apiRequest.Items.Select(r => ToServiceCommand(r)), apiRequest.TransactionId);
         }
 
         public static BringbackItemCommand ToServiceCommand(BringbackItemRequest apiRequest)

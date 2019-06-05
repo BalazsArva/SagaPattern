@@ -2,11 +2,6 @@
 {
     public class GetProductByIdRequest
     {
-        public GetProductByIdRequest(string productId)
-        {
-            ProductId = productId;
-        }
-
-        public string ProductId { get; }
+        public int ProductId { get; set; }
     }
 }

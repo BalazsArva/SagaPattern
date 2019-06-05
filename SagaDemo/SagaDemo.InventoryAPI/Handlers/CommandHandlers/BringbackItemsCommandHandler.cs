@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Raven.Client.Documents;
-using Raven.Client.Exceptions;
-using SagaDemo.InventoryAPI.Extensions;
+using Microsoft.EntityFrameworkCore;
+using SagaDemo.InventoryAPI.DataAccess;
+using SagaDemo.InventoryAPI.DataAccess.Entities;
 using SagaDemo.InventoryAPI.Operations.Commands;
 using SagaDemo.InventoryAPI.Validation.Validators;
 
@@ -12,53 +13,48 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 {
     public class BringbackItemsCommandHandler : IBringbackItemsCommandHandler
     {
-        private readonly IDocumentStore documentStore;
+        private readonly IInventoryDbContextFactory dbContextFactory;
         private readonly IInventoryBatchCommandValidator<BringbackItemsCommand> requestValidator;
 
-        public BringbackItemsCommandHandler(IDocumentStore documentStore, IInventoryBatchCommandValidator<BringbackItemsCommand> requestValidator)
+        public BringbackItemsCommandHandler(IInventoryDbContextFactory dbContextFactory, IInventoryBatchCommandValidator<BringbackItemsCommand> requestValidator)
         {
-            this.documentStore = documentStore ?? throw new ArgumentNullException(nameof(documentStore));
+            this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
             this.requestValidator = requestValidator ?? throw new ArgumentNullException(nameof(requestValidator));
         }
 
         public async Task HandleAsync(BringbackItemsCommand command, CancellationToken cancellationToken)
         {
-            while (true)
+            using (var context = dbContextFactory.CreateDbContext())
             {
-                try
-                {
-                    await HandleInternalAsync(command, cancellationToken).ConfigureAwait(false);
-
-                    return;
-                }
-                catch (ConcurrencyException)
-                {
-                    // Ignore, retry until successfully updated
-                }
-            }
-        }
-
-        private async Task HandleInternalAsync(BringbackItemsCommand command, CancellationToken cancellationToken)
-        {
-            using (var session = documentStore.OpenAsyncSession())
-            {
-                var productQuantityLookup = command.Items.ToDictionary(cmd => cmd.ProductId, cmd => cmd.Quantity);
-                var productLookup = await session.LoadProductsAsync(productQuantityLookup.Keys, cancellationToken).ConfigureAwait(false);
+                var productLookup = await GetProductLookupAsync(context, command, cancellationToken).ConfigureAwait(false);
 
                 requestValidator.ValidateAndThrow(command, productLookup);
 
-                foreach (var pair in productLookup)
+                foreach (var broughtBackItem in command.Items)
                 {
-                    var loadedProduct = pair.Value;
-                    var changeVector = session.Advanced.GetChangeVectorFor(loadedProduct);
-
-                    loadedProduct.StockCount += productQuantityLookup[pair.Key];
-
-                    await session.StoreAsync(loadedProduct, changeVector, loadedProduct.Id, cancellationToken).ConfigureAwait(false);
+                    context.ProductBroughtBackEvents.Add(new ProductBroughtBackEvent
+                    {
+                        ProductId = broughtBackItem.ProductId,
+                        Quantity = broughtBackItem.Quantity,
+                        TransactionId = command.TransactionId
+                    });
                 }
 
-                await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
+        }
+
+        private static async Task<IDictionary<int, Product>> GetProductLookupAsync(InventoryDbContext context, BringbackItemsCommand command, CancellationToken cancellationToken)
+        {
+            var productIds = command.Items.Select(i => i.ProductId);
+
+            var products = await context
+                .Products
+                .Where(p => productIds.Contains(p.Id))
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            return products.ToDictionary(p => p.Id);
         }
     }
 }

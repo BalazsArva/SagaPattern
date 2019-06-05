@@ -5,5 +5,7 @@ namespace SagaDemo.InventoryAPI.Contracts.Requests
     public class AddStocksRequest
     {
         public List<AddStockRequest> Items { get; set; }
+
+        public string TransactionId { get; set; }
     }
 }

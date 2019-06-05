@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Raven.Client.Documents;
-using SagaDemo.Common.DataAccess.RavenDb.Utilities;
-using SagaDemo.InventoryAPI.Entities;
+using SagaDemo.InventoryAPI.DataAccess;
 using SagaDemo.InventoryAPI.Operations.Requests;
 using SagaDemo.InventoryAPI.Operations.Responses;
 
@@ -11,27 +9,30 @@ namespace SagaDemo.InventoryAPI.Handlers.RequestHandlers
 {
     public class GetProductByIdRequestHandler : IGetProductByIdRequestHandler
     {
-        private readonly IDocumentStore _documentStore;
+        private readonly IInventoryDbContextFactory dbContextFactory;
 
-        public GetProductByIdRequestHandler(IDocumentStore documentStore)
+        public GetProductByIdRequestHandler(IInventoryDbContextFactory dbContextFactory)
         {
-            _documentStore = documentStore ?? throw new ArgumentNullException(nameof(documentStore));
+            this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
         }
 
         public async Task<GetProductByIdResponse> HandleAsync(GetProductByIdRequest request, CancellationToken cancellationToken)
         {
-            using (var session = _documentStore.OpenAsyncSession())
+            using (var context = dbContextFactory.CreateDbContext())
             {
-                var entityId = DocumentIdHelper.GetEntityId<Product>(session, request.ProductId);
+                var product = await context.Products.FindAsync(new[] { request.ProductId }, cancellationToken).ConfigureAwait(false);
 
-                var entity = await session.LoadAsync<Product>(entityId, cancellationToken).ConfigureAwait(false);
-
-                if (entity == null)
+                if (product == null)
                 {
                     return null;
                 }
 
-                return new GetProductByIdResponse(request.ProductId, entity.Name, entity.PointsCost, entity.StockCount);
+                return new GetProductByIdResponse
+                {
+                    Name = product.Name,
+                    ProductId = product.Id,
+                    PointsCost = product.PointsCost
+                };
             }
         }
     }

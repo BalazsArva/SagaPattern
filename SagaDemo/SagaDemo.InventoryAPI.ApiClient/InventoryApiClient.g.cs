@@ -21,11 +21,11 @@ namespace SagaDemo.InventoryAPI.ApiClient
         System.Threading.Tasks.Task<SwaggerResponse<CreateProductResponse>> CreateItemAsync(CreateProductRequest request, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<SwaggerResponse<GetProductByIdResponse>> GetItemAsync(string id);
+        System.Threading.Tasks.Task<SwaggerResponse<GetProductByIdResponse>> GetItemAsync(int id);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        System.Threading.Tasks.Task<SwaggerResponse<GetProductByIdResponse>> GetItemAsync(string id, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<SwaggerResponse<GetProductByIdResponse>> GetItemAsync(int id, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         System.Threading.Tasks.Task<SwaggerResponse> ReserveItemsAsync(AddReservationsRequest request);
@@ -40,6 +40,13 @@ namespace SagaDemo.InventoryAPI.ApiClient
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         System.Threading.Tasks.Task<SwaggerResponse> AddStocksAsync(AddStocksRequest request, System.Threading.CancellationToken cancellationToken);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<SwaggerResponse> RemoveStocksAsync(RemoveStocksRequest request);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        System.Threading.Tasks.Task<SwaggerResponse> RemoveStocksAsync(RemoveStocksRequest request, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         System.Threading.Tasks.Task<SwaggerResponse> TakeoutItemAsync(TakeoutItemsRequest request);
@@ -174,15 +181,18 @@ namespace SagaDemo.InventoryAPI.ApiClient
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<SwaggerResponse<GetProductByIdResponse>> GetItemAsync(string id)
+        public System.Threading.Tasks.Task<SwaggerResponse<GetProductByIdResponse>> GetItemAsync(int id)
         {
             return GetItemAsync(id, System.Threading.CancellationToken.None);
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        public async System.Threading.Tasks.Task<SwaggerResponse<GetProductByIdResponse>> GetItemAsync(string id, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<SwaggerResponse<GetProductByIdResponse>> GetItemAsync(int id, System.Threading.CancellationToken cancellationToken)
         {
+            if (id == null)
+                throw new System.ArgumentNullException("id");
+    
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append("api/Catalog/{id}");
             urlBuilder_.Replace("{id}", System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
@@ -355,7 +365,7 @@ namespace SagaDemo.InventoryAPI.ApiClient
         public async System.Threading.Tasks.Task<SwaggerResponse> AddStocksAsync(AddStocksRequest request, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append("api/Catalog/add-to-stock");
+            urlBuilder_.Append("api/Catalog/stocks");
     
             var client_ = _httpClient;
             try
@@ -366,6 +376,87 @@ namespace SagaDemo.InventoryAPI.ApiClient
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("POST");
+    
+                    PrepareRequest(client_, request_, urlBuilder_);
+                    var url_ = urlBuilder_.ToString();
+                    request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
+                    PrepareRequest(client_, request_, url_);
+    
+                    var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                    try
+                    {
+                        var headers_ = System.Linq.Enumerable.ToDictionary(response_.Headers, h_ => h_.Key, h_ => h_.Value);
+                        if (response_.Content != null && response_.Content.Headers != null)
+                        {
+                            foreach (var item_ in response_.Content.Headers)
+                                headers_[item_.Key] = item_.Value;
+                        }
+    
+                        ProcessResponse(client_, response_);
+    
+                        var status_ = ((int)response_.StatusCode).ToString();
+                        if (status_ == "204") 
+                        {
+                            return new SwaggerResponse((int)response_.StatusCode, headers_);
+                        }
+                        else
+                        if (status_ == "400") 
+                        {
+                            var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false); 
+                            var result_ = default(ValidationProblemDetails); 
+                            try
+                            {
+                                result_ = Newtonsoft.Json.JsonConvert.DeserializeObject<ValidationProblemDetails>(responseData_, _settings.Value);
+                            } 
+                            catch (System.Exception exception_) 
+                            {
+                                throw new SwaggerException("Could not deserialize the response body.", (int)response_.StatusCode, responseData_, headers_, exception_);
+                            }
+                            throw new SwaggerException<ValidationProblemDetails>("A server side error occurred.", (int)response_.StatusCode, responseData_, headers_, result_, null);
+                        }
+                        else
+                        if (status_ != "200" && status_ != "204")
+                        {
+                            var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false); 
+                            throw new SwaggerException("The HTTP status code of the response was not expected (" + (int)response_.StatusCode + ").", (int)response_.StatusCode, responseData_, headers_, null);
+                        }
+    
+                        return new SwaggerResponse((int)response_.StatusCode, headers_); 
+                    }
+                    finally
+                    {
+                        if (response_ != null)
+                            response_.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+            }
+        }
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        public System.Threading.Tasks.Task<SwaggerResponse> RemoveStocksAsync(RemoveStocksRequest request)
+        {
+            return RemoveStocksAsync(request, System.Threading.CancellationToken.None);
+        }
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        public async System.Threading.Tasks.Task<SwaggerResponse> RemoveStocksAsync(RemoveStocksRequest request, System.Threading.CancellationToken cancellationToken)
+        {
+            var urlBuilder_ = new System.Text.StringBuilder();
+            urlBuilder_.Append("api/Catalog/stocks");
+    
+            var client_ = _httpClient;
+            try
+            {
+                using (var request_ = new System.Net.Http.HttpRequestMessage())
+                {
+                    var content_ = new System.Net.Http.StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(request, _settings.Value));
+                    content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
+                    request_.Content = content_;
+                    request_.Method = new System.Net.Http.HttpMethod("DELETE");
     
                     PrepareRequest(client_, request_, urlBuilder_);
                     var url_ = urlBuilder_.ToString();
@@ -629,25 +720,21 @@ namespace SagaDemo.InventoryAPI.ApiClient
     public partial class CreateProductResponse 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public CreateProductResponse(string @name, int @pointsCost, string @productId, int @stockCount)
+        public CreateProductResponse(string @name, int @pointsCost, int @productId)
         {
             this.ProductId = @productId;
             this.Name = @name;
             this.PointsCost = @pointsCost;
-            this.StockCount = @stockCount;
         }
     
-        [Newtonsoft.Json.JsonProperty("productId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string ProductId { get; }
+        [Newtonsoft.Json.JsonProperty("productId", Required = Newtonsoft.Json.Required.Always)]
+        public int ProductId { get; }
     
         [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Name { get; }
     
         [Newtonsoft.Json.JsonProperty("pointsCost", Required = Newtonsoft.Json.Required.Always)]
         public int PointsCost { get; }
-    
-        [Newtonsoft.Json.JsonProperty("stockCount", Required = Newtonsoft.Json.Required.Always)]
-        public int StockCount { get; }
     
         public string ToJson() 
         {
@@ -776,25 +863,21 @@ namespace SagaDemo.InventoryAPI.ApiClient
     public partial class GetProductByIdResponse 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public GetProductByIdResponse(string @name, int @pointsCost, string @productId, int @stockCount)
+        public GetProductByIdResponse(string @name, int @pointsCost, int @productId)
         {
             this.ProductId = @productId;
             this.Name = @name;
             this.PointsCost = @pointsCost;
-            this.StockCount = @stockCount;
         }
     
-        [Newtonsoft.Json.JsonProperty("productId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string ProductId { get; }
+        [Newtonsoft.Json.JsonProperty("productId", Required = Newtonsoft.Json.Required.Always)]
+        public int ProductId { get; }
     
         [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Name { get; }
     
         [Newtonsoft.Json.JsonProperty("pointsCost", Required = Newtonsoft.Json.Required.Always)]
         public int PointsCost { get; }
-    
-        [Newtonsoft.Json.JsonProperty("stockCount", Required = Newtonsoft.Json.Required.Always)]
-        public int StockCount { get; }
     
         public string ToJson() 
         {
@@ -812,13 +895,17 @@ namespace SagaDemo.InventoryAPI.ApiClient
     public partial class AddReservationsRequest 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public AddReservationsRequest(System.Collections.Generic.ICollection<AddReservationRequest> @items)
+        public AddReservationsRequest(System.Collections.Generic.ICollection<AddReservationRequest> @items, string @transactionId)
         {
             this.Items = @items;
+            this.TransactionId = @transactionId;
         }
     
         [Newtonsoft.Json.JsonProperty("items", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<AddReservationRequest> Items { get; }
+    
+        [Newtonsoft.Json.JsonProperty("transactionId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string TransactionId { get; }
     
         public string ToJson() 
         {
@@ -836,14 +923,14 @@ namespace SagaDemo.InventoryAPI.ApiClient
     public partial class AddReservationRequest 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public AddReservationRequest(string @productId, int @quantity)
+        public AddReservationRequest(int @productId, int @quantity)
         {
             this.ProductId = @productId;
             this.Quantity = @quantity;
         }
     
-        [Newtonsoft.Json.JsonProperty("productId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string ProductId { get; }
+        [Newtonsoft.Json.JsonProperty("productId", Required = Newtonsoft.Json.Required.Always)]
+        public int ProductId { get; }
     
         [Newtonsoft.Json.JsonProperty("quantity", Required = Newtonsoft.Json.Required.Always)]
         public int Quantity { get; }
@@ -864,13 +951,17 @@ namespace SagaDemo.InventoryAPI.ApiClient
     public partial class AddStocksRequest 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public AddStocksRequest(System.Collections.Generic.ICollection<AddStockRequest> @items)
+        public AddStocksRequest(System.Collections.Generic.ICollection<AddStockRequest> @items, string @transactionId)
         {
             this.Items = @items;
+            this.TransactionId = @transactionId;
         }
     
         [Newtonsoft.Json.JsonProperty("items", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<AddStockRequest> Items { get; }
+    
+        [Newtonsoft.Json.JsonProperty("transactionId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string TransactionId { get; }
     
         public string ToJson() 
         {
@@ -888,14 +979,14 @@ namespace SagaDemo.InventoryAPI.ApiClient
     public partial class AddStockRequest 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public AddStockRequest(string @productId, int @quantity)
+        public AddStockRequest(int @productId, int @quantity)
         {
             this.ProductId = @productId;
             this.Quantity = @quantity;
         }
     
-        [Newtonsoft.Json.JsonProperty("productId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string ProductId { get; }
+        [Newtonsoft.Json.JsonProperty("productId", Required = Newtonsoft.Json.Required.Always)]
+        public int ProductId { get; }
     
         [Newtonsoft.Json.JsonProperty("quantity", Required = Newtonsoft.Json.Required.Always)]
         public int Quantity { get; }
@@ -913,16 +1004,76 @@ namespace SagaDemo.InventoryAPI.ApiClient
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.36.0 (Newtonsoft.Json v11.0.0.0)")]
+    public partial class RemoveStocksRequest 
+    {
+        [Newtonsoft.Json.JsonConstructor]
+        public RemoveStocksRequest(System.Collections.Generic.ICollection<RemoveStockRequest> @items, string @transactionId)
+        {
+            this.Items = @items;
+            this.TransactionId = @transactionId;
+        }
+    
+        [Newtonsoft.Json.JsonProperty("items", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.ICollection<RemoveStockRequest> Items { get; }
+    
+        [Newtonsoft.Json.JsonProperty("transactionId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string TransactionId { get; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static RemoveStocksRequest FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<RemoveStocksRequest>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.36.0 (Newtonsoft.Json v11.0.0.0)")]
+    public partial class RemoveStockRequest 
+    {
+        [Newtonsoft.Json.JsonConstructor]
+        public RemoveStockRequest(int @productId, int @quantity)
+        {
+            this.ProductId = @productId;
+            this.Quantity = @quantity;
+        }
+    
+        [Newtonsoft.Json.JsonProperty("productId", Required = Newtonsoft.Json.Required.Always)]
+        public int ProductId { get; }
+    
+        [Newtonsoft.Json.JsonProperty("quantity", Required = Newtonsoft.Json.Required.Always)]
+        public int Quantity { get; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static RemoveStockRequest FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<RemoveStockRequest>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.36.0 (Newtonsoft.Json v11.0.0.0)")]
     public partial class TakeoutItemsRequest 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public TakeoutItemsRequest(System.Collections.Generic.ICollection<TakeoutItemRequest> @items)
+        public TakeoutItemsRequest(System.Collections.Generic.ICollection<TakeoutItemRequest> @items, string @transactionId)
         {
             this.Items = @items;
+            this.TransactionId = @transactionId;
         }
     
         [Newtonsoft.Json.JsonProperty("items", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<TakeoutItemRequest> Items { get; }
+    
+        [Newtonsoft.Json.JsonProperty("transactionId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string TransactionId { get; }
     
         public string ToJson() 
         {
@@ -940,14 +1091,14 @@ namespace SagaDemo.InventoryAPI.ApiClient
     public partial class TakeoutItemRequest 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public TakeoutItemRequest(string @productId, int @quantity)
+        public TakeoutItemRequest(int @productId, int @quantity)
         {
             this.ProductId = @productId;
             this.Quantity = @quantity;
         }
     
-        [Newtonsoft.Json.JsonProperty("productId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string ProductId { get; }
+        [Newtonsoft.Json.JsonProperty("productId", Required = Newtonsoft.Json.Required.Always)]
+        public int ProductId { get; }
     
         [Newtonsoft.Json.JsonProperty("quantity", Required = Newtonsoft.Json.Required.Always)]
         public int Quantity { get; }
@@ -968,13 +1119,17 @@ namespace SagaDemo.InventoryAPI.ApiClient
     public partial class BringbackItemsRequest 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public BringbackItemsRequest(System.Collections.Generic.ICollection<BringbackItemRequest> @items)
+        public BringbackItemsRequest(System.Collections.Generic.ICollection<BringbackItemRequest> @items, string @transactionId)
         {
             this.Items = @items;
+            this.TransactionId = @transactionId;
         }
     
         [Newtonsoft.Json.JsonProperty("items", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<BringbackItemRequest> Items { get; }
+    
+        [Newtonsoft.Json.JsonProperty("transactionId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string TransactionId { get; }
     
         public string ToJson() 
         {
@@ -992,14 +1147,14 @@ namespace SagaDemo.InventoryAPI.ApiClient
     public partial class BringbackItemRequest 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public BringbackItemRequest(string @productId, int @quantity)
+        public BringbackItemRequest(int @productId, int @quantity)
         {
             this.ProductId = @productId;
             this.Quantity = @quantity;
         }
     
-        [Newtonsoft.Json.JsonProperty("productId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string ProductId { get; }
+        [Newtonsoft.Json.JsonProperty("productId", Required = Newtonsoft.Json.Required.Always)]
+        public int ProductId { get; }
     
         [Newtonsoft.Json.JsonProperty("quantity", Required = Newtonsoft.Json.Required.Always)]
         public int Quantity { get; }

@@ -2,13 +2,13 @@
 {
     public class TakeoutItemCommand
     {
-        public TakeoutItemCommand(string productId, int quantity)
+        public TakeoutItemCommand(int productId, int quantity)
         {
             ProductId = productId;
             Quantity = quantity;
         }
 
-        public string ProductId { get; }
+        public int ProductId { get; }
 
         public int Quantity { get; }
     }

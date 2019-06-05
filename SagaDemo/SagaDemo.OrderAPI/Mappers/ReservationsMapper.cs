@@ -6,14 +6,14 @@ namespace SagaDemo.OrderAPI.Mappers
 {
     public static class ReservationsMapper
     {
-        public static AddReservationsRequest ToReservationsApiContract(Order order)
+        public static AddReservationsRequest ToReservationsApiContract(Order order, string transactionId)
         {
             if (order == null)
             {
                 return null;
             }
 
-            return new AddReservationsRequest(order.Items.Select(i => new AddReservationRequest(i.ProductId, i.Quantity)).ToList());
+            return new AddReservationsRequest(order.Items.Select(i => new AddReservationRequest(i.ProductId, i.Quantity)).ToList(), transactionId);
         }
     }
 }
