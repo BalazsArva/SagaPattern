@@ -2,13 +2,13 @@
 {
     public class OrderItem
     {
-        public OrderItem(string productId, int quantity)
+        public OrderItem(int productId, int quantity)
         {
             ProductId = productId;
             Quantity = quantity;
         }
 
-        public string ProductId { get; }
+        public int ProductId { get; }
 
         public int Quantity { get; }
     }

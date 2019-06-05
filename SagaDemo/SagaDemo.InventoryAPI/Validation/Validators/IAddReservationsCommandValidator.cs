@@ -6,6 +6,6 @@ namespace SagaDemo.InventoryAPI.Validation.Validators
 {
     public interface IAddReservationsCommandValidator
     {
-        void ValidateAndThrow(AddReservationsCommand command, IDictionary<int, Product> productLookup, IDictionary<int, int> reservationQuantityLookup);
+        void ValidateAndThrow(AddReservationsCommand command, IDictionary<int, Product> productLookup);
     }
 }

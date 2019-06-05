@@ -19,24 +19,6 @@ namespace SagaDemo.InventoryAPI.Validation.Validators
                     RuleFor(x => x.Quantity)
                         .GreaterThan(0)
                         .WithMessage(ValidationMessages.QuantityMustBePositive);
-
-                    RuleFor(x => x.Quantity)
-                        .Must((command, quantity, validationContext) =>
-                        {
-                            var product = validationContext.GetProductFromLookup(command.ProductId);
-
-                            if (validationContext.TryGetReservedQuantity(command.ProductId, out var reservedQuantity))
-                            {
-                                var availableCount = product.AvailableQuantity - reservedQuantity;
-
-                                return availableCount >= quantity;
-                            }
-
-                            // No reservations exist for product
-                            return product.AvailableQuantity >= quantity;
-                        })
-                        .When(cmd => cmd.Quantity > 0)
-                        .WithMessage(ValidationMessages.QuantityExceedsAvailable);
                 });
         }
     }

@@ -29,9 +29,8 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
                 var productQuantityLookup = command.Items.ToDictionary(cmd => cmd.ProductId, cmd => cmd.Quantity);
 
                 var productLookup = await GetProductLookupAsync(context, command, cancellationToken).ConfigureAwait(false);
-                var productReservationsLookup = await GetProductReservationsLookupAsync(context, command, cancellationToken).ConfigureAwait(false);
 
-                requestValidator.ValidateAndThrow(command, productLookup, productReservationsLookup);
+                requestValidator.ValidateAndThrow(command, productLookup);
 
                 foreach (var pair in productLookup)
                 {
@@ -47,24 +46,6 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 
                 await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
-        }
-
-        private static async Task<Dictionary<int, int>> GetProductReservationsLookupAsync(InventoryDbContext context, AddReservationsCommand command, CancellationToken cancellationToken)
-        {
-            var productIds = command.Items.Select(i => i.ProductId);
-
-            var productReservations = await context
-                .ProductReservationAddedEvents
-                .Where(p => productIds.Contains(p.Id))
-                .GroupBy(p => p.Id, (key, values) => new
-                {
-                    ProductId = key,
-                    Quantity = values.Sum(v => v.Quantity)
-                })
-                .ToListAsync(cancellationToken)
-                .ConfigureAwait(false);
-
-            return productReservations.ToDictionary(p => p.ProductId, p => p.Quantity);
         }
 
         private static async Task<IDictionary<int, Product>> GetProductLookupAsync(InventoryDbContext context, AddReservationsCommand command, CancellationToken cancellationToken)
