@@ -24,6 +24,7 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 
         public async Task HandleAsync(AddReservationsCommand command, CancellationToken cancellationToken)
         {
+            // TODO: Handle multiple attempts with the same transaction Id idempotently here and everywhere else.
             using (var context = dbContextFactory.CreateDbContext())
             {
                 var productLookup = await GetProductLookupAsync(context, command, cancellationToken).ConfigureAwait(false);

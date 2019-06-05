@@ -37,6 +37,7 @@ namespace SagaDemo.InventoryAPI.Extensions
                 .AddSingleton<IAddStocksCommandHandler, AddStocksCommandHandler>()
                 .AddSingleton<IRemoveStocksCommandHandler, RemoveStocksCommandHandler>()
                 .AddSingleton<IAddReservationsCommandHandler, AddReservationsCommandHandler>()
+                .AddSingleton<ICancelReservationsCommandHandler, CancelReservationsCommandHandler>()
                 .AddSingleton<ITakeoutItemsCommandHandler, TakeoutItemsCommandHandler>()
                 .AddSingleton<IBringbackItemsCommandHandler, BringbackItemsCommandHandler>()
                 .AddSingleton<IGetProductByIdRequestHandler, GetProductByIdRequestHandler>();
@@ -48,6 +49,7 @@ namespace SagaDemo.InventoryAPI.Extensions
                 .AddSingleton<IValidator<TakeoutItemCommand>, TakeoutItemCommandValidator>()
                 .AddSingleton<IValidator<BringbackItemCommand>, BringbackItemCommandValidator>()
                 .AddSingleton<IAddReservationsCommandValidator, AddReservationsCommandValidator>()
+                .AddSingleton<IValidator<CancelReservationsCommand>, CancelReservationsCommandValidator>()
                 .AddSingleton<IAddStocksCommandValidator, AddStocksCommandValidator>()
                 .AddSingleton<IRemoveStocksCommandValidator, RemoveStocksCommandValidator>()
                 .AddSingleton<IInventoryBatchCommandValidator<TakeoutItemsCommand>, TakeoutItemsCommandValidator>()
