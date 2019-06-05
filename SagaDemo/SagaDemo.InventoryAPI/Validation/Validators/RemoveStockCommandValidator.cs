@@ -4,9 +4,9 @@ using SagaDemo.InventoryAPI.Operations.Commands;
 
 namespace SagaDemo.InventoryAPI.Validation.Validators
 {
-    public class AddReservationCommandValidator : AbstractValidator<AddReservationCommand>
+    public class RemoveStockCommandValidator : AbstractValidator<RemoveStockCommand>
     {
-        public AddReservationCommandValidator()
+        public RemoveStockCommandValidator()
         {
             RuleFor(x => x.ProductId)
                 .Must((command, productId, validationContext) =>
@@ -19,6 +19,8 @@ namespace SagaDemo.InventoryAPI.Validation.Validators
                     RuleFor(x => x.Quantity)
                         .GreaterThan(0)
                         .WithMessage(ValidationMessages.QuantityMustBePositive);
+
+                    // TODO: Validate that there are enough non-reserved, non-taken-away stocks
                 });
         }
     }

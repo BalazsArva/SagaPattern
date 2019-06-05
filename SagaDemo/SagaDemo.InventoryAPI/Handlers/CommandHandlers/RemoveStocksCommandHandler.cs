@@ -11,30 +11,29 @@ using SagaDemo.InventoryAPI.Validation.Validators;
 
 namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 {
-    public class AddReservationsCommandHandler : IAddReservationsCommandHandler
+    public class RemoveStocksCommandHandler : IRemoveStocksCommandHandler
     {
         private readonly IInventoryDbContextFactory dbContextFactory;
-        private readonly IAddReservationsCommandValidator requestValidator;
+        private readonly IRemoveStocksCommandValidator requestValidator;
 
-        public AddReservationsCommandHandler(IInventoryDbContextFactory dbContextFactory, IAddReservationsCommandValidator requestValidator)
+        public RemoveStocksCommandHandler(IInventoryDbContextFactory dbContextFactory, IRemoveStocksCommandValidator requestValidator)
         {
             this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
             this.requestValidator = requestValidator ?? throw new ArgumentNullException(nameof(requestValidator));
         }
 
-        public async Task HandleAsync(AddReservationsCommand command, CancellationToken cancellationToken)
+        public async Task HandleAsync(RemoveStocksCommand command, CancellationToken cancellationToken)
         {
             using (var context = dbContextFactory.CreateDbContext())
             {
                 var productQuantityLookup = command.Items.ToDictionary(cmd => cmd.ProductId, cmd => cmd.Quantity);
-
                 var productLookup = await GetProductLookupAsync(context, command, cancellationToken).ConfigureAwait(false);
 
                 requestValidator.ValidateAndThrow(command, productLookup);
 
                 foreach (var pair in productLookup)
                 {
-                    context.ProductReservationAddedEvents.Add(new ProductReservationAddedEvent
+                    context.ProductStockRemovedEvents.Add(new ProductStockRemovedEvent
                     {
                         ProductId = pair.Key,
                         Quantity = productQuantityLookup[pair.Key],
@@ -48,7 +47,7 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
             }
         }
 
-        private static async Task<IDictionary<int, Product>> GetProductLookupAsync(InventoryDbContext context, AddReservationsCommand command, CancellationToken cancellationToken)
+        private static async Task<IDictionary<int, Product>> GetProductLookupAsync(InventoryDbContext context, RemoveStocksCommand command, CancellationToken cancellationToken)
         {
             var productIds = command.Items.Select(i => i.ProductId);
 

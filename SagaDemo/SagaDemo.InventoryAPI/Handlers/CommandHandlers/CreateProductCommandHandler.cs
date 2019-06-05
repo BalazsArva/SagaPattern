@@ -2,8 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation;
-using Raven.Client.Documents;
-using SagaDemo.Common.DataAccess.RavenDb.Utilities;
+using SagaDemo.InventoryAPI.DataAccess;
 using SagaDemo.InventoryAPI.DataAccess.Entities;
 using SagaDemo.InventoryAPI.Operations.Commands;
 using SagaDemo.InventoryAPI.Operations.Responses;
@@ -12,12 +11,12 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 {
     public class CreateProductCommandHandler : ICreateProductCommandHandler
     {
-        private readonly IDocumentStore documentStore;
+        private readonly IInventoryDbContextFactory dbContextFactory;
         private readonly IValidator<CreateProductCommand> requestValidator;
 
-        public CreateProductCommandHandler(IDocumentStore documentStore, IValidator<CreateProductCommand> requestValidator)
+        public CreateProductCommandHandler(IInventoryDbContextFactory dbContextFactory, IValidator<CreateProductCommand> requestValidator)
         {
-            this.documentStore = documentStore ?? throw new ArgumentNullException(nameof(documentStore));
+            this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
             this.requestValidator = requestValidator ?? throw new ArgumentNullException(nameof(requestValidator));
         }
 
@@ -25,22 +24,24 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
         {
             requestValidator.ValidateAndThrow(command);
 
-            using (var session = documentStore.OpenAsyncSession())
+            using (var context = dbContextFactory.CreateDbContext())
             {
-                var documentId = Guid.NewGuid().ToString();
-                var productDocument = new Product
+                var product = new Product
                 {
-                    Id = DocumentIdHelper.GetDocumentId<Product>(session, documentId),
                     Name = command.Name,
-                    PointsCost = command.PointsCost,
-                    ReservationCount = 0,
-                    StockCount = 0
+                    PointsCost = command.PointsCost
                 };
 
-                await session.StoreAsync(productDocument, cancellationToken).ConfigureAwait(false);
-                await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                context.Products.Add(product);
 
-                return new CreateProductResponse(documentId, productDocument.Name, productDocument.PointsCost, productDocument.StockCount);
+                await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                return new CreateProductResponse
+                {
+                    PointsCost = product.PointsCost,
+                    ProductId = product.Id,
+                    Name = product.Name
+                };
             }
         }
     }

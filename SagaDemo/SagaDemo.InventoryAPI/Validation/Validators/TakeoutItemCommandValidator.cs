@@ -23,9 +23,8 @@ namespace SagaDemo.InventoryAPI.Validation.Validators
                     RuleFor(x => x.Quantity)
                         .Must((command, quantity, validationContext) =>
                         {
-                            var product = validationContext.GetProductFromLookup(command.ProductId);
-
-                            return product.StockCount >= quantity;
+                            // TODO: Validate that appropriate reservations exist (using the transaction id). Remove the available stocks validation from the reservation validator, since that is only a reservation. Availability must be validated at takeout.
+                            return true;
                         })
                         .When(cmd => cmd.Quantity > 0)
                         .WithMessage(ValidationMessages.QuantityExceedsAvailable);
@@ -33,11 +32,11 @@ namespace SagaDemo.InventoryAPI.Validation.Validators
                     RuleFor(x => x.Quantity)
                         .Must((command, quantity, validationContext) =>
                         {
-                            var product = validationContext.GetProductFromLookup(command.ProductId);
-
-                            return product.ReservationCount >= quantity;
+                            // TODO: Validate that appropriate reservations exist (using the transaction id).
+                            return true;
                         })
                         .When(cmd => cmd.Quantity > 0)
+                        // TODO: Change message to match new semantics
                         .WithMessage(ValidationMessages.QuantityExceedsReservations);
                 });
         }

@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Raven.Client.Documents;
-using Raven.Client.Exceptions;
-using SagaDemo.InventoryAPI.Extensions;
+using Microsoft.EntityFrameworkCore;
+using SagaDemo.InventoryAPI.DataAccess;
+using SagaDemo.InventoryAPI.DataAccess.Entities;
 using SagaDemo.InventoryAPI.Operations.Commands;
 using SagaDemo.InventoryAPI.Validation.Validators;
 
@@ -12,53 +13,51 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 {
     public class AddStocksCommandHandler : IAddStocksCommandHandler
     {
-        private readonly IDocumentStore documentStore;
-        private readonly IInventoryBatchCommandValidator<AddStocksCommand> requestValidator;
+        private readonly IInventoryDbContextFactory dbContextFactory;
+        private readonly IAddStocksCommandValidator requestValidator;
 
-        public AddStocksCommandHandler(IDocumentStore documentStore, IInventoryBatchCommandValidator<AddStocksCommand> requestValidator)
+        public AddStocksCommandHandler(IInventoryDbContextFactory dbContextFactory, IAddStocksCommandValidator requestValidator)
         {
-            this.documentStore = documentStore ?? throw new ArgumentNullException(nameof(documentStore));
+            this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
             this.requestValidator = requestValidator ?? throw new ArgumentNullException(nameof(requestValidator));
         }
 
         public async Task HandleAsync(AddStocksCommand command, CancellationToken cancellationToken)
         {
-            while (true)
-            {
-                try
-                {
-                    await HandleInternalAsync(command, cancellationToken).ConfigureAwait(false);
-
-                    return;
-                }
-                catch (ConcurrencyException)
-                {
-                    // Ignore, retry until no concurrency issue occurs
-                }
-            }
-        }
-
-        private async Task HandleInternalAsync(AddStocksCommand command, CancellationToken cancellationToken)
-        {
-            using (var session = documentStore.OpenAsyncSession())
+            using (var context = dbContextFactory.CreateDbContext())
             {
                 var productQuantityLookup = command.Items.ToDictionary(cmd => cmd.ProductId, cmd => cmd.Quantity);
-                var productLookup = await session.LoadProductsAsync(productQuantityLookup.Keys, cancellationToken).ConfigureAwait(false);
+                var productLookup = await GetProductLookupAsync(context, command, cancellationToken).ConfigureAwait(false);
 
                 requestValidator.ValidateAndThrow(command, productLookup);
 
                 foreach (var pair in productLookup)
                 {
-                    var loadedProduct = pair.Value;
-                    var changeVector = session.Advanced.GetChangeVectorFor(loadedProduct);
+                    context.ProductStockAddedEvents.Add(new ProductStockAddedEvent
+                    {
+                        ProductId = pair.Key,
+                        Quantity = productQuantityLookup[pair.Key],
 
-                    loadedProduct.StockCount += productQuantityLookup[pair.Key];
-
-                    await session.StoreAsync(loadedProduct, changeVector, loadedProduct.Id, cancellationToken).ConfigureAwait(false);
+                        // TODO: Set this
+                        //TransactionId =
+                    });
                 }
 
-                await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
+        }
+
+        private static async Task<IDictionary<int, Product>> GetProductLookupAsync(InventoryDbContext context, AddStocksCommand command, CancellationToken cancellationToken)
+        {
+            var productIds = command.Items.Select(i => i.ProductId);
+
+            var products = await context
+                .Products
+                .Where(p => productIds.Contains(p.Id))
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            return products.ToDictionary(p => p.Id);
         }
     }
 }
