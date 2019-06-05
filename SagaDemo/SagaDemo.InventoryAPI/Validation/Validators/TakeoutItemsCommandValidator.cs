@@ -9,6 +9,10 @@ namespace SagaDemo.InventoryAPI.Validation.Validators
         {
             RuleForEach(x => x.Items)
                 .SetValidator(childItemValidator);
+
+            RuleFor(x => x.TransactionId)
+                .NotEmpty()
+                .WithMessage(ValidationMessages.TransactionIdRequired);
         }
     }
 }
