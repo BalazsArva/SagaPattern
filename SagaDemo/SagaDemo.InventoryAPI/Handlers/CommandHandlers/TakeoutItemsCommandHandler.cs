@@ -50,6 +50,7 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 
             var products = await context
                 .Products
+                .AsNoTracking()
                 .Where(p => productIds.Contains(p.Id))
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
