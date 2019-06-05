@@ -103,7 +103,7 @@ namespace SagaDemo.InventoryAPI.Mappers
                 return null;
             }
 
-            return new BringbackItemsCommand(apiRequest.Items.Select(r => ToServiceCommand(r)));
+            return new BringbackItemsCommand(apiRequest.Items.Select(r => ToServiceCommand(r)), apiRequest.TransactionId);
         }
 
         public static BringbackItemCommand ToServiceCommand(BringbackItemRequest apiRequest)

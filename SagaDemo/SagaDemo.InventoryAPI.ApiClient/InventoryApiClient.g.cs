@@ -1111,13 +1111,17 @@ namespace SagaDemo.InventoryAPI.ApiClient
     public partial class BringbackItemsRequest 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public BringbackItemsRequest(System.Collections.Generic.ICollection<BringbackItemRequest> @items)
+        public BringbackItemsRequest(System.Collections.Generic.ICollection<BringbackItemRequest> @items, string @transactionId)
         {
             this.Items = @items;
+            this.TransactionId = @transactionId;
         }
     
         [Newtonsoft.Json.JsonProperty("items", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<BringbackItemRequest> Items { get; }
+    
+        [Newtonsoft.Json.JsonProperty("transactionId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string TransactionId { get; }
     
         public string ToJson() 
         {
