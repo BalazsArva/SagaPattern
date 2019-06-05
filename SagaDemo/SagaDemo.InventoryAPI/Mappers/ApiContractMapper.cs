@@ -23,7 +23,7 @@ namespace SagaDemo.InventoryAPI.Mappers
                 return null;
             }
 
-            return new AddReservationsCommand(apiRequest.Items.Select(r => ToServiceCommand(r)));
+            return new AddReservationsCommand(apiRequest.Items.Select(r => ToServiceCommand(r)), apiRequest.TransactionId);
         }
 
         public static AddReservationCommand ToServiceCommand(AddReservationRequest apiRequest)
@@ -43,7 +43,7 @@ namespace SagaDemo.InventoryAPI.Mappers
                 return null;
             }
 
-            return new AddStocksCommand(apiRequest.Items.Select(r => ToServiceCommand(r)));
+            return new AddStocksCommand(apiRequest.Items.Select(r => ToServiceCommand(r)), apiRequest.TransactionId);
         }
 
         public static RemoveStocksCommand ToServiceCommand(RemoveStocksRequest apiRequest)

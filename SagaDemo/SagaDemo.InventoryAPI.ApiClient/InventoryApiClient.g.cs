@@ -895,13 +895,17 @@ namespace SagaDemo.InventoryAPI.ApiClient
     public partial class AddReservationsRequest 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public AddReservationsRequest(System.Collections.Generic.ICollection<AddReservationRequest> @items)
+        public AddReservationsRequest(System.Collections.Generic.ICollection<AddReservationRequest> @items, string @transactionId)
         {
             this.Items = @items;
+            this.TransactionId = @transactionId;
         }
     
         [Newtonsoft.Json.JsonProperty("items", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<AddReservationRequest> Items { get; }
+    
+        [Newtonsoft.Json.JsonProperty("transactionId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string TransactionId { get; }
     
         public string ToJson() 
         {
@@ -947,13 +951,17 @@ namespace SagaDemo.InventoryAPI.ApiClient
     public partial class AddStocksRequest 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public AddStocksRequest(System.Collections.Generic.ICollection<AddStockRequest> @items)
+        public AddStocksRequest(System.Collections.Generic.ICollection<AddStockRequest> @items, string @transactionId)
         {
             this.Items = @items;
+            this.TransactionId = @transactionId;
         }
     
         [Newtonsoft.Json.JsonProperty("items", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<AddStockRequest> Items { get; }
+    
+        [Newtonsoft.Json.JsonProperty("transactionId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string TransactionId { get; }
     
         public string ToJson() 
         {

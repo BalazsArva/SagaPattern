@@ -35,10 +35,8 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
                     context.ProductReservationAddedEvents.Add(new ProductReservationAddedEvent
                     {
                         ProductId = addedReservation.ProductId,
-                        Quantity = addedReservation.Quantity
-
-                        // TODO: Set this
-                        //TransactionId =
+                        Quantity = addedReservation.Quantity,
+                        TransactionId = command.TransactionId
                     });
                 }
 

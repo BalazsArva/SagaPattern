@@ -35,10 +35,8 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
                     context.ProductStockAddedEvents.Add(new ProductStockAddedEvent
                     {
                         ProductId = addedStock.ProductId,
-                        Quantity = addedStock.Quantity
-
-                        // TODO: Set this
-                        //TransactionId =
+                        Quantity = addedStock.Quantity,
+                        TransactionId = command.TransactionId
                     });
                 }
 
