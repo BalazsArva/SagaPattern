@@ -18,27 +18,15 @@ namespace SagaDemo.InventoryAPI.Controllers
     {
         private readonly ICreateProductCommandHandler createProductCommandHandler;
         private readonly IGetProductByIdRequestHandler getProductByIdRequestHandler;
-        private readonly IAddStocksCommandHandler addStocksCommandHandler;
-        private readonly IRemoveStocksCommandHandler removeStocksCommandHandler;
-        private readonly ITakeoutItemsCommandHandler takeoutItemsCommandHandler;
-        private readonly IBringbackItemsCommandHandler bringbackItemsCommandHandler;
         private readonly IAddReservationsCommandHandler addProductReservationsCommandHandler;
 
         public CatalogController(
             ICreateProductCommandHandler createProductCommandHandler,
             IGetProductByIdRequestHandler getProductByIdRequestHandler,
-            IAddStocksCommandHandler addStocksCommandHandler,
-            IRemoveStocksCommandHandler removeStocksCommandHandler,
-            ITakeoutItemsCommandHandler takeoutItemsCommandHandler,
-            IBringbackItemsCommandHandler bringbackItemsCommandHandler,
             IAddReservationsCommandHandler addProductReservationsCommandHandler)
         {
             this.createProductCommandHandler = createProductCommandHandler ?? throw new ArgumentNullException(nameof(createProductCommandHandler));
             this.getProductByIdRequestHandler = getProductByIdRequestHandler ?? throw new ArgumentNullException(nameof(getProductByIdRequestHandler));
-            this.addStocksCommandHandler = addStocksCommandHandler ?? throw new ArgumentNullException(nameof(addStocksCommandHandler));
-            this.removeStocksCommandHandler = removeStocksCommandHandler ?? throw new ArgumentNullException(nameof(removeStocksCommandHandler));
-            this.takeoutItemsCommandHandler = takeoutItemsCommandHandler ?? throw new ArgumentNullException(nameof(takeoutItemsCommandHandler));
-            this.bringbackItemsCommandHandler = bringbackItemsCommandHandler ?? throw new ArgumentNullException(nameof(bringbackItemsCommandHandler));
             this.addProductReservationsCommandHandler = addProductReservationsCommandHandler ?? throw new ArgumentNullException(nameof(addProductReservationsCommandHandler));
         }
 
@@ -78,56 +66,6 @@ namespace SagaDemo.InventoryAPI.Controllers
             var command = ApiContractMapper.ToServiceCommand(request);
 
             await addProductReservationsCommandHandler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
-
-            return NoContent();
-        }
-
-        // TODO: Create separate controller for stock management.
-        [HttpPost("stocks")]
-        [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(void))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
-        public async Task<IActionResult> AddStocks(AddStocksRequest request, CancellationToken cancellationToken)
-        {
-            var command = ApiContractMapper.ToServiceCommand(request);
-
-            await addStocksCommandHandler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
-
-            return NoContent();
-        }
-
-        // TODO: Create separate controller for stock management.
-        [HttpDelete("stocks")]
-        [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(void))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
-        public async Task<IActionResult> RemoveStocks(RemoveStocksRequest request, CancellationToken cancellationToken)
-        {
-            var command = ApiContractMapper.ToServiceCommand(request);
-
-            await removeStocksCommandHandler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
-
-            return NoContent();
-        }
-
-        [HttpPost("takeout")]
-        [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(void))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
-        public async Task<IActionResult> TakeoutItem(TakeoutItemsRequest request, CancellationToken cancellationToken)
-        {
-            var command = ApiContractMapper.ToServiceCommand(request);
-
-            await takeoutItemsCommandHandler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
-
-            return NoContent();
-        }
-
-        [HttpPost("bringback")]
-        [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(void))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
-        public async Task<IActionResult> BringbackItem(BringbackItemsRequest request, CancellationToken cancellationToken)
-        {
-            var command = ApiContractMapper.ToServiceCommand(request);
-
-            await bringbackItemsCommandHandler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
 
             return NoContent();
         }
