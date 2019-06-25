@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,7 +10,7 @@ using SagaDemo.InventoryAPI.Validation.Validators;
 
 namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 {
-    public class AddReservationsCommandHandler : IAddReservationsCommandHandler
+    public class AddReservationsCommandHandler : CommandHandlerBase, IAddReservationsCommandHandler
     {
         private readonly IInventoryDbContextFactory dbContextFactory;
         private readonly IAddReservationsCommandValidator requestValidator;
@@ -26,7 +25,9 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
         {
             using (var context = dbContextFactory.CreateDbContext())
             {
-                var productLookup = await GetProductLookupAsync(context, command, cancellationToken).ConfigureAwait(false);
+                var productIds = command.Items.Select(i => i.ProductId).ToList();
+
+                var productLookup = await GetProductLookupAsync(context, productIds, cancellationToken).ConfigureAwait(false);
 
                 requestValidator.ValidateAndThrow(command, productLookup);
 
@@ -49,20 +50,6 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 
                 await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
-        }
-
-        private static async Task<IDictionary<int, Product>> GetProductLookupAsync(InventoryDbContext context, AddReservationsCommand command, CancellationToken cancellationToken)
-        {
-            var productIds = command.Items.Select(i => i.ProductId);
-
-            var products = await context
-                .Products
-                .AsNoTracking()
-                .Where(p => productIds.Contains(p.Id))
-                .ToListAsync(cancellationToken)
-                .ConfigureAwait(false);
-
-            return products.ToDictionary(p => p.Id);
         }
     }
 }
