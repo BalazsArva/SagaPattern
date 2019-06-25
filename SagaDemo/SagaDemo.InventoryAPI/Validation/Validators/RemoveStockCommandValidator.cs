@@ -18,9 +18,20 @@ namespace SagaDemo.InventoryAPI.Validation.Validators
                 {
                     RuleFor(x => x.Quantity)
                         .GreaterThan(0)
-                        .WithMessage(ValidationMessages.QuantityMustBePositive);
+                        .WithMessage(ValidationMessages.QuantityMustBePositive)
+                        .DependentRules(() =>
+                        {
+                            RuleFor(x => x.Quantity)
+                                .Must((command, quantity, context) =>
+                                {
+                                    if (context.TryGetAvailableCountFromLookup(command.ProductId, out var availableCount))
+                                    {
+                                        return availableCount >= quantity;
+                                    }
 
-                    // TODO: Validate that there are enough non-reserved, non-taken-away stocks
+                                    return false;
+                                });
+                        });
                 });
         }
     }

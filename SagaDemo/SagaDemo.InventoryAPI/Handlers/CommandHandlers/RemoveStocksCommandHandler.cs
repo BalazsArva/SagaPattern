@@ -26,9 +26,12 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
         {
             using (var context = dbContextFactory.CreateDbContext())
             {
-                var productLookup = await GetProductLookupAsync(context, command, cancellationToken).ConfigureAwait(false);
+                var productIds = command.Items.Select(i => i.ProductId).ToList();
 
-                requestValidator.ValidateAndThrow(command, productLookup);
+                var productLookup = await GetProductLookupAsync(context, productIds, cancellationToken).ConfigureAwait(false);
+                var availableCountLookup = await GetAvailabileCountLookupAsync(context, productIds, cancellationToken).ConfigureAwait(false);
+
+                requestValidator.ValidateAndThrow(command, productLookup, availableCountLookup);
 
                 // This is for idempotence. We check only the TransactionId because we assume that if stocks for one product in a transaction is removed then so are the others.
                 var stocksAlreadyRemoved = await context.ProductStockRemovedEvents.AnyAsync(evt => evt.TransactionId == command.TransactionId, cancellationToken).ConfigureAwait(false);
@@ -51,10 +54,8 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
             }
         }
 
-        private static async Task<IDictionary<int, Product>> GetProductLookupAsync(InventoryDbContext context, RemoveStocksCommand command, CancellationToken cancellationToken)
+        private static async Task<IDictionary<int, Product>> GetProductLookupAsync(InventoryDbContext context, IEnumerable<int> productIds, CancellationToken cancellationToken)
         {
-            var productIds = command.Items.Select(i => i.ProductId);
-
             var products = await context
                 .Products
                 .AsNoTracking()
@@ -63,6 +64,36 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
                 .ConfigureAwait(false);
 
             return products.ToDictionary(p => p.Id);
+        }
+
+        private static async Task<IDictionary<int, int>> GetAvailabileCountLookupAsync(InventoryDbContext context, IEnumerable<int> productIds, CancellationToken cancellationToken)
+        {
+            var addedStocks = context
+                .ProductStockAddedEvents
+                .Select(e => new { e.ProductId, e.Quantity });
+
+            var removedStocks = context
+                .ProductStockRemovedEvents
+                .Select(e => new { e.ProductId, Quantity = -e.Quantity });
+
+            var itemsTakenOut = context
+                .ProductTakenOutEvents
+                .Select(e => new { e.ProductId, Quantity = -e.Quantity });
+
+            var itemsBroughtBack = context
+                .ProductBroughtBackEvents
+                .Select(e => new { e.ProductId, e.Quantity });
+
+            var allStockChanges = await addedStocks
+                .Concat(removedStocks)
+                .Concat(itemsTakenOut)
+                .Concat(itemsBroughtBack)
+                .Where(evt => productIds.Contains(evt.ProductId))
+                .GroupBy(s => s.ProductId, (key, elements) => new { ProductId = key, Quantity = elements.Sum(e => e.Quantity) })
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            return allStockChanges.ToDictionary(grp => grp.ProductId, grp => grp.Quantity);
         }
     }
 }
