@@ -14,7 +14,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.3" />
     <PackageReference Include="RavenDB.Client" Version="4.1.5" />
-    <PackageReference Include="RavenDB.Client" Version="4.1.5" />
+    <PackageReference Include="RavenDB.Client" Version="4.2.0" />
     <PackageReference Include="NSwag.MSBuild" Version="12.2.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
