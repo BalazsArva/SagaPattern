@@ -30,8 +30,7 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 
                 requestValidator.ValidateAndThrow(command, productLookup);
 
-                // TODO: Handle multiple attempts with the same transaction Id idempotently in other command handlers as well.
-                // For idempotence
+                // This is for idempotence. We check only the TransactionId because we assume that if one item in a transaction is reserved then so are the others.
                 var alreadyReserved = await context.ProductReservations.AnyAsync(r => r.TransactionId == command.TransactionId, cancellationToken).ConfigureAwait(false);
                 if (alreadyReserved)
                 {

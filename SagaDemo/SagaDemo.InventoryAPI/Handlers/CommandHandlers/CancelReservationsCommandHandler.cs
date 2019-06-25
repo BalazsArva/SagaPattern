@@ -32,6 +32,11 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
                     .ToListAsync(cancellationToken)
                     .ConfigureAwait(false);
 
+                if (productReservations.Count == 0)
+                {
+                    return;
+                }
+
                 context.ProductReservations.RemoveRange(productReservations);
 
                 await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

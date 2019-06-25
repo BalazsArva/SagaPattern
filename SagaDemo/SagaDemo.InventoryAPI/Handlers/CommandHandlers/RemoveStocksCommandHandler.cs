@@ -30,6 +30,13 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 
                 requestValidator.ValidateAndThrow(command, productLookup);
 
+                // This is for idempotence. We check only the TransactionId because we assume that if stocks for one product in a transaction is removed then so are the others.
+                var stocksAlreadyRemoved = await context.ProductStockRemovedEvents.AnyAsync(evt => evt.TransactionId == command.TransactionId, cancellationToken).ConfigureAwait(false);
+                if (stocksAlreadyRemoved)
+                {
+                    return;
+                }
+
                 foreach (var removedStock in command.Items)
                 {
                     context.ProductStockRemovedEvents.Add(new ProductStockRemovedEvent

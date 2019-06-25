@@ -30,6 +30,13 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 
                 requestValidator.ValidateAndThrow(command, productLookup);
 
+                // This is for idempotence. We check only the TransactionId because we assume that if one item in a transaction is brought back then so are the others.
+                var itemsAlreadyBroughtBack = await context.ProductBroughtBackEvents.AnyAsync(evt => evt.TransactionId == command.TransactionId, cancellationToken).ConfigureAwait(false);
+                if (itemsAlreadyBroughtBack)
+                {
+                    return;
+                }
+
                 foreach (var broughtBackItem in command.Items)
                 {
                     context.ProductBroughtBackEvents.Add(new ProductBroughtBackEvent

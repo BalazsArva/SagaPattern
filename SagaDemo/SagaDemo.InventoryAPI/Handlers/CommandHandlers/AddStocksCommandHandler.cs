@@ -30,6 +30,13 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 
                 requestValidator.ValidateAndThrow(command, productLookup);
 
+                // This is for idempotence. We check only the TransactionId because we assume that if stocks for one product in a transaction is added then so are the others.
+                var stocksAlreadyAdded = await context.ProductStockAddedEvents.AnyAsync(evt => evt.TransactionId == command.TransactionId, cancellationToken).ConfigureAwait(false);
+                if (stocksAlreadyAdded)
+                {
+                    return;
+                }
+
                 foreach (var addedStock in command.Items)
                 {
                     context.ProductStockAddedEvents.Add(new ProductStockAddedEvent
