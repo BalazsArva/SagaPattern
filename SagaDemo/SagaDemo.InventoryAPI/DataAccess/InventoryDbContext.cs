@@ -26,7 +26,72 @@ namespace SagaDemo.InventoryAPI.DataAccess
         {
             base.OnModelCreating(modelBuilder);
 
-            // TODO: Configure entities
+            ConfigureProductTable(modelBuilder);
+            ConfigureProductReservationsTable(modelBuilder);
+            ConfigureProductStockAddedEventsTable(modelBuilder);
+            ConfigureProductStockRemovedEventsTable(modelBuilder);
+            ConfigureProductTakenOutEventsTable(modelBuilder);
+            ConfigureProductBroughtBackEventsTable(modelBuilder);
+        }
+
+        private void ConfigureProductTable(ModelBuilder modelBuilder)
+        {
+            var entityBuilder = modelBuilder.Entity<Product>();
+
+            entityBuilder.HasKey(x => x.Id).ForSqlServerIsClustered(true);
+            entityBuilder.Property(x => x.Id).UseSqlServerIdentityColumn();
+            entityBuilder.Property(x => x.Name).IsRequired(true).HasMaxLength(EntityConstraints.Product.NameMaxLength);
+            entityBuilder.Property(x => x.RowVersion).IsRowVersion();
+        }
+
+        private void ConfigureProductReservationsTable(ModelBuilder modelBuilder)
+        {
+            var entityBuilder = modelBuilder.Entity<ProductReservation>();
+
+            entityBuilder.HasKey(x => x.Id).ForSqlServerIsClustered(true);
+            entityBuilder.Property(x => x.Id).UseSqlServerIdentityColumn();
+            entityBuilder.Property(x => x.TransactionId).IsRequired(true).HasMaxLength(EntityConstraints.TransactionIdMaxLength);
+            entityBuilder.HasOne(x => x.Product).WithMany(x => x.Reservations).HasForeignKey(x => x.ProductId);
+        }
+
+        private void ConfigureProductStockAddedEventsTable(ModelBuilder modelBuilder)
+        {
+            var entityBuilder = modelBuilder.Entity<ProductStockAddedEvent>();
+
+            entityBuilder.HasKey(x => x.Id).ForSqlServerIsClustered(true);
+            entityBuilder.Property(x => x.Id).UseSqlServerIdentityColumn();
+            entityBuilder.Property(x => x.TransactionId).IsRequired(true).HasMaxLength(EntityConstraints.TransactionIdMaxLength);
+            entityBuilder.HasOne(x => x.Product).WithMany(x => x.ProductStockAddedEvents).HasForeignKey(x => x.ProductId);
+        }
+
+        private void ConfigureProductStockRemovedEventsTable(ModelBuilder modelBuilder)
+        {
+            var entityBuilder = modelBuilder.Entity<ProductStockRemovedEvent>();
+
+            entityBuilder.HasKey(x => x.Id).ForSqlServerIsClustered(true);
+            entityBuilder.Property(x => x.Id).UseSqlServerIdentityColumn();
+            entityBuilder.Property(x => x.TransactionId).IsRequired(true).HasMaxLength(EntityConstraints.TransactionIdMaxLength);
+            entityBuilder.HasOne(x => x.Product).WithMany(x => x.ProductStockRemovedEvents).HasForeignKey(x => x.ProductId);
+        }
+
+        private void ConfigureProductTakenOutEventsTable(ModelBuilder modelBuilder)
+        {
+            var entityBuilder = modelBuilder.Entity<ProductTakenOutEvent>();
+
+            entityBuilder.HasKey(x => x.Id).ForSqlServerIsClustered(true);
+            entityBuilder.Property(x => x.Id).UseSqlServerIdentityColumn();
+            entityBuilder.Property(x => x.TransactionId).IsRequired(true).HasMaxLength(EntityConstraints.TransactionIdMaxLength);
+            entityBuilder.HasOne(x => x.Product).WithMany(x => x.ProductTakenOutEvents).HasForeignKey(x => x.ProductId);
+        }
+
+        private void ConfigureProductBroughtBackEventsTable(ModelBuilder modelBuilder)
+        {
+            var entityBuilder = modelBuilder.Entity<ProductBroughtBackEvent>();
+
+            entityBuilder.HasKey(x => x.Id).ForSqlServerIsClustered(true);
+            entityBuilder.Property(x => x.Id).UseSqlServerIdentityColumn();
+            entityBuilder.Property(x => x.TransactionId).IsRequired(true).HasMaxLength(EntityConstraints.TransactionIdMaxLength);
+            entityBuilder.HasOne(x => x.Product).WithMany(x => x.ProductBroughtBackEvents).HasForeignKey(x => x.ProductId);
         }
     }
 }
