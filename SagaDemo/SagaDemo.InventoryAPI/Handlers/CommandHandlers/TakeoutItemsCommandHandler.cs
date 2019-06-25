@@ -14,9 +14,9 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
     public class TakeoutItemsCommandHandler : ITakeoutItemsCommandHandler
     {
         private readonly IInventoryDbContextFactory dbContextFactory;
-        private readonly IInventoryBatchCommandValidator<TakeoutItemsCommand> requestValidator;
+        private readonly ITakeoutItemsCommandValidator requestValidator;
 
-        public TakeoutItemsCommandHandler(IInventoryDbContextFactory dbContextFactory, IInventoryBatchCommandValidator<TakeoutItemsCommand> requestValidator)
+        public TakeoutItemsCommandHandler(IInventoryDbContextFactory dbContextFactory, ITakeoutItemsCommandValidator requestValidator)
         {
             this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
             this.requestValidator = requestValidator ?? throw new ArgumentNullException(nameof(requestValidator));
@@ -26,9 +26,13 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
         {
             using (var context = dbContextFactory.CreateDbContext())
             {
-                var productLookup = await GetProductLookupAsync(context, command, cancellationToken).ConfigureAwait(false);
+                var productIds = command.Items.Select(i => i.ProductId).ToList();
 
-                requestValidator.ValidateAndThrow(command, productLookup);
+                var productLookup = await GetProductLookupAsync(context, productIds, cancellationToken).ConfigureAwait(false);
+                var reservationLookup = await GetReservationLookupAsync(context, command.TransactionId, cancellationToken).ConfigureAwait(false);
+                var availableCountLookup = await GetAvailabileCountLookupAsync(context, productIds, cancellationToken).ConfigureAwait(false);
+
+                requestValidator.ValidateAndThrow(command, productLookup, reservationLookup, availableCountLookup);
 
                 // This is for idempotence. We check only the TransactionId because we assume that if one item in a transaction is taken out then so are the others.
                 var itemsAlreadyTakenOut = await context.ProductTakenOutEvents.AnyAsync(evt => evt.TransactionId == command.TransactionId, cancellationToken).ConfigureAwait(false);
@@ -51,10 +55,8 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
             }
         }
 
-        private static async Task<IDictionary<int, Product>> GetProductLookupAsync(InventoryDbContext context, TakeoutItemsCommand command, CancellationToken cancellationToken)
+        private static async Task<IDictionary<int, Product>> GetProductLookupAsync(InventoryDbContext context, IEnumerable<int> productIds, CancellationToken cancellationToken)
         {
-            var productIds = command.Items.Select(i => i.ProductId);
-
             var products = await context
                 .Products
                 .AsNoTracking()
@@ -63,6 +65,43 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
                 .ConfigureAwait(false);
 
             return products.ToDictionary(p => p.Id);
+        }
+
+        private static async Task<IDictionary<int, ProductReservation>> GetReservationLookupAsync(InventoryDbContext context, string transactionId, CancellationToken cancellationToken)
+        {
+            var reservations = await context.ProductReservations.AsNoTracking().Where(r => r.TransactionId == transactionId).ToListAsync(cancellationToken).ConfigureAwait(false);
+
+            return reservations.ToDictionary(r => r.ProductId);
+        }
+
+        private static async Task<IDictionary<int, int>> GetAvailabileCountLookupAsync(InventoryDbContext context, IEnumerable<int> productIds, CancellationToken cancellationToken)
+        {
+            var addedStocks = context
+                .ProductStockAddedEvents
+                .Select(e => new { e.ProductId, e.Quantity });
+
+            var removedStocks = context
+                .ProductStockRemovedEvents
+                .Select(e => new { e.ProductId, Quantity = -e.Quantity });
+
+            var itemsTakenOut = context
+                .ProductTakenOutEvents
+                .Select(e => new { e.ProductId, Quantity = -e.Quantity });
+
+            var itemsBroughtBack = context
+                .ProductBroughtBackEvents
+                .Select(e => new { e.ProductId, e.Quantity });
+
+            var allStockChanges = await addedStocks
+                .Concat(removedStocks)
+                .Concat(itemsTakenOut)
+                .Concat(itemsBroughtBack)
+                .Where(evt => productIds.Contains(evt.ProductId))
+                .GroupBy(s => s.ProductId, (key, elements) => new { ProductId = key, Quantity = elements.Sum(e => e.Quantity) })
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            return allStockChanges.ToDictionary(grp => grp.ProductId, grp => grp.Quantity);
         }
     }
 }

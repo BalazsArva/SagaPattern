@@ -18,26 +18,34 @@ namespace SagaDemo.InventoryAPI.Validation.Validators
                 {
                     RuleFor(x => x.Quantity)
                         .GreaterThan(0)
-                        .WithMessage(ValidationMessages.QuantityMustBePositive);
-
-                    RuleFor(x => x.Quantity)
-                        .Must((command, quantity, validationContext) =>
+                        .WithMessage(ValidationMessages.QuantityMustBePositive)
+                        .DependentRules(() =>
                         {
-                            // TODO: Validate that appropriate reservations exist (using the transaction id). Remove the available stocks validation from the reservation validator, since that is only a reservation. Availability must be validated at takeout.
-                            return true;
-                        })
-                        .When(cmd => cmd.Quantity > 0)
-                        .WithMessage(ValidationMessages.QuantityExceedsAvailable);
+                            RuleFor(x => x.Quantity)
+                                .Must((command, quantity, context) =>
+                                {
+                                    var reservationDbEntry = context.GetProductReservationFromLookup(command.ProductId);
+                                    if (reservationDbEntry == null)
+                                    {
+                                        return false;
+                                    }
 
-                    RuleFor(x => x.Quantity)
-                        .Must((command, quantity, validationContext) =>
-                        {
-                            // TODO: Validate that appropriate reservations exist (using the transaction id).
-                            return true;
-                        })
-                        .When(cmd => cmd.Quantity > 0)
-                        // TODO: Change message to match new semantics
-                        .WithMessage(ValidationMessages.QuantityExceedsReservations);
+                                    return reservationDbEntry.Quantity == quantity;
+                                })
+                                .WithMessage(ValidationMessages.QuantityMustMeetReservations);
+
+                            RuleFor(x => x.Quantity)
+                                .Must((command, quantity, context) =>
+                                {
+                                    if (context.TryGetAvailableCountFromLookup(command.ProductId, out var availableCount))
+                                    {
+                                        return availableCount >= quantity;
+                                    }
+
+                                    return false;
+                                })
+                                .WithMessage(ValidationMessages.QuantityExceedsAvailable);
+                        });
                 });
         }
     }
