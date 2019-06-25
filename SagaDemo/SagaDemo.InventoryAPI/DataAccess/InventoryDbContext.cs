@@ -48,6 +48,8 @@ namespace SagaDemo.InventoryAPI.DataAccess
         {
             var entityBuilder = modelBuilder.Entity<ProductReservation>();
 
+            entityBuilder.ForSqlServerHasIndex(x => x.TransactionId).IsUnique(false);
+
             entityBuilder.HasKey(x => x.Id).ForSqlServerIsClustered(true);
             entityBuilder.Property(x => x.Id).UseSqlServerIdentityColumn();
             entityBuilder.Property(x => x.TransactionId).IsRequired(true).HasMaxLength(EntityConstraints.TransactionIdMaxLength);
@@ -57,6 +59,8 @@ namespace SagaDemo.InventoryAPI.DataAccess
         private void ConfigureProductStockAddedEventsTable(ModelBuilder modelBuilder)
         {
             var entityBuilder = modelBuilder.Entity<ProductStockAddedEvent>();
+
+            entityBuilder.ForSqlServerHasIndex(x => x.TransactionId).IsUnique(false);
 
             entityBuilder.HasKey(x => x.Id).ForSqlServerIsClustered(true);
             entityBuilder.Property(x => x.Id).UseSqlServerIdentityColumn();
@@ -68,6 +72,8 @@ namespace SagaDemo.InventoryAPI.DataAccess
         {
             var entityBuilder = modelBuilder.Entity<ProductStockRemovedEvent>();
 
+            entityBuilder.ForSqlServerHasIndex(x => x.TransactionId).IsUnique(false);
+
             entityBuilder.HasKey(x => x.Id).ForSqlServerIsClustered(true);
             entityBuilder.Property(x => x.Id).UseSqlServerIdentityColumn();
             entityBuilder.Property(x => x.TransactionId).IsRequired(true).HasMaxLength(EntityConstraints.TransactionIdMaxLength);
@@ -78,6 +84,8 @@ namespace SagaDemo.InventoryAPI.DataAccess
         {
             var entityBuilder = modelBuilder.Entity<ProductTakenOutEvent>();
 
+            entityBuilder.ForSqlServerHasIndex(x => x.TransactionId).IsUnique(false);
+
             entityBuilder.HasKey(x => x.Id).ForSqlServerIsClustered(true);
             entityBuilder.Property(x => x.Id).UseSqlServerIdentityColumn();
             entityBuilder.Property(x => x.TransactionId).IsRequired(true).HasMaxLength(EntityConstraints.TransactionIdMaxLength);
@@ -87,6 +95,8 @@ namespace SagaDemo.InventoryAPI.DataAccess
         private void ConfigureProductBroughtBackEventsTable(ModelBuilder modelBuilder)
         {
             var entityBuilder = modelBuilder.Entity<ProductBroughtBackEvent>();
+
+            entityBuilder.ForSqlServerHasIndex(x => x.TransactionId).IsUnique(false);
 
             entityBuilder.HasKey(x => x.Id).ForSqlServerIsClustered(true);
             entityBuilder.Property(x => x.Id).UseSqlServerIdentityColumn();
