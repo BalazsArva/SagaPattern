@@ -28,11 +28,11 @@ namespace SagaDemo.InventoryAPI.ApiClient
         System.Threading.Tasks.Task<SwaggerResponse<GetProductByIdResponse>> GetItemAsync(int id, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<SwaggerResponse> ReserveItemsAsync(AddReservationsRequest request);
+        System.Threading.Tasks.Task<SwaggerResponse> ReserveItemsAsync(string transactionId, AddReservationsRequest request);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        System.Threading.Tasks.Task<SwaggerResponse> ReserveItemsAsync(AddReservationsRequest request, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<SwaggerResponse> ReserveItemsAsync(string transactionId, AddReservationsRequest request, System.Threading.CancellationToken cancellationToken);
     
     }
     
@@ -246,17 +246,18 @@ namespace SagaDemo.InventoryAPI.ApiClient
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<SwaggerResponse> ReserveItemsAsync(AddReservationsRequest request)
+        public System.Threading.Tasks.Task<SwaggerResponse> ReserveItemsAsync(string transactionId, AddReservationsRequest request)
         {
-            return ReserveItemsAsync(request, System.Threading.CancellationToken.None);
+            return ReserveItemsAsync(transactionId, request, System.Threading.CancellationToken.None);
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        public async System.Threading.Tasks.Task<SwaggerResponse> ReserveItemsAsync(AddReservationsRequest request, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<SwaggerResponse> ReserveItemsAsync(string transactionId, AddReservationsRequest request, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append("api/Catalog/reservations");
+            urlBuilder_.Append("api/Catalog/{transactionId}/reserve");
+            urlBuilder_.Replace("{transactionId}", System.Uri.EscapeDataString(ConvertToString(transactionId, System.Globalization.CultureInfo.InvariantCulture)));
     
             var client_ = _httpClient;
             try
@@ -960,17 +961,13 @@ namespace SagaDemo.InventoryAPI.ApiClient
     public partial class AddReservationsRequest 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public AddReservationsRequest(System.Collections.Generic.ICollection<AddReservationRequest> @items, string @transactionId)
+        public AddReservationsRequest(System.Collections.Generic.ICollection<AddReservationRequest> @items)
         {
             this.Items = @items;
-            this.TransactionId = @transactionId;
         }
     
         [Newtonsoft.Json.JsonProperty("items", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<AddReservationRequest> Items { get; }
-    
-        [Newtonsoft.Json.JsonProperty("transactionId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string TransactionId { get; }
     
         public string ToJson() 
         {

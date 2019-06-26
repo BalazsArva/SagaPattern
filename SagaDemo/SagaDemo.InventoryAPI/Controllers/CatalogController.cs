@@ -58,12 +58,12 @@ namespace SagaDemo.InventoryAPI.Controllers
             return Ok(response);
         }
 
-        [HttpPost("reservations")]
+        [HttpPost("{transactionId}/reserve")]
         [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(void))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
-        public async Task<IActionResult> ReserveItems(AddReservationsRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> ReserveItems(string transactionId, AddReservationsRequest request, CancellationToken cancellationToken)
         {
-            var command = ApiContractMapper.ToServiceCommand(request);
+            var command = ApiContractMapper.ToServiceCommand(transactionId, request);
 
             await addProductReservationsCommandHandler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
 

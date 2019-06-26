@@ -16,14 +16,14 @@ namespace SagaDemo.InventoryAPI.Mappers
             return new CreateProductCommand(apiRequest.Name, apiRequest.PointsCost);
         }
 
-        public static AddReservationsCommand ToServiceCommand(AddReservationsRequest apiRequest)
+        public static AddReservationsCommand ToServiceCommand(string transactionId, AddReservationsRequest apiRequest)
         {
             if (apiRequest == null)
             {
                 return null;
             }
 
-            return new AddReservationsCommand(apiRequest.Items.Select(r => ToServiceCommand(r)), apiRequest.TransactionId);
+            return new AddReservationsCommand(apiRequest.Items.Select(r => ToServiceCommand(r)), transactionId);
         }
 
         public static AddReservationCommand ToServiceCommand(AddReservationRequest apiRequest)
