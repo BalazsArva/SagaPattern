@@ -20,7 +20,6 @@ namespace SagaDemo.LoyaltyPointsAPI.DataAccess
         {
             base.OnModelCreating(modelBuilder);
 
-            // TODO: Extract common properties of these entities into a base class
             SetupPointsConsumedEvent(modelBuilder);
             SetupPointsEarnedEvent(modelBuilder);
             SetupPointsRefundedEvent(modelBuilder);

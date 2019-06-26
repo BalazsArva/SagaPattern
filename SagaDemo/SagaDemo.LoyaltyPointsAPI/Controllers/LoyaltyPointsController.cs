@@ -46,7 +46,6 @@ namespace SagaDemo.LoyaltyPointsAPI.Controllers
         {
             var command = new RefundPointsCommand(transactionId);
 
-            // TODO: Consider returning 404 instead of 400 when the consume event does not exist.
             await refundPointsCommandHandler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
 
             return NoContent();

@@ -12,14 +12,14 @@ namespace SagaDemo.InventoryAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class StockController : ControllerBase
+    public class StocksController : ControllerBase
     {
         private readonly IAddStocksCommandHandler addStocksCommandHandler;
         private readonly IRemoveStocksCommandHandler removeStocksCommandHandler;
         private readonly ITakeoutItemsCommandHandler takeoutItemsCommandHandler;
         private readonly IBringbackItemsCommandHandler bringbackItemsCommandHandler;
 
-        public StockController(
+        public StocksController(
             IAddStocksCommandHandler addStocksCommandHandler,
             IRemoveStocksCommandHandler removeStocksCommandHandler,
             ITakeoutItemsCommandHandler takeoutItemsCommandHandler,

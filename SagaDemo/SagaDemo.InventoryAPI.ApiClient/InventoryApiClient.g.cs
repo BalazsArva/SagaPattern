@@ -515,7 +515,7 @@ namespace SagaDemo.InventoryAPI.ApiClient
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NSwag", "12.2.4.0 (NJsonSchema v9.13.36.0 (Newtonsoft.Json v11.0.0.0))")]
-    public partial interface IStockApiClient
+    public partial interface IStocksApiClient
     {
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         System.Threading.Tasks.Task<SwaggerResponse> AddStocksAsync(AddStocksRequest request);
@@ -548,12 +548,12 @@ namespace SagaDemo.InventoryAPI.ApiClient
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NSwag", "12.2.4.0 (NJsonSchema v9.13.36.0 (Newtonsoft.Json v11.0.0.0))")]
-    public partial class StockApiClient : IStockApiClient
+    public partial class StocksApiClient : IStocksApiClient
     {
         private System.Net.Http.HttpClient _httpClient;
         private System.Lazy<Newtonsoft.Json.JsonSerializerSettings> _settings;
     
-        public StockApiClient(System.Net.Http.HttpClient httpClient)
+        public StocksApiClient(System.Net.Http.HttpClient httpClient)
         {
             _httpClient = httpClient; 
             _settings = new System.Lazy<Newtonsoft.Json.JsonSerializerSettings>(() => 
@@ -582,7 +582,7 @@ namespace SagaDemo.InventoryAPI.ApiClient
         public async System.Threading.Tasks.Task<SwaggerResponse> AddStocksAsync(AddStocksRequest request, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append("api/Stock");
+            urlBuilder_.Append("api/Stocks");
     
             var client_ = _httpClient;
             try
@@ -663,7 +663,7 @@ namespace SagaDemo.InventoryAPI.ApiClient
         public async System.Threading.Tasks.Task<SwaggerResponse> RemoveStocksAsync(RemoveStocksRequest request, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append("api/Stock");
+            urlBuilder_.Append("api/Stocks");
     
             var client_ = _httpClient;
             try
@@ -744,7 +744,7 @@ namespace SagaDemo.InventoryAPI.ApiClient
         public async System.Threading.Tasks.Task<SwaggerResponse> TakeoutItemAsync(string transactionId, TakeoutItemsRequest request, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append("api/Stock/{transactionId}/takeout");
+            urlBuilder_.Append("api/Stocks/{transactionId}/takeout");
             urlBuilder_.Replace("{transactionId}", System.Uri.EscapeDataString(ConvertToString(transactionId, System.Globalization.CultureInfo.InvariantCulture)));
     
             var client_ = _httpClient;
@@ -826,7 +826,7 @@ namespace SagaDemo.InventoryAPI.ApiClient
         public async System.Threading.Tasks.Task<SwaggerResponse> BringbackItemAsync(string transactionId, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append("api/Stock/{transactionId}/bringback");
+            urlBuilder_.Append("api/Stocks/{transactionId}/bringback");
             urlBuilder_.Replace("{transactionId}", System.Uri.EscapeDataString(ConvertToString(transactionId, System.Globalization.CultureInfo.InvariantCulture)));
     
             var client_ = _httpClient;
