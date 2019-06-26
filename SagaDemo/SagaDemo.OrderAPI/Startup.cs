@@ -20,7 +20,7 @@ namespace SagaDemo.OrderAPI
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
-            services.AddOrderApiServices();
+            services.AddOrderApiServices(Configuration);
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
