@@ -16,6 +16,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SagaDemo.Common.Errors", "SagaDemo.Common.Errors\SagaDemo.Common.Errors.csproj", "{2DF62ED9-A5DD-46B3-821A-65814E993CA5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SagaDemo.LoyaltyPointsAPI.ApiClient", "SagaDemo.LoyaltyPointsAPI.ApiClient\SagaDemo.LoyaltyPointsAPI.ApiClient.csproj", "{701B3083-3E47-4136-9740-776F6C258ACF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{67909C05-9475-4234-8C53-FA96E94E7EF7} = {67909C05-9475-4234-8C53-FA96E94E7EF7}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "APIs", "APIs", "{E8AD692B-0AB6-44A7-9F51-CD5D932B03FB}"
 EndProject
@@ -24,14 +27,20 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API Clients", "API Clients", "{C8C6DD59-19F5-4628-A9F3-14F352BB8A37}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SagaDemo.InventoryAPI.ApiClient", "SagaDemo.InventoryAPI.ApiClient\SagaDemo.InventoryAPI.ApiClient.csproj", "{91BF081C-C596-438B-BF66-C485ECC7A4E3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3364C9A4-E719-40E5-BC26-C9BA1649906D} = {3364C9A4-E719-40E5-BC26-C9BA1649906D}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SagaDemo.Common.DataAccess.RavenDb", "SagaDemo.Common.DataAccess.RavenDb\SagaDemo.Common.DataAccess.RavenDb.csproj", "{AEA7AEB9-4C48-4C81-AB62-216C1089E2A6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SagaDemo.DeliveryAPI.ApiClient", "SagaDemo.DeliveryAPI.ApiClient\SagaDemo.DeliveryAPI.ApiClient.csproj", "{BD2F65EE-AE53-47EB-8900-0A9B7340B4E3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{19E3257D-DB01-484E-A6CF-A7B76A0C8A6E} = {19E3257D-DB01-484E-A6CF-A7B76A0C8A6E}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SagaDemo.Common.Validation", "SagaDemo.Common.Validation\SagaDemo.Common.Validation.csproj", "{F4D7E2B9-5795-4AD6-83D5-ADDDF794AA77}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SagaDemo.Common.DataAccess.EntityFrameworkCore", "SagaDemo.Common.DataAccess.EntityFrameworkCore\SagaDemo.Common.DataAccess.EntityFrameworkCore.csproj", "{84B89D87-68F7-47C5-851D-8D2CFEC7B1A8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SagaDemo.Common.DataAccess.EntityFrameworkCore", "SagaDemo.Common.DataAccess.EntityFrameworkCore\SagaDemo.Common.DataAccess.EntityFrameworkCore.csproj", "{84B89D87-68F7-47C5-851D-8D2CFEC7B1A8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
