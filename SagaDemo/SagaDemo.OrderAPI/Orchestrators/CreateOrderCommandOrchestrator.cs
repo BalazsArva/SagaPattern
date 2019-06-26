@@ -43,13 +43,20 @@ namespace SagaDemo.OrderAPI.Orchestrators
 
         public async Task HandleAsync(CreateOrderCommand command, CancellationToken cancellationToken)
         {
+            var totalCost = 0;
             var transactionId = guidProvider.GenerateGuidString();
             var userId = command.UserId;
 
             await CreateDocumentIfNotExistsAsync(transactionId, cancellationToken).ConfigureAwait(false);
 
-            // TODO: Create an endpoint in the inventory api to get the cost.
-            var totalCost = 100;
+            // TODO: Consider batching this somehow.
+            // TODO: Error handling for the API call. (Can use Polly policies once they are set up.)
+            foreach (var orderItem in command.Order.Items)
+            {
+                var product = await catalogApiClient.GetItemAsync(orderItem.ProductId, cancellationToken).ConfigureAwait(false);
+
+                totalCost += product.Result.PointsCost;
+            }
 
             await ConsumeLoyaltyPointsAsync(transactionId, totalCost, userId, cancellationToken).ConfigureAwait(false);
 
@@ -71,32 +78,34 @@ namespace SagaDemo.OrderAPI.Orchestrators
                 var transactionDocumentId = DocumentIdHelper.GetDocumentId<OrderTransaction>(session, transactionId);
                 var transactionDocument = await session.LoadAsync<OrderTransaction>(transactionDocumentId, cancellationToken).ConfigureAwait(false);
 
-                if (transactionDocument == null)
+                if (transactionDocument != null)
                 {
-                    transactionDocument = new OrderTransaction
-                    {
-                        Id = transactionDocumentId,
-                        TransactionStatus = TransactionStatus.NotStarted,
-                        LoyaltyPointsConsumptionStepDetails = new StepDetails
-                        {
-                            Attempts = 0,
-                            StepStatus = StepStatus.NotStarted
-                        },
-                        DeliveryCreationStepDetails = new StepDetails
-                        {
-                            Attempts = 0,
-                            StepStatus = StepStatus.NotStarted
-                        },
-                        InventoryReservationStepDetails = new StepDetails
-                        {
-                            Attempts = 0,
-                            StepStatus = StepStatus.NotStarted
-                        }
-                    };
-
-                    await session.StoreAsync(transactionDocument, cancellationToken).ConfigureAwait(false);
-                    await session.SaveChangesAsync().ConfigureAwait(false);
+                    return;
                 }
+
+                transactionDocument = new OrderTransaction
+                {
+                    Id = transactionDocumentId,
+                    TransactionStatus = TransactionStatus.NotStarted,
+                    LoyaltyPointsConsumptionStepDetails = new StepDetails
+                    {
+                        Attempts = 0,
+                        StepStatus = StepStatus.NotStarted
+                    },
+                    DeliveryCreationStepDetails = new StepDetails
+                    {
+                        Attempts = 0,
+                        StepStatus = StepStatus.NotStarted
+                    },
+                    InventoryReservationStepDetails = new StepDetails
+                    {
+                        Attempts = 0,
+                        StepStatus = StepStatus.NotStarted
+                    }
+                };
+
+                await session.StoreAsync(transactionDocument, cancellationToken).ConfigureAwait(false);
+                await session.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
