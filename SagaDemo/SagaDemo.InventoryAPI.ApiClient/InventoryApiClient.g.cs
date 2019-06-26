@@ -380,11 +380,11 @@ namespace SagaDemo.InventoryAPI.ApiClient
         System.Threading.Tasks.Task<SwaggerResponse> RemoveStocksAsync(RemoveStocksRequest request, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<SwaggerResponse> TakeoutItemAsync(TakeoutItemsRequest request);
+        System.Threading.Tasks.Task<SwaggerResponse> TakeoutItemAsync(string transactionId, TakeoutItemsRequest request);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        System.Threading.Tasks.Task<SwaggerResponse> TakeoutItemAsync(TakeoutItemsRequest request, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<SwaggerResponse> TakeoutItemAsync(string transactionId, TakeoutItemsRequest request, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         System.Threading.Tasks.Task<SwaggerResponse> BringbackItemAsync(string transactionId);
@@ -430,7 +430,7 @@ namespace SagaDemo.InventoryAPI.ApiClient
         public async System.Threading.Tasks.Task<SwaggerResponse> AddStocksAsync(AddStocksRequest request, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append("api/Stock/stocks");
+            urlBuilder_.Append("api/Stock");
     
             var client_ = _httpClient;
             try
@@ -511,7 +511,7 @@ namespace SagaDemo.InventoryAPI.ApiClient
         public async System.Threading.Tasks.Task<SwaggerResponse> RemoveStocksAsync(RemoveStocksRequest request, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append("api/Stock/stocks");
+            urlBuilder_.Append("api/Stock");
     
             var client_ = _httpClient;
             try
@@ -582,17 +582,18 @@ namespace SagaDemo.InventoryAPI.ApiClient
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<SwaggerResponse> TakeoutItemAsync(TakeoutItemsRequest request)
+        public System.Threading.Tasks.Task<SwaggerResponse> TakeoutItemAsync(string transactionId, TakeoutItemsRequest request)
         {
-            return TakeoutItemAsync(request, System.Threading.CancellationToken.None);
+            return TakeoutItemAsync(transactionId, request, System.Threading.CancellationToken.None);
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        public async System.Threading.Tasks.Task<SwaggerResponse> TakeoutItemAsync(TakeoutItemsRequest request, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<SwaggerResponse> TakeoutItemAsync(string transactionId, TakeoutItemsRequest request, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append("api/Stock/takeout");
+            urlBuilder_.Append("api/Stock/{transactionId}/takeout");
+            urlBuilder_.Replace("{transactionId}", System.Uri.EscapeDataString(ConvertToString(transactionId, System.Globalization.CultureInfo.InvariantCulture)));
     
             var client_ = _httpClient;
             try
@@ -1127,17 +1128,13 @@ namespace SagaDemo.InventoryAPI.ApiClient
     public partial class TakeoutItemsRequest 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public TakeoutItemsRequest(System.Collections.Generic.ICollection<TakeoutItemRequest> @items, string @transactionId)
+        public TakeoutItemsRequest(System.Collections.Generic.ICollection<TakeoutItemRequest> @items)
         {
             this.Items = @items;
-            this.TransactionId = @transactionId;
         }
     
         [Newtonsoft.Json.JsonProperty("items", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<TakeoutItemRequest> Items { get; }
-    
-        [Newtonsoft.Json.JsonProperty("transactionId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string TransactionId { get; }
     
         public string ToJson() 
         {
