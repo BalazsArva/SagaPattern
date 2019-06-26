@@ -20,18 +20,21 @@ namespace SagaDemo.OrderAPI.Orchestrators
         private readonly IDocumentStore documentStore;
         private readonly ILoyaltyPointsApiClient loyaltyPointsApiClient;
         private readonly ICatalogApiClient catalogApiClient;
+        private readonly IReservationsApiClient reservationsApiClient;
         private readonly IDeliveryApiClient deliveryApiClient;
 
         public CreateOrderCommandOrchestrator(
             IDocumentStore documentStore,
             ILoyaltyPointsApiClient loyaltyPointsApiClient,
             ICatalogApiClient catalogApiClient,
+            IReservationsApiClient reservationsApiClient,
             IDeliveryApiClient deliveryApiClient)
         {
             this.documentStore = documentStore ?? throw new ArgumentNullException(nameof(documentStore));
             this.loyaltyPointsApiClient = loyaltyPointsApiClient ?? throw new ArgumentNullException(nameof(loyaltyPointsApiClient));
             this.catalogApiClient = catalogApiClient ?? throw new ArgumentNullException(nameof(catalogApiClient));
             this.deliveryApiClient = deliveryApiClient ?? throw new ArgumentNullException(nameof(deliveryApiClient));
+            this.reservationsApiClient = reservationsApiClient ?? throw new ArgumentNullException(nameof(reservationsApiClient));
         }
 
         public async Task HandleAsync(CreateOrderCommand command, CancellationToken cancellationToken)
@@ -49,7 +52,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
 
             var reservationsRequest = ReservationsMapper.ToReservationsApiContract(command.Order);
 
-            await catalogApiClient.ReserveItemsAsync(transactionId, reservationsRequest, cancellationToken).ConfigureAwait(false);
+            await reservationsApiClient.ReserveItemsAsync(transactionId, reservationsRequest, cancellationToken).ConfigureAwait(false);
 
             var address = AddressMapper.ToDeliveryApiContract(command.Address);
 

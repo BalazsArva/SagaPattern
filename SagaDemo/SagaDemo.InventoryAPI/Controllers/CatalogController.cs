@@ -18,16 +18,13 @@ namespace SagaDemo.InventoryAPI.Controllers
     {
         private readonly ICreateProductCommandHandler createProductCommandHandler;
         private readonly IGetProductByIdRequestHandler getProductByIdRequestHandler;
-        private readonly IAddReservationsCommandHandler addProductReservationsCommandHandler;
 
         public CatalogController(
             ICreateProductCommandHandler createProductCommandHandler,
-            IGetProductByIdRequestHandler getProductByIdRequestHandler,
-            IAddReservationsCommandHandler addProductReservationsCommandHandler)
+            IGetProductByIdRequestHandler getProductByIdRequestHandler)
         {
             this.createProductCommandHandler = createProductCommandHandler ?? throw new ArgumentNullException(nameof(createProductCommandHandler));
             this.getProductByIdRequestHandler = getProductByIdRequestHandler ?? throw new ArgumentNullException(nameof(getProductByIdRequestHandler));
-            this.addProductReservationsCommandHandler = addProductReservationsCommandHandler ?? throw new ArgumentNullException(nameof(addProductReservationsCommandHandler));
         }
 
         [HttpPost]
@@ -56,18 +53,6 @@ namespace SagaDemo.InventoryAPI.Controllers
             }
 
             return Ok(response);
-        }
-
-        [HttpPost("{transactionId}/reserve")]
-        [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(void))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
-        public async Task<IActionResult> ReserveItems(string transactionId, AddReservationsRequest request, CancellationToken cancellationToken)
-        {
-            var command = ApiContractMapper.ToServiceCommand(transactionId, request);
-
-            await addProductReservationsCommandHandler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
-
-            return NoContent();
         }
     }
 }
