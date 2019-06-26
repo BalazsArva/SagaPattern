@@ -12,11 +12,13 @@ using SagaDemo.LoyaltyPointsAPI.ApiClient;
 using SagaDemo.OrderAPI.Entitites;
 using SagaDemo.OrderAPI.Mappers;
 using SagaDemo.OrderAPI.Operations.Commands;
+using SagaDemo.OrderAPI.Providers;
 
 namespace SagaDemo.OrderAPI.Orchestrators
 {
     public class CreateOrderCommandOrchestrator
     {
+        private readonly IGuidProvider guidProvider;
         private readonly IDocumentStore documentStore;
         private readonly ILoyaltyPointsApiClient loyaltyPointsApiClient;
         private readonly ICatalogApiClient catalogApiClient;
@@ -24,12 +26,14 @@ namespace SagaDemo.OrderAPI.Orchestrators
         private readonly IDeliveryApiClient deliveryApiClient;
 
         public CreateOrderCommandOrchestrator(
+            IGuidProvider guidProvider,
             IDocumentStore documentStore,
             ILoyaltyPointsApiClient loyaltyPointsApiClient,
             ICatalogApiClient catalogApiClient,
             IReservationsApiClient reservationsApiClient,
             IDeliveryApiClient deliveryApiClient)
         {
+            this.guidProvider = guidProvider ?? throw new ArgumentNullException(nameof(guidProvider));
             this.documentStore = documentStore ?? throw new ArgumentNullException(nameof(documentStore));
             this.loyaltyPointsApiClient = loyaltyPointsApiClient ?? throw new ArgumentNullException(nameof(loyaltyPointsApiClient));
             this.catalogApiClient = catalogApiClient ?? throw new ArgumentNullException(nameof(catalogApiClient));
@@ -39,8 +43,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
 
         public async Task HandleAsync(CreateOrderCommand command, CancellationToken cancellationToken)
         {
-            // TODO: Move to a provider for testability
-            var transactionId = Guid.NewGuid().ToString();
+            var transactionId = guidProvider.GenerateGuidString();
             var userId = command.UserId;
 
             await CreateDocumentIfNotExistsAsync(transactionId, cancellationToken).ConfigureAwait(false);
