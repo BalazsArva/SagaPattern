@@ -108,9 +108,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
 
                 try
                 {
-                    // TODO: Should create and endpoint which can refund points based on transactionId.
-                    // This will require event sourcing-like solution, but makes it possible to detect multiple refund requests and handle them idempotently.
-                    await loyaltyPointsApiClient.ConsumePointsAsync(new ConsumePointsCommand(totalCost, transactionId, userId), cancellationToken).ConfigureAwait(false);
+                    await loyaltyPointsApiClient.ConsumePointsAsync(transactionId, new ConsumePointsRequest(totalCost, userId), cancellationToken).ConfigureAwait(false);
 
                     transactionDocument.LoyaltyPointsConsumptionStepDetails.StepStatus = StepStatus.Completed;
                 }
@@ -175,7 +173,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
                 var changeVector = session.Advanced.GetChangeVectorFor(transactionDocument);
 
                 // TODO: Handle errors. E.g. no corresponsing consumption event found can be ignored.
-                await loyaltyPointsApiClient.RefundPointsAsync(new RefundPointsCommand(transactionId), cancellationToken).ConfigureAwait(false);
+                await loyaltyPointsApiClient.RefundPointsAsync(transactionId, cancellationToken).ConfigureAwait(false);
 
                 transactionDocument.LoyaltyPointsConsumptionStepDetails.StepStatus = StepStatus.RolledBack;
 

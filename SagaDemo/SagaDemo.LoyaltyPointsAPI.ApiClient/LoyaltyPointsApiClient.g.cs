@@ -14,25 +14,25 @@ namespace SagaDemo.LoyaltyPointsAPI.ApiClient
     public partial interface ILoyaltyPointsApiClient
     {
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<SwaggerResponse> EarnPointsAsync(EarnPointsCommand command);
+        System.Threading.Tasks.Task<SwaggerResponse> EarnPointsAsync(string transactionId, EarnPointsRequest request);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        System.Threading.Tasks.Task<SwaggerResponse> EarnPointsAsync(EarnPointsCommand command, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<SwaggerResponse> EarnPointsAsync(string transactionId, EarnPointsRequest request, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<SwaggerResponse> RefundPointsAsync(RefundPointsCommand command);
-    
-        /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        System.Threading.Tasks.Task<SwaggerResponse> RefundPointsAsync(RefundPointsCommand command, System.Threading.CancellationToken cancellationToken);
-    
-        /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<SwaggerResponse> ConsumePointsAsync(ConsumePointsCommand command);
+        System.Threading.Tasks.Task<SwaggerResponse> RefundPointsAsync(string transactionId);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        System.Threading.Tasks.Task<SwaggerResponse> ConsumePointsAsync(ConsumePointsCommand command, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<SwaggerResponse> RefundPointsAsync(string transactionId, System.Threading.CancellationToken cancellationToken);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<SwaggerResponse> ConsumePointsAsync(string transactionId, ConsumePointsRequest request);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        System.Threading.Tasks.Task<SwaggerResponse> ConsumePointsAsync(string transactionId, ConsumePointsRequest request, System.Threading.CancellationToken cancellationToken);
     
     }
     
@@ -61,24 +61,25 @@ namespace SagaDemo.LoyaltyPointsAPI.ApiClient
         partial void ProcessResponse(System.Net.Http.HttpClient client, System.Net.Http.HttpResponseMessage response);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<SwaggerResponse> EarnPointsAsync(EarnPointsCommand command)
+        public System.Threading.Tasks.Task<SwaggerResponse> EarnPointsAsync(string transactionId, EarnPointsRequest request)
         {
-            return EarnPointsAsync(command, System.Threading.CancellationToken.None);
+            return EarnPointsAsync(transactionId, request, System.Threading.CancellationToken.None);
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        public async System.Threading.Tasks.Task<SwaggerResponse> EarnPointsAsync(EarnPointsCommand command, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<SwaggerResponse> EarnPointsAsync(string transactionId, EarnPointsRequest request, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append("api/LoyaltyPoints/earn");
+            urlBuilder_.Append("api/LoyaltyPoints/{transactionId}/earn");
+            urlBuilder_.Replace("{transactionId}", System.Uri.EscapeDataString(ConvertToString(transactionId, System.Globalization.CultureInfo.InvariantCulture)));
     
             var client_ = _httpClient;
             try
             {
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
-                    var content_ = new System.Net.Http.StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(command, _settings.Value));
+                    var content_ = new System.Net.Http.StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(request, _settings.Value));
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("POST");
@@ -142,26 +143,25 @@ namespace SagaDemo.LoyaltyPointsAPI.ApiClient
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<SwaggerResponse> RefundPointsAsync(RefundPointsCommand command)
+        public System.Threading.Tasks.Task<SwaggerResponse> RefundPointsAsync(string transactionId)
         {
-            return RefundPointsAsync(command, System.Threading.CancellationToken.None);
+            return RefundPointsAsync(transactionId, System.Threading.CancellationToken.None);
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        public async System.Threading.Tasks.Task<SwaggerResponse> RefundPointsAsync(RefundPointsCommand command, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<SwaggerResponse> RefundPointsAsync(string transactionId, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append("api/LoyaltyPoints/refund");
+            urlBuilder_.Append("api/LoyaltyPoints/{transactionId}/refund");
+            urlBuilder_.Replace("{transactionId}", System.Uri.EscapeDataString(ConvertToString(transactionId, System.Globalization.CultureInfo.InvariantCulture)));
     
             var client_ = _httpClient;
             try
             {
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
-                    var content_ = new System.Net.Http.StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(command, _settings.Value));
-                    content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
-                    request_.Content = content_;
+                    request_.Content = new System.Net.Http.StringContent(string.Empty, System.Text.Encoding.UTF8, "application/json");
                     request_.Method = new System.Net.Http.HttpMethod("POST");
     
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -223,24 +223,25 @@ namespace SagaDemo.LoyaltyPointsAPI.ApiClient
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<SwaggerResponse> ConsumePointsAsync(ConsumePointsCommand command)
+        public System.Threading.Tasks.Task<SwaggerResponse> ConsumePointsAsync(string transactionId, ConsumePointsRequest request)
         {
-            return ConsumePointsAsync(command, System.Threading.CancellationToken.None);
+            return ConsumePointsAsync(transactionId, request, System.Threading.CancellationToken.None);
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        public async System.Threading.Tasks.Task<SwaggerResponse> ConsumePointsAsync(ConsumePointsCommand command, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<SwaggerResponse> ConsumePointsAsync(string transactionId, ConsumePointsRequest request, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append("api/LoyaltyPoints/consume");
+            urlBuilder_.Append("api/LoyaltyPoints/{transactionId}/consume");
+            urlBuilder_.Replace("{transactionId}", System.Uri.EscapeDataString(ConvertToString(transactionId, System.Globalization.CultureInfo.InvariantCulture)));
     
             var client_ = _httpClient;
             try
             {
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
-                    var content_ = new System.Net.Http.StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(command, _settings.Value));
+                    var content_ = new System.Net.Http.StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(request, _settings.Value));
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("POST");
@@ -425,14 +426,13 @@ namespace SagaDemo.LoyaltyPointsAPI.ApiClient
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.36.0 (Newtonsoft.Json v11.0.0.0)")]
-    public partial class EarnPointsCommand 
+    public partial class EarnPointsRequest 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public EarnPointsCommand(int @points, string @transactionId, int @userId)
+        public EarnPointsRequest(int @points, int @userId)
         {
             this.Points = @points;
             this.UserId = @userId;
-            this.TransactionId = @transactionId;
         }
     
         [Newtonsoft.Json.JsonProperty("points", Required = Newtonsoft.Json.Required.Always)]
@@ -441,54 +441,26 @@ namespace SagaDemo.LoyaltyPointsAPI.ApiClient
         [Newtonsoft.Json.JsonProperty("userId", Required = Newtonsoft.Json.Required.Always)]
         public int UserId { get; }
     
-        [Newtonsoft.Json.JsonProperty("transactionId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string TransactionId { get; }
-    
         public string ToJson() 
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this);
         }
     
-        public static EarnPointsCommand FromJson(string data)
+        public static EarnPointsRequest FromJson(string data)
         {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<EarnPointsCommand>(data);
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<EarnPointsRequest>(data);
         }
     
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.36.0 (Newtonsoft.Json v11.0.0.0)")]
-    public partial class RefundPointsCommand 
+    public partial class ConsumePointsRequest 
     {
         [Newtonsoft.Json.JsonConstructor]
-        public RefundPointsCommand(string @transactionId)
-        {
-            this.TransactionId = @transactionId;
-        }
-    
-        [Newtonsoft.Json.JsonProperty("transactionId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string TransactionId { get; }
-    
-        public string ToJson() 
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
-        }
-    
-        public static RefundPointsCommand FromJson(string data)
-        {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<RefundPointsCommand>(data);
-        }
-    
-    }
-    
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.36.0 (Newtonsoft.Json v11.0.0.0)")]
-    public partial class ConsumePointsCommand 
-    {
-        [Newtonsoft.Json.JsonConstructor]
-        public ConsumePointsCommand(int @points, string @transactionId, int @userId)
+        public ConsumePointsRequest(int @points, int @userId)
         {
             this.Points = @points;
             this.UserId = @userId;
-            this.TransactionId = @transactionId;
         }
     
         [Newtonsoft.Json.JsonProperty("points", Required = Newtonsoft.Json.Required.Always)]
@@ -497,17 +469,14 @@ namespace SagaDemo.LoyaltyPointsAPI.ApiClient
         [Newtonsoft.Json.JsonProperty("userId", Required = Newtonsoft.Json.Required.Always)]
         public int UserId { get; }
     
-        [Newtonsoft.Json.JsonProperty("transactionId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string TransactionId { get; }
-    
         public string ToJson() 
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this);
         }
     
-        public static ConsumePointsCommand FromJson(string data)
+        public static ConsumePointsRequest FromJson(string data)
         {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<ConsumePointsCommand>(data);
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<ConsumePointsRequest>(data);
         }
     
     }
