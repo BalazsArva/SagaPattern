@@ -2,20 +2,20 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using SagaDemo.InventoryAPI.DataAccess;
 using SagaDemo.InventoryAPI.DataAccess.Entities;
 using SagaDemo.InventoryAPI.Operations.Commands;
-using SagaDemo.InventoryAPI.Validation.Validators;
 
 namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
 {
     public class BringbackItemsCommandHandler : CommandHandlerBase, IBringbackItemsCommandHandler
     {
         private readonly IInventoryDbContextFactory dbContextFactory;
-        private readonly IInventoryBatchCommandValidator<BringbackItemsCommand> requestValidator;
+        private readonly IValidator<BringbackItemsCommand> requestValidator;
 
-        public BringbackItemsCommandHandler(IInventoryDbContextFactory dbContextFactory, IInventoryBatchCommandValidator<BringbackItemsCommand> requestValidator)
+        public BringbackItemsCommandHandler(IInventoryDbContextFactory dbContextFactory, IValidator<BringbackItemsCommand> requestValidator)
         {
             this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
             this.requestValidator = requestValidator ?? throw new ArgumentNullException(nameof(requestValidator));
@@ -25,11 +25,7 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
         {
             using (var context = dbContextFactory.CreateDbContext())
             {
-                var productIds = command.Items.Select(i => i.ProductId).ToList();
-
-                var productLookup = await GetProductLookupAsync(context, productIds, cancellationToken).ConfigureAwait(false);
-
-                requestValidator.ValidateAndThrow(command, productLookup);
+                requestValidator.ValidateAndThrow(command);
 
                 // This is for idempotence. We check only the TransactionId because we assume that if one item in a transaction is brought back then so are the others.
                 var itemsAlreadyBroughtBack = await context.ProductBroughtBackEvents.AnyAsync(evt => evt.TransactionId == command.TransactionId, cancellationToken).ConfigureAwait(false);
@@ -38,12 +34,24 @@ namespace SagaDemo.InventoryAPI.Handlers.CommandHandlers
                     return;
                 }
 
-                foreach (var broughtBackItem in command.Items)
+                var correspondingTakeoutEvents = await context
+                    .ProductTakenOutEvents
+                    .AsNoTracking()
+                    .Where(evt => evt.TransactionId == command.TransactionId)
+                    .ToListAsync(cancellationToken)
+                    .ConfigureAwait(false);
+
+                if (correspondingTakeoutEvents.Count == 0)
+                {
+                    return;
+                }
+
+                foreach (var takeoutEvent in correspondingTakeoutEvents)
                 {
                     context.ProductBroughtBackEvents.Add(new ProductBroughtBackEvent
                     {
-                        ProductId = broughtBackItem.ProductId,
-                        Quantity = broughtBackItem.Quantity,
+                        ProductId = takeoutEvent.ProductId,
+                        Quantity = takeoutEvent.Quantity,
                         TransactionId = command.TransactionId
                     });
                 }

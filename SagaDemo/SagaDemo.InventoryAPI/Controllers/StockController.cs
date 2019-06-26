@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using SagaDemo.InventoryAPI.Contracts.Requests;
 using SagaDemo.InventoryAPI.Handlers.CommandHandlers;
 using SagaDemo.InventoryAPI.Mappers;
+using SagaDemo.InventoryAPI.Operations.Commands;
 
 namespace SagaDemo.InventoryAPI.Controllers
 {
@@ -66,12 +67,12 @@ namespace SagaDemo.InventoryAPI.Controllers
             return NoContent();
         }
 
-        [HttpPost("bringback")]
+        [HttpPost("{transactionId}/bringback")]
         [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(void))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
-        public async Task<IActionResult> BringbackItem(BringbackItemsRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> BringbackItem(string transactionId, CancellationToken cancellationToken)
         {
-            var command = ApiContractMapper.ToServiceCommand(request);
+            var command = new BringbackItemsCommand(transactionId);
 
             await bringbackItemsCommandHandler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
 

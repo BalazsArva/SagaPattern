@@ -95,25 +95,5 @@ namespace SagaDemo.InventoryAPI.Mappers
 
             return new TakeoutItemCommand(apiRequest.ProductId, apiRequest.Quantity);
         }
-
-        public static BringbackItemsCommand ToServiceCommand(BringbackItemsRequest apiRequest)
-        {
-            if (apiRequest == null)
-            {
-                return null;
-            }
-
-            return new BringbackItemsCommand(apiRequest.Items.Select(r => ToServiceCommand(r)), apiRequest.TransactionId);
-        }
-
-        public static BringbackItemCommand ToServiceCommand(BringbackItemRequest apiRequest)
-        {
-            if (apiRequest == null)
-            {
-                return null;
-            }
-
-            return new BringbackItemCommand(apiRequest.ProductId, apiRequest.Quantity);
-        }
     }
 }

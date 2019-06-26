@@ -387,11 +387,11 @@ namespace SagaDemo.InventoryAPI.ApiClient
         System.Threading.Tasks.Task<SwaggerResponse> TakeoutItemAsync(TakeoutItemsRequest request, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<SwaggerResponse> BringbackItemAsync(BringbackItemsRequest request);
+        System.Threading.Tasks.Task<SwaggerResponse> BringbackItemAsync(string transactionId);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        System.Threading.Tasks.Task<SwaggerResponse> BringbackItemAsync(BringbackItemsRequest request, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<SwaggerResponse> BringbackItemAsync(string transactionId, System.Threading.CancellationToken cancellationToken);
     
     }
     
@@ -663,26 +663,25 @@ namespace SagaDemo.InventoryAPI.ApiClient
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<SwaggerResponse> BringbackItemAsync(BringbackItemsRequest request)
+        public System.Threading.Tasks.Task<SwaggerResponse> BringbackItemAsync(string transactionId)
         {
-            return BringbackItemAsync(request, System.Threading.CancellationToken.None);
+            return BringbackItemAsync(transactionId, System.Threading.CancellationToken.None);
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        public async System.Threading.Tasks.Task<SwaggerResponse> BringbackItemAsync(BringbackItemsRequest request, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<SwaggerResponse> BringbackItemAsync(string transactionId, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append("api/Stock/bringback");
+            urlBuilder_.Append("api/Stock/{transactionId}/bringback");
+            urlBuilder_.Replace("{transactionId}", System.Uri.EscapeDataString(ConvertToString(transactionId, System.Globalization.CultureInfo.InvariantCulture)));
     
             var client_ = _httpClient;
             try
             {
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
-                    var content_ = new System.Net.Http.StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(request, _settings.Value));
-                    content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
-                    request_.Content = content_;
+                    request_.Content = new System.Net.Http.StringContent(string.Empty, System.Text.Encoding.UTF8, "application/json");
                     request_.Method = new System.Net.Http.HttpMethod("POST");
     
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -1176,62 +1175,6 @@ namespace SagaDemo.InventoryAPI.ApiClient
         public static TakeoutItemRequest FromJson(string data)
         {
             return Newtonsoft.Json.JsonConvert.DeserializeObject<TakeoutItemRequest>(data);
-        }
-    
-    }
-    
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.36.0 (Newtonsoft.Json v11.0.0.0)")]
-    public partial class BringbackItemsRequest 
-    {
-        [Newtonsoft.Json.JsonConstructor]
-        public BringbackItemsRequest(System.Collections.Generic.ICollection<BringbackItemRequest> @items, string @transactionId)
-        {
-            this.Items = @items;
-            this.TransactionId = @transactionId;
-        }
-    
-        [Newtonsoft.Json.JsonProperty("items", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Collections.Generic.ICollection<BringbackItemRequest> Items { get; }
-    
-        [Newtonsoft.Json.JsonProperty("transactionId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string TransactionId { get; }
-    
-        public string ToJson() 
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
-        }
-    
-        public static BringbackItemsRequest FromJson(string data)
-        {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<BringbackItemsRequest>(data);
-        }
-    
-    }
-    
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.36.0 (Newtonsoft.Json v11.0.0.0)")]
-    public partial class BringbackItemRequest 
-    {
-        [Newtonsoft.Json.JsonConstructor]
-        public BringbackItemRequest(int @productId, int @quantity)
-        {
-            this.ProductId = @productId;
-            this.Quantity = @quantity;
-        }
-    
-        [Newtonsoft.Json.JsonProperty("productId", Required = Newtonsoft.Json.Required.Always)]
-        public int ProductId { get; }
-    
-        [Newtonsoft.Json.JsonProperty("quantity", Required = Newtonsoft.Json.Required.Always)]
-        public int Quantity { get; }
-    
-        public string ToJson() 
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
-        }
-    
-        public static BringbackItemRequest FromJson(string data)
-        {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<BringbackItemRequest>(data);
         }
     
     }
