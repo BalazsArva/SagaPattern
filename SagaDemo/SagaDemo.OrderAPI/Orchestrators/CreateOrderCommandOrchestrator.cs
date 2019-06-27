@@ -306,7 +306,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
 
                 var changeVector = session.Advanced.GetChangeVectorFor(transactionDocument);
 
-                // TODO: Handle errors. E.g. no corresponsing consumption event found can be ignored.
+                // TODO: Handle errors, retry rollback, etc.
                 await loyaltyPointsApiClient.RefundPointsAsync(transactionId, cancellationToken).ConfigureAwait(false);
 
                 transactionDocument.LoyaltyPointsConsumptionStepDetails.StepStatus = StepStatus.RolledBack;
@@ -332,8 +332,8 @@ namespace SagaDemo.OrderAPI.Orchestrators
 
                 var changeVector = session.Advanced.GetChangeVectorFor(transactionDocument);
 
-                // TODO: Perform actual rollback.
-                // Will have to create an endpoint in the inventory API.
+                // TODO: Handle errors, retry rollback, etc.
+                await reservationsApiClient.CancelReservationAsync(transactionId, cancellationToken).ConfigureAwait(false);
 
                 transactionDocument.InventoryReservationStepDetails.StepStatus = StepStatus.RolledBack;
 
@@ -361,7 +361,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
                 var deliveryDetails = await deliveryApiClient.GetDeliveryDetailsAsync(transactionId, cancellationToken).ConfigureAwait(false);
                 var entityVersion = deliveryDetails.Headers[CustomHttpHeaderKeys.EntityVersion].Single();
 
-                // TODO: Handle concurrency and other errors
+                // TODO: Handle errors, retry rollback, etc.
                 await deliveryApiClient.CancelDeliveryAsync(transactionId, entityVersion, cancellationToken).ConfigureAwait(false);
 
                 transactionDocument.DeliveryCreationStepDetails.StepStatus = StepStatus.RolledBack;
