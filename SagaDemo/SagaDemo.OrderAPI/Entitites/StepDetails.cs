@@ -5,5 +5,7 @@
         public StepStatus StepStatus { get; set; }
 
         public int Attempts { get; set; }
+
+        public int RollbackAttempts { get; set; }
     }
 }

@@ -12,6 +12,8 @@
 
         TemporalFailure,
 
-        PermanentFailure
+        PermanentFailure,
+
+        RollbackFailed
     }
 }

@@ -19,6 +19,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
     public class CreateOrderCommandOrchestrator
     {
         private const int MaxAttemptsPerStep = 10;
+        private const int MaxRollbackAttemptsPerStep = 10;
         private const int BadRequestStatusCode = 400;
         private const int ConflictStatusCode = 409;
 
@@ -104,7 +105,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
                     else
                     {
                         stepDetails.StepStatus = StepStatus.TemporalFailure;
-                        // TODO: Retry
+                        // TODO: Retry with delay, check max retry count
                     }
                 }
                 catch
@@ -145,9 +146,24 @@ namespace SagaDemo.OrderAPI.Orchestrators
                     return;
                 }
 
-                await rollbackInvoker(cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    await rollbackInvoker(cancellationToken).ConfigureAwait(false);
 
-                stepDetails.StepStatus = StepStatus.RolledBack;
+                    stepDetails.StepStatus = StepStatus.RolledBack;
+                }
+                catch
+                {
+                    ++stepDetails.RollbackAttempts;
+
+                    if (stepDetails.RollbackAttempts > MaxRollbackAttemptsPerStep)
+                    {
+                        stepDetails.StepStatus = StepStatus.RollbackFailed;
+                        transactionDocument.TransactionStatus = TransactionStatus.RollbackFailed;
+                    }
+
+                    // TODO: Retry with delay
+                }
 
                 // TODO: Handle concurrency and other errors
                 await session.StoreAsync(transactionDocument, changeVector, transactionDocumentId, cancellationToken).ConfigureAwait(false);
@@ -174,16 +190,19 @@ namespace SagaDemo.OrderAPI.Orchestrators
                     LoyaltyPointsConsumptionStepDetails = new StepDetails
                     {
                         Attempts = 0,
+                        RollbackAttempts = 0,
                         StepStatus = StepStatus.NotStarted
                     },
                     DeliveryCreationStepDetails = new StepDetails
                     {
                         Attempts = 0,
+                        RollbackAttempts = 0,
                         StepStatus = StepStatus.NotStarted
                     },
                     InventoryReservationStepDetails = new StepDetails
                     {
                         Attempts = 0,
+                        RollbackAttempts = 0,
                         StepStatus = StepStatus.NotStarted
                     }
                 };
@@ -269,7 +288,6 @@ namespace SagaDemo.OrderAPI.Orchestrators
 
         private async Task RollbackAsync(string transactionId, CancellationToken cancellationToken)
         {
-            // TODO: Retry strategy
             await RollbackLoyaltyPointsConsumptionAsync(transactionId, cancellationToken).ConfigureAwait(false);
             await RollbackInventoryReservationAsync(transactionId, cancellationToken).ConfigureAwait(false);
             await RollbackDeliveryCreationAsync(transactionId, cancellationToken).ConfigureAwait(false);
@@ -299,7 +317,6 @@ namespace SagaDemo.OrderAPI.Orchestrators
             await PerformRollbackStepAsync(
                 transactionId,
                 t => t.LoyaltyPointsConsumptionStepDetails,
-                // TODO: Handle errors, retry rollback, etc.
                 async ct => await loyaltyPointsApiClient.RefundPointsAsync(transactionId, ct).ConfigureAwait(false),
                 cancellationToken)
                 .ConfigureAwait(false);
@@ -310,7 +327,6 @@ namespace SagaDemo.OrderAPI.Orchestrators
             await PerformRollbackStepAsync(
                 transactionId,
                 t => t.InventoryReservationStepDetails,
-                // TODO: Handle errors, retry rollback, etc.
                 async ct => await reservationsApiClient.CancelReservationAsync(transactionId, ct).ConfigureAwait(false),
                 cancellationToken)
                 .ConfigureAwait(false);
@@ -321,31 +337,17 @@ namespace SagaDemo.OrderAPI.Orchestrators
             await PerformRollbackStepAsync(
                 transactionId,
                 t => t.InventoryReservationStepDetails,
-                // TODO: Handle errors, retry rollback, etc.
                 async ct =>
                 {
-                    while (true)
+                    var deliveryDetails = await deliveryApiClient.GetDeliveryDetailsAsync(transactionId, ct).ConfigureAwait(false);
+                    var entityVersion = deliveryDetails.Headers[CustomHttpHeaderKeys.EntityVersion].Single();
+
+                    if (deliveryDetails.Result.Status == DeliveryStatus.Cancelled)
                     {
-                        try
-                        {
-                            var deliveryDetails = await deliveryApiClient.GetDeliveryDetailsAsync(transactionId, ct).ConfigureAwait(false);
-                            var entityVersion = deliveryDetails.Headers[CustomHttpHeaderKeys.EntityVersion].Single();
-
-                            if (deliveryDetails.Result.Status == DeliveryStatus.Cancelled)
-                            {
-                                return;
-                            }
-
-                            // TODO: Handle errors, retry rollback, etc.
-                            await deliveryApiClient.CancelDeliveryAsync(transactionId, entityVersion, ct).ConfigureAwait(false);
-
-                            return;
-                        }
-                        catch (SwaggerException e) when (e.StatusCode == ConflictStatusCode)
-                        {
-                            // Ignore and retry.
-                        }
+                        return;
                     }
+
+                    await deliveryApiClient.CancelDeliveryAsync(transactionId, entityVersion, ct).ConfigureAwait(false);
                 },
                 cancellationToken)
                 .ConfigureAwait(false);
