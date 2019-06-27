@@ -10,7 +10,7 @@
 
         RolledBack,
 
-        TemporarFailure,
+        TemporalFailure,
 
         PermanentFailure
     }
