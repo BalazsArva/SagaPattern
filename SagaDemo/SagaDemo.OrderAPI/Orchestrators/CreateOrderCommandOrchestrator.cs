@@ -18,6 +18,8 @@ namespace SagaDemo.OrderAPI.Orchestrators
 {
     public class CreateOrderCommandOrchestrator
     {
+        private const int MaxAttemptsPerStep = 10;
+
         private readonly IGuidProvider guidProvider;
         private readonly IDocumentStore documentStore;
         private readonly ILoyaltyPointsApiClient loyaltyPointsApiClient;
@@ -47,7 +49,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
             var transactionId = guidProvider.GenerateGuidString();
             var userId = command.UserId;
 
-            await CreateDocumentIfNotExistsAsync(transactionId, cancellationToken).ConfigureAwait(false);
+            await CreateTransactionDocumentIfNotExistsAsync(transactionId, cancellationToken).ConfigureAwait(false);
 
             // TODO: Consider batching this somehow.
             // TODO: Error handling for the API call. (Can use Polly policies once they are set up.)
@@ -58,20 +60,34 @@ namespace SagaDemo.OrderAPI.Orchestrators
                 totalCost += product.Result.PointsCost;
             }
 
-            await ConsumeLoyaltyPointsAsync(transactionId, totalCost, userId, cancellationToken).ConfigureAwait(false);
+            var consumeLoyaltyPointsResult = await ConsumeLoyaltyPointsAsync(transactionId, totalCost, userId, cancellationToken).ConfigureAwait(false);
+            if (consumeLoyaltyPointsResult == StepResult.Abort)
+            {
+                // TODO: Will have to do something about interrupted rollbacks as well (probably the best would be to store pending operations in a queue or periodically poll unfinished orders)
+                await RollbackAsync(transactionId, cancellationToken).ConfigureAwait(false);
+            }
+            // TODO: Handle Retry case
 
-            var reservationsRequest = ReservationsMapper.ToReservationsApiContract(command.Order);
+            var reserveItemsResult = await ReserveItemsAsync(transactionId, command, cancellationToken).ConfigureAwait(false);
+            if (reserveItemsResult == StepResult.Abort)
+            {
+                // TODO: Will have to do something about interrupted rollbacks as well (probably the best would be to store pending operations in a queue or periodically poll unfinished orders)
+                await RollbackAsync(transactionId, cancellationToken).ConfigureAwait(false);
+            }
+            // TODO: Handle Retry case
 
-            await reservationsApiClient.ReserveItemsAsync(transactionId, reservationsRequest, cancellationToken).ConfigureAwait(false);
+            var createDeliveryResult = await CreateDeliveryRequestAsync(transactionId, command, cancellationToken).ConfigureAwait(false);
+            if (createDeliveryResult == StepResult.Abort)
+            {
+                // TODO: Will have to do something about interrupted rollbacks as well (probably the best would be to store pending operations in a queue or periodically poll unfinished orders)
+                await RollbackAsync(transactionId, cancellationToken).ConfigureAwait(false);
+            }
+            // TODO: Handle Retry case
 
-            var address = AddressMapper.ToDeliveryApiContract(command.Address);
-
-            await deliveryApiClient.CreateDeliveryRequestAsync(transactionId, address, cancellationToken).ConfigureAwait(false);
-
-            throw new NotImplementedException();
+            // TODO: Finalize transaction
         }
 
-        private async Task CreateDocumentIfNotExistsAsync(string transactionId, CancellationToken cancellationToken)
+        private async Task CreateTransactionDocumentIfNotExistsAsync(string transactionId, CancellationToken cancellationToken)
         {
             using (var session = documentStore.OpenAsyncSession())
             {
@@ -109,10 +125,12 @@ namespace SagaDemo.OrderAPI.Orchestrators
             }
         }
 
-        private async Task ConsumeLoyaltyPointsAsync(string transactionId, int totalCost, int userId, CancellationToken cancellationToken)
+        private async Task<StepResult> ConsumeLoyaltyPointsAsync(string transactionId, int totalCost, int userId, CancellationToken cancellationToken)
         {
             using (var session = documentStore.OpenAsyncSession())
             {
+                StepResult result;
+
                 var transactionDocumentId = DocumentIdHelper.GetDocumentId<OrderTransaction>(session, transactionId);
                 var transactionDocument = await session.LoadAsync<OrderTransaction>(transactionDocumentId, cancellationToken).ConfigureAwait(false);
 
@@ -125,22 +143,124 @@ namespace SagaDemo.OrderAPI.Orchestrators
                     await loyaltyPointsApiClient.ConsumePointsAsync(transactionId, new ConsumePointsRequest(totalCost, userId), cancellationToken).ConfigureAwait(false);
 
                     transactionDocument.LoyaltyPointsConsumptionStepDetails.StepStatus = StepStatus.Completed;
+                    result = StepResult.Successful;
                 }
-                catch (SwaggerException<LoyaltyPointsAPI.ApiClient.ValidationProblemDetails> validationException)
+                catch (SwaggerException<LoyaltyPointsAPI.ApiClient.ValidationProblemDetails>)
                 {
                     // Permanent error
-                    // TODO: Roll back all other steps. Will have to track whether a step has been undone (or rely on idempotence of rollback operations).
-
                     transactionDocument.LoyaltyPointsConsumptionStepDetails.StepStatus = StepStatus.RolledBack;
+                    transactionDocument.TransactionStatus = TransactionStatus.PermanentFailure;
+
+                    result = StepResult.Abort;
                 }
                 catch
                 {
                     ++transactionDocument.LoyaltyPointsConsumptionStepDetails.Attempts;
+
+                    result = transactionDocument.LoyaltyPointsConsumptionStepDetails.Attempts > MaxAttemptsPerStep
+                        ? StepResult.Abort
+                        : StepResult.Retry;
                 }
 
                 // TODO: Handle concurrency and other errors
                 await session.StoreAsync(transactionDocument, changeVector, transactionDocumentId, cancellationToken).ConfigureAwait(false);
                 await session.SaveChangesAsync().ConfigureAwait(false);
+
+                return result;
+            }
+        }
+
+        private async Task<StepResult> ReserveItemsAsync(string transactionId, CreateOrderCommand command, CancellationToken cancellationToken)
+        {
+            using (var session = documentStore.OpenAsyncSession())
+            {
+                StepResult result;
+
+                var transactionDocumentId = DocumentIdHelper.GetDocumentId<OrderTransaction>(session, transactionId);
+                var transactionDocument = await session.LoadAsync<OrderTransaction>(transactionDocumentId, cancellationToken).ConfigureAwait(false);
+
+                var changeVector = session.Advanced.GetChangeVectorFor(transactionDocument);
+
+                transactionDocument.InventoryReservationStepDetails.StepStatus = StepStatus.InProgress;
+
+                try
+                {
+                    var reservationsRequest = ReservationsMapper.ToReservationsApiContract(command.Order);
+
+                    await reservationsApiClient.ReserveItemsAsync(transactionId, reservationsRequest, cancellationToken).ConfigureAwait(false);
+
+                    transactionDocument.InventoryReservationStepDetails.StepStatus = StepStatus.Completed;
+                    result = StepResult.Successful;
+                }
+                catch (SwaggerException<InventoryAPI.ApiClient.ValidationProblemDetails>)
+                {
+                    // Permanent error. Can set step state to rolled back since if a validation error occurs, then no
+                    // change has occured in the inventory API so there is nothing to roll back.
+                    transactionDocument.InventoryReservationStepDetails.StepStatus = StepStatus.RolledBack;
+                    transactionDocument.TransactionStatus = TransactionStatus.PermanentFailure;
+
+                    result = StepResult.Abort;
+                }
+                catch
+                {
+                    ++transactionDocument.InventoryReservationStepDetails.Attempts;
+
+                    result = transactionDocument.InventoryReservationStepDetails.Attempts > MaxAttemptsPerStep
+                        ? StepResult.Abort
+                        : StepResult.Retry;
+                }
+
+                // TODO: Handle concurrency and other errors
+                await session.StoreAsync(transactionDocument, changeVector, transactionDocumentId, cancellationToken).ConfigureAwait(false);
+                await session.SaveChangesAsync().ConfigureAwait(false);
+
+                return result;
+            }
+        }
+
+        private async Task<StepResult> CreateDeliveryRequestAsync(string transactionId, CreateOrderCommand command, CancellationToken cancellationToken)
+        {
+            using (var session = documentStore.OpenAsyncSession())
+            {
+                StepResult result;
+
+                var transactionDocumentId = DocumentIdHelper.GetDocumentId<OrderTransaction>(session, transactionId);
+                var transactionDocument = await session.LoadAsync<OrderTransaction>(transactionDocumentId, cancellationToken).ConfigureAwait(false);
+
+                var changeVector = session.Advanced.GetChangeVectorFor(transactionDocument);
+
+                transactionDocument.DeliveryCreationStepDetails.StepStatus = StepStatus.InProgress;
+
+                try
+                {
+                    var address = AddressMapper.ToDeliveryApiContract(command.Address);
+
+                    await deliveryApiClient.CreateDeliveryRequestAsync(transactionId, address, cancellationToken).ConfigureAwait(false);
+
+                    transactionDocument.DeliveryCreationStepDetails.StepStatus = StepStatus.Completed;
+                    result = StepResult.Successful;
+                }
+                catch (SwaggerException<DeliveryAPI.ApiClient.ValidationProblemDetails>)
+                {
+                    transactionDocument.DeliveryCreationStepDetails.StepStatus = StepStatus.RolledBack;
+                    transactionDocument.TransactionStatus = TransactionStatus.PermanentFailure;
+
+                    result = StepResult.Abort;
+                }
+                catch
+                {
+                    ++transactionDocument.DeliveryCreationStepDetails.Attempts;
+
+                    result = transactionDocument.DeliveryCreationStepDetails.Attempts > MaxAttemptsPerStep
+                        ? StepResult.Abort
+                        : StepResult.Retry;
+                }
+
+                // TODO: Handle concurrency and other errors
+                await session.StoreAsync(transactionDocument, changeVector, transactionDocumentId, cancellationToken).ConfigureAwait(false);
+                await session.SaveChangesAsync().ConfigureAwait(false);
+
+                return result;
             }
         }
 
@@ -250,6 +370,15 @@ namespace SagaDemo.OrderAPI.Orchestrators
                 await session.StoreAsync(transactionDocument, changeVector, transactionDocumentId, cancellationToken).ConfigureAwait(false);
                 await session.SaveChangesAsync().ConfigureAwait(false);
             }
+        }
+
+        private enum StepResult
+        {
+            Successful,
+
+            Retry,
+
+            Abort
         }
     }
 }

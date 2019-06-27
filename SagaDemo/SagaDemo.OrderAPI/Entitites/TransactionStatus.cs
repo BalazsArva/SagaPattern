@@ -8,6 +8,8 @@
 
         Completed,
 
+        PermanentFailure,
+
         RolledBack
     }
 }
