@@ -20,6 +20,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
     {
         private const int MaxAttemptsPerStep = 10;
         private const int BadRequestStatusCode = 400;
+        private const int ConflictStatusCode = 409;
 
         private readonly IGuidProvider guidProvider;
         private readonly IDocumentStore documentStore;
@@ -53,7 +54,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
             await CreateTransactionDocumentIfNotExistsAsync(transactionId, cancellationToken).ConfigureAwait(false);
 
             // TODO: Consider batching this somehow.
-            // TODO: Error handling for the API call. (Can use Polly policies once they are set up.)
+            // TODO: Error handling for the API call.
             foreach (var orderItem in command.Order.Items)
             {
                 var product = await catalogApiClient.GetItemAsync(orderItem.ProductId, cancellationToken).ConfigureAwait(false);
@@ -124,6 +125,36 @@ namespace SagaDemo.OrderAPI.Orchestrators
             }
         }
 
+        private async Task PerformRollbackStepAsync(
+            string transactionId,
+            Func<OrderTransaction, StepDetails> stepSelector,
+            Func<CancellationToken, Task> rollbackInvoker,
+            CancellationToken cancellationToken)
+        {
+            using (var session = documentStore.OpenAsyncSession())
+            {
+                var transactionDocumentId = DocumentIdHelper.GetDocumentId<OrderTransaction>(session, transactionId);
+                var transactionDocument = await session.LoadAsync<OrderTransaction>(transactionDocumentId, cancellationToken).ConfigureAwait(false);
+
+                var changeVector = session.Advanced.GetChangeVectorFor(transactionDocument);
+                var stepDetails = stepSelector(transactionDocument);
+                var stepStatus = stepDetails.StepStatus;
+
+                if (stepStatus == StepStatus.RolledBack || stepStatus == StepStatus.NotStarted)
+                {
+                    return;
+                }
+
+                await rollbackInvoker(cancellationToken).ConfigureAwait(false);
+
+                stepDetails.StepStatus = StepStatus.RolledBack;
+
+                // TODO: Handle concurrency and other errors
+                await session.StoreAsync(transactionDocument, changeVector, transactionDocumentId, cancellationToken).ConfigureAwait(false);
+                await session.SaveChangesAsync().ConfigureAwait(false);
+            }
+        }
+
         private async Task CreateTransactionDocumentIfNotExistsAsync(string transactionId, CancellationToken cancellationToken)
         {
             using (var session = documentStore.OpenAsyncSession())
@@ -171,7 +202,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
                 {
                     try
                     {
-                        await loyaltyPointsApiClient.ConsumePointsAsync(transactionId, new ConsumePointsRequest(totalCost, userId), cancellationToken).ConfigureAwait(false);
+                        await loyaltyPointsApiClient.ConsumePointsAsync(transactionId, new ConsumePointsRequest(totalCost, userId), ct).ConfigureAwait(false);
 
                         return StepResult.Successful;
                     }
@@ -195,7 +226,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
                     {
                         var reservationsRequest = ReservationsMapper.ToReservationsApiContract(command.Order);
 
-                        await reservationsApiClient.ReserveItemsAsync(transactionId, reservationsRequest, cancellationToken).ConfigureAwait(false);
+                        await reservationsApiClient.ReserveItemsAsync(transactionId, reservationsRequest, ct).ConfigureAwait(false);
 
                         return StepResult.Successful;
                     }
@@ -223,14 +254,12 @@ namespace SagaDemo.OrderAPI.Orchestrators
                     {
                         var reservationsRequest = ReservationsMapper.ToReservationsApiContract(command.Order);
 
-                        await deliveryApiClient.CreateDeliveryRequestAsync(transactionId, address, cancellationToken).ConfigureAwait(false);
+                        await deliveryApiClient.CreateDeliveryRequestAsync(transactionId, address, ct).ConfigureAwait(false);
 
                         return StepResult.Successful;
                     }
                     catch (SwaggerException<InventoryAPI.ApiClient.ValidationProblemDetails>)
                     {
-                        // Permanent error. Can set step state to rolled back since if a validation error occurs, then no
-                        // change has occured in the inventory API so there is nothing to roll back.
                         return StepResult.Abort;
                     }
                 },
@@ -267,83 +296,59 @@ namespace SagaDemo.OrderAPI.Orchestrators
 
         private async Task RollbackLoyaltyPointsConsumptionAsync(string transactionId, CancellationToken cancellationToken)
         {
-            using (var session = documentStore.OpenAsyncSession())
-            {
-                var transactionDocumentId = DocumentIdHelper.GetDocumentId<OrderTransaction>(session, transactionId);
-                var transactionDocument = await session.LoadAsync<OrderTransaction>(transactionDocumentId, cancellationToken).ConfigureAwait(false);
-
-                var stepStatus = transactionDocument.LoyaltyPointsConsumptionStepDetails.StepStatus;
-                if (stepStatus == StepStatus.RolledBack || stepStatus == StepStatus.NotStarted)
-                {
-                    return;
-                }
-
-                var changeVector = session.Advanced.GetChangeVectorFor(transactionDocument);
-
+            await PerformRollbackStepAsync(
+                transactionId,
+                t => t.LoyaltyPointsConsumptionStepDetails,
                 // TODO: Handle errors, retry rollback, etc.
-                await loyaltyPointsApiClient.RefundPointsAsync(transactionId, cancellationToken).ConfigureAwait(false);
-
-                transactionDocument.LoyaltyPointsConsumptionStepDetails.StepStatus = StepStatus.RolledBack;
-
-                // TODO: Handle concurrency and other errors
-                await session.StoreAsync(transactionDocument, changeVector, transactionDocumentId, cancellationToken).ConfigureAwait(false);
-                await session.SaveChangesAsync().ConfigureAwait(false);
-            }
+                async ct => await loyaltyPointsApiClient.RefundPointsAsync(transactionId, ct).ConfigureAwait(false),
+                cancellationToken)
+                .ConfigureAwait(false);
         }
 
         private async Task RollbackInventoryReservationAsync(string transactionId, CancellationToken cancellationToken)
         {
-            using (var session = documentStore.OpenAsyncSession())
-            {
-                var transactionDocumentId = DocumentIdHelper.GetDocumentId<OrderTransaction>(session, transactionId);
-                var transactionDocument = await session.LoadAsync<OrderTransaction>(transactionDocumentId, cancellationToken).ConfigureAwait(false);
-
-                var stepStatus = transactionDocument.InventoryReservationStepDetails.StepStatus;
-                if (stepStatus == StepStatus.RolledBack || stepStatus == StepStatus.NotStarted)
-                {
-                    return;
-                }
-
-                var changeVector = session.Advanced.GetChangeVectorFor(transactionDocument);
-
+            await PerformRollbackStepAsync(
+                transactionId,
+                t => t.InventoryReservationStepDetails,
                 // TODO: Handle errors, retry rollback, etc.
-                await reservationsApiClient.CancelReservationAsync(transactionId, cancellationToken).ConfigureAwait(false);
-
-                transactionDocument.InventoryReservationStepDetails.StepStatus = StepStatus.RolledBack;
-
-                // TODO: Handle concurrency and other errors
-                await session.StoreAsync(transactionDocument, changeVector, transactionDocumentId, cancellationToken).ConfigureAwait(false);
-                await session.SaveChangesAsync().ConfigureAwait(false);
-            }
+                async ct => await reservationsApiClient.CancelReservationAsync(transactionId, ct).ConfigureAwait(false),
+                cancellationToken)
+                .ConfigureAwait(false);
         }
 
         private async Task RollbackDeliveryCreationAsync(string transactionId, CancellationToken cancellationToken)
         {
-            using (var session = documentStore.OpenAsyncSession())
-            {
-                var transactionDocumentId = DocumentIdHelper.GetDocumentId<OrderTransaction>(session, transactionId);
-                var transactionDocument = await session.LoadAsync<OrderTransaction>(transactionDocumentId, cancellationToken).ConfigureAwait(false);
-
-                var stepStatus = transactionDocument.DeliveryCreationStepDetails.StepStatus;
-                if (stepStatus == StepStatus.RolledBack || stepStatus == StepStatus.NotStarted)
-                {
-                    return;
-                }
-
-                var changeVector = session.Advanced.GetChangeVectorFor(transactionDocument);
-
-                var deliveryDetails = await deliveryApiClient.GetDeliveryDetailsAsync(transactionId, cancellationToken).ConfigureAwait(false);
-                var entityVersion = deliveryDetails.Headers[CustomHttpHeaderKeys.EntityVersion].Single();
-
+            await PerformRollbackStepAsync(
+                transactionId,
+                t => t.InventoryReservationStepDetails,
                 // TODO: Handle errors, retry rollback, etc.
-                await deliveryApiClient.CancelDeliveryAsync(transactionId, entityVersion, cancellationToken).ConfigureAwait(false);
+                async ct =>
+                {
+                    while (true)
+                    {
+                        try
+                        {
+                            var deliveryDetails = await deliveryApiClient.GetDeliveryDetailsAsync(transactionId, ct).ConfigureAwait(false);
+                            var entityVersion = deliveryDetails.Headers[CustomHttpHeaderKeys.EntityVersion].Single();
 
-                transactionDocument.DeliveryCreationStepDetails.StepStatus = StepStatus.RolledBack;
+                            if (deliveryDetails.Result.Status == DeliveryStatus.Cancelled)
+                            {
+                                return;
+                            }
 
-                // TODO: Handle concurrency and other errors
-                await session.StoreAsync(transactionDocument, changeVector, transactionDocumentId, cancellationToken).ConfigureAwait(false);
-                await session.SaveChangesAsync().ConfigureAwait(false);
-            }
+                            // TODO: Handle errors, retry rollback, etc.
+                            await deliveryApiClient.CancelDeliveryAsync(transactionId, entityVersion, ct).ConfigureAwait(false);
+
+                            return;
+                        }
+                        catch (SwaggerException e) when (e.StatusCode == ConflictStatusCode)
+                        {
+                            // Ignore and retry.
+                        }
+                    }
+                },
+                cancellationToken)
+                .ConfigureAwait(false);
         }
 
         private enum StepResult
