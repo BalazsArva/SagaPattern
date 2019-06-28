@@ -17,7 +17,7 @@ using SagaDemo.OrderAPI.Providers;
 
 namespace SagaDemo.OrderAPI.Orchestrators
 {
-    public class CreateOrderCommandOrchestrator
+    public class CreateOrderCommandOrchestrator : ICreateOrderCommandOrchestrator
     {
         private const int MaxAttemptsPerStep = 10;
         private const int MaxRollbackAttemptsPerStep = 10;
