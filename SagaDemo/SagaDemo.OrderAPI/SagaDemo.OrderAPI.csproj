@@ -10,11 +10,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="2.2.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.3" />
     <PackageReference Include="RavenDB.Client" Version="4.2.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Controllers\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,6 +20,10 @@
     <ProjectReference Include="..\SagaDemo.DeliveryAPI.ApiClient\SagaDemo.DeliveryAPI.ApiClient.csproj" />
     <ProjectReference Include="..\SagaDemo.InventoryAPI.ApiClient\SagaDemo.InventoryAPI.ApiClient.csproj" />
     <ProjectReference Include="..\SagaDemo.LoyaltyPointsAPI.ApiClient\SagaDemo.LoyaltyPointsAPI.ApiClient.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Contracts\Responses\" />
   </ItemGroup>
 
 </Project>

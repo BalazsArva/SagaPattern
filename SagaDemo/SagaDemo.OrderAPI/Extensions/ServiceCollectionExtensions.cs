@@ -12,6 +12,7 @@ using SagaDemo.DeliveryAPI.ApiClient;
 using SagaDemo.InventoryAPI.ApiClient;
 using SagaDemo.LoyaltyPointsAPI.ApiClient;
 using SagaDemo.OrderAPI.Providers;
+using SagaDemo.OrderAPI.Services.Handlers.CommandHandlers;
 
 namespace SagaDemo.OrderAPI.Extensions
 {
@@ -27,6 +28,7 @@ namespace SagaDemo.OrderAPI.Extensions
         public static IServiceCollection AddOrderApiServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddSingleton<IGuidProvider, GuidProvider>();
+            services.AddSingleton<IRegisterOrderCommandHandler, RegisterOrderCommandHandler>();
             services.AddRavenDb(configuration);
 
             services.AddHttpClientConsumer<IDeliveryApiClient, DeliveryApiClient>(DeliveryApiBaseUrl);

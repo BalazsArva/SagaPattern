@@ -1,8 +1,8 @@
-﻿using SagaDemo.OrderAPI.Operations.DataStructures;
+﻿using SagaDemo.OrderAPI.Contracts.DataStructures;
 
-namespace SagaDemo.OrderAPI.Operations.Commands
+namespace SagaDemo.OrderAPI.Contracts.Requests
 {
-    public class CreateOrderCommand
+    public class RegisterOrderRequest
     {
         public int UserId { get; set; }
 

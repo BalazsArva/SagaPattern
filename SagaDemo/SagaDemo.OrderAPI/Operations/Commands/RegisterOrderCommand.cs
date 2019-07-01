@@ -2,7 +2,7 @@
 
 namespace SagaDemo.OrderAPI.Operations.Commands
 {
-    public class CreateOrderCommand
+    public class RegisterOrderCommand
     {
         public int UserId { get; set; }
 

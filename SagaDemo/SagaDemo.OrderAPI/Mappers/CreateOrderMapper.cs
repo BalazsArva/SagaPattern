@@ -6,7 +6,7 @@ using SagaDemo.OrderAPI.Operations.DataStructures;
 
 namespace SagaDemo.OrderAPI.Mappers
 {
-    public static class CreateOrderCommandMapper
+    public static class CreateOrderMapper
     {
         public static CreateOrderCommand ToCommand(OrderTransaction transaction)
         {
@@ -15,9 +15,10 @@ namespace SagaDemo.OrderAPI.Mappers
                 throw new ArgumentNullException(nameof(transaction));
             }
 
-            return new CreateOrderCommand(
-                transaction.OrderDetails.UserId,
-                new Order
+            return new CreateOrderCommand
+            {
+                UserId = transaction.OrderDetails.UserId,
+                Order = new Order
                 {
                     Items = transaction
                         .OrderDetails
@@ -29,7 +30,7 @@ namespace SagaDemo.OrderAPI.Mappers
                         })
                         .ToList()
                 },
-                new Operations.DataStructures.Address
+                Address = new Operations.DataStructures.Address
                 {
                     City = transaction.OrderDetails.Address.City,
                     Country = transaction.OrderDetails.Address.Country,
@@ -37,7 +38,8 @@ namespace SagaDemo.OrderAPI.Mappers
                     State = transaction.OrderDetails.Address.State,
                     Street = transaction.OrderDetails.Address.Street,
                     Zip = transaction.OrderDetails.Address.Zip
-                });
+                }
+            };
         }
     }
 }
