@@ -1,4 +1,4 @@
-﻿namespace SagaDemo.OrderAPI.Operations.DataStructures
+﻿namespace SagaDemo.OrderAPI.Entitites
 {
     public class OrderItem
     {
