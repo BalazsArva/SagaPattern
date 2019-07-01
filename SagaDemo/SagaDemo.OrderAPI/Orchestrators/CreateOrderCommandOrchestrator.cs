@@ -67,7 +67,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
             await ReserveItemsAsync(transactionId, command, cancellationToken).ConfigureAwait(false);
             await CreateDeliveryRequestAsync(transactionId, command, cancellationToken).ConfigureAwait(false);
 
-            // TODO: Finalize transaction
+            await FinalizeTransactionAsync(transactionId, cancellationToken).ConfigureAwait(false);
         }
 
         private async Task PerformTransactionStepAsync(
@@ -83,6 +83,15 @@ namespace SagaDemo.OrderAPI.Orchestrators
 
                 var changeVector = session.Advanced.GetChangeVectorFor(transactionDocument);
                 var stepDetails = stepSelector(transactionDocument);
+
+                // TODO: Rethink whether PermanentFailure should be included here (since when in that state, the rollback still needs to be done).
+                if (stepDetails.StepStatus == StepStatus.Completed ||
+                    stepDetails.StepStatus == StepStatus.PermanentFailure ||
+                    stepDetails.StepStatus == StepStatus.RollbackFailed ||
+                    stepDetails.StepStatus == StepStatus.RolledBack)
+                {
+                    return;
+                }
 
                 stepDetails.StepStatus = StepStatus.InProgress;
 
@@ -121,7 +130,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
 
                 // TODO: Handle concurrent updates
                 await session.StoreAsync(transactionDocument, changeVector, transactionDocumentId, cancellationToken).ConfigureAwait(false);
-                await session.SaveChangesAsync().ConfigureAwait(false);
+                await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -167,7 +176,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
                     }
 
                     await session.StoreAsync(transactionDocument, changeVector, transactionDocumentId, ct).ConfigureAwait(false);
-                    await session.SaveChangesAsync().ConfigureAwait(false);
+                    await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }, cancellationToken)
                 .ConfigureAwait(false);
         }
@@ -246,6 +255,24 @@ namespace SagaDemo.OrderAPI.Orchestrators
                 .ConfigureAwait(false);
         }
 
+        public async Task FinalizeTransactionAsync(string transactionId, CancellationToken cancellationToken)
+        {
+            using (var session = documentStore.OpenAsyncSession())
+            {
+                var transactionDocumentId = DocumentIdHelper.GetDocumentId<OrderTransaction>(session, transactionId);
+                var transactionDocument = await session.LoadAsync<OrderTransaction>(transactionDocumentId, cancellationToken).ConfigureAwait(false);
+
+                var changeVector = session.Advanced.GetChangeVectorFor(transactionDocument);
+
+                transactionDocument.TransactionStatus = TransactionStatus.Completed;
+
+                // TODO: Handle concurrency issues
+                await session.StoreAsync(transactionDocument, changeVector, transactionDocumentId, cancellationToken).ConfigureAwait(false);
+                await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        // TODO: use this where necessary (currently has 0 references)
         private async Task RollbackAsync(string transactionId, CancellationToken cancellationToken)
         {
             await RollbackLoyaltyPointsConsumptionAsync(transactionId, cancellationToken).ConfigureAwait(false);
@@ -268,7 +295,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
                     transactionDocument.TransactionStatus = TransactionStatus.RolledBack;
 
                     await session.StoreAsync(transactionDocument, changeVector, transactionDocumentId, ct).ConfigureAwait(false);
-                    await session.SaveChangesAsync().ConfigureAwait(false);
+                    await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }, cancellationToken)
                 .ConfigureAwait(false);
         }
