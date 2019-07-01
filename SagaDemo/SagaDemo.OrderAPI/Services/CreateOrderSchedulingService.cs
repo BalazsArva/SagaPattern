@@ -8,6 +8,7 @@ using Raven.Client.Documents;
 using Raven.Client.Documents.Session;
 using Raven.Client.Exceptions;
 using SagaDemo.OrderAPI.Entitites;
+using SagaDemo.OrderAPI.Mappers;
 using SagaDemo.OrderAPI.Orchestrators;
 
 namespace SagaDemo.OrderAPI.Services
@@ -97,29 +98,7 @@ namespace SagaDemo.OrderAPI.Services
                 return;
             }
 
-            var command = new Operations.Commands.CreateOrderCommand(
-                transaction.OrderDetails.UserId,
-                new Operations.DataStructures.Order
-                {
-                    Items = transaction
-                        .OrderDetails
-                        .Items
-                        .Select(i => new Operations.DataStructures.OrderItem
-                        {
-                            ProductId = i.ProductId,
-                            Quantity = i.Quantity
-                        })
-                        .ToList()
-                },
-                new Operations.DataStructures.Address
-                {
-                    City = transaction.OrderDetails.Address.City,
-                    Country = transaction.OrderDetails.Address.Country,
-                    House = transaction.OrderDetails.Address.House,
-                    State = transaction.OrderDetails.Address.State,
-                    Street = transaction.OrderDetails.Address.Street,
-                    Zip = transaction.OrderDetails.Address.Zip
-                });
+            var command = CreateOrderCommandMapper.ToCommand(transaction);
 
             await commandOrchestrator.HandleAsync(command, cancellationToken).ConfigureAwait(false);
         }
