@@ -8,6 +8,8 @@
 
         public StepDetails DeliveryCreationStepDetails { get; set; }
 
+        public OrderTotalStepDetails OrderTotalStepDetails { get; set; }
+
         public OrderDetails OrderDetails { get; set; }
     }
 }

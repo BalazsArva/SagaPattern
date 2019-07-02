@@ -10,6 +10,7 @@ namespace SagaDemo.Common.DataAccess.RavenDb.Utilities
     {
         public static string GetDocumentId<TEntity>(IAsyncDocumentSession session, string id)
         {
+            // TODO: Consider definig this for DocumentStore instead of session
             var separator = session.Advanced.DocumentStore.Conventions.IdentityPartsSeparator;
             var collectionName = session.Advanced.DocumentStore.Conventions.GetCollectionName(typeof(TEntity));
 

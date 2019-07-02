@@ -50,6 +50,13 @@ namespace SagaDemo.OrderAPI.Services.Handlers.CommandHandlers
                         RollbackAttempts = 0,
                         StepStatus = StepStatus.NotStarted
                     },
+                    OrderTotalStepDetails = new OrderTotalStepDetails
+                    {
+                        Attempts = 0,
+                        RollbackAttempts = 0,
+                        StepStatus = StepStatus.NotStarted,
+                        Total = 0
+                    },
                     OrderDetails = new OrderDetails
                     {
                         UserId = command.UserId,
