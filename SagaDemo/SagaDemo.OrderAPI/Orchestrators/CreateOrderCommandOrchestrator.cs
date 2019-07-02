@@ -17,16 +17,12 @@ using SagaDemo.OrderAPI.Providers;
 
 namespace SagaDemo.OrderAPI.Orchestrators
 {
-    public class CreateOrderCommandOrchestrator : ICreateOrderCommandOrchestrator
+    public class CreateOrderCommandOrchestrator : TransactionOrchestratorBase<OrderTransaction>, ICreateOrderCommandOrchestrator
     {
-        private const int DefaultRetryDelaySeconds = 15;
-        private const int MaxAttemptsPerStep = 10;
-        private const int MaxRollbackAttemptsPerStep = 10;
         private const int BadRequestStatusCode = 400;
         private const int ConflictStatusCode = 409;
 
         private readonly IGuidProvider guidProvider;
-        private readonly IDocumentStore documentStore;
         private readonly ILoyaltyPointsApiClient loyaltyPointsApiClient;
         private readonly ICatalogApiClient catalogApiClient;
         private readonly IReservationsApiClient reservationsApiClient;
@@ -39,9 +35,9 @@ namespace SagaDemo.OrderAPI.Orchestrators
             ICatalogApiClient catalogApiClient,
             IReservationsApiClient reservationsApiClient,
             IDeliveryApiClient deliveryApiClient)
+            : base(documentStore)
         {
             this.guidProvider = guidProvider ?? throw new ArgumentNullException(nameof(guidProvider));
-            this.documentStore = documentStore ?? throw new ArgumentNullException(nameof(documentStore));
             this.loyaltyPointsApiClient = loyaltyPointsApiClient ?? throw new ArgumentNullException(nameof(loyaltyPointsApiClient));
             this.catalogApiClient = catalogApiClient ?? throw new ArgumentNullException(nameof(catalogApiClient));
             this.deliveryApiClient = deliveryApiClient ?? throw new ArgumentNullException(nameof(deliveryApiClient));
@@ -79,129 +75,26 @@ namespace SagaDemo.OrderAPI.Orchestrators
             }
         }
 
-        private async Task<TransactionStatus> GetTransactionStatusAsync(string transactionId, CancellationToken cancellationToken)
+        private async Task RollbackAsync(string transactionId, CancellationToken cancellationToken)
         {
-            using (var session = documentStore.OpenAsyncSession())
-            {
-                var transactionDocumentId = DocumentIdHelper.GetDocumentId<OrderTransaction>(session, transactionId);
-                var transactionDocument = await session.LoadAsync<OrderTransaction>(transactionDocumentId, cancellationToken).ConfigureAwait(false);
+            await RollbackLoyaltyPointsConsumptionAsync(transactionId, cancellationToken).ConfigureAwait(false);
+            await RollbackInventoryReservationAsync(transactionId, cancellationToken).ConfigureAwait(false);
+            await RollbackDeliveryCreationAsync(transactionId, cancellationToken).ConfigureAwait(false);
 
-                return transactionDocument.TransactionStatus;
-            }
-        }
-
-        private async Task PerformTransactionStepAsync(
-            string transactionId,
-            Func<OrderTransaction, StepDetails> stepSelector,
-            Func<CancellationToken, Task<StepResult>> stepInvoker,
-            CancellationToken cancellationToken)
-        {
-            using (var session = documentStore.OpenAsyncSession())
-            {
-                var transactionDocumentId = DocumentIdHelper.GetDocumentId<OrderTransaction>(session, transactionId);
-                var transactionDocument = await session.LoadAsync<OrderTransaction>(transactionDocumentId, cancellationToken).ConfigureAwait(false);
-
-                var changeVector = session.Advanced.GetChangeVectorFor(transactionDocument);
-                var stepDetails = stepSelector(transactionDocument);
-
-                // TODO: Rethink whether PermanentFailure should be included here (since when in that state, the rollback still needs to be done).
-                if (stepDetails.StepStatus == StepStatus.Completed ||
-                    stepDetails.StepStatus == StepStatus.PermanentFailure ||
-                    stepDetails.StepStatus == StepStatus.RollbackFailed ||
-                    stepDetails.StepStatus == StepStatus.RolledBack)
-                {
-                    return;
-                }
-
-                if (transactionDocument.TransactionStatus != TransactionStatus.NotStarted ||
-                    transactionDocument.TransactionStatus != TransactionStatus.InProgress)
-                {
-                    return;
-                }
-
-                stepDetails.StepStatus = StepStatus.InProgress;
-                StepResult stepResult;
-
-                try
-                {
-                    stepResult = await stepInvoker(cancellationToken).ConfigureAwait(false);
-                }
-                catch
-                {
-                    stepResult = StepResult.Retry;
-                }
-
-                if (stepResult == StepResult.Retry)
-                {
-                    stepDetails.StepStatus = StepStatus.TemporalFailure;
-                    transactionDocument.UtcDoNotExecuteBefore = DateTime.UtcNow.AddSeconds(DefaultRetryDelaySeconds);
-                    ++stepDetails.Attempts;
-
-                    if (stepDetails.Attempts > MaxAttemptsPerStep)
-                    {
-                        stepDetails.StepStatus = StepStatus.PermanentFailure;
-                    }
-                }
-                else if (stepResult == StepResult.Abort)
-                {
-                    stepDetails.StepStatus = StepStatus.PermanentFailure;
-                }
-                else
-                {
-                    stepDetails.StepStatus = StepStatus.Completed;
-                }
-
-                if (stepDetails.StepStatus == StepStatus.PermanentFailure)
-                {
-                    transactionDocument.TransactionStatus = TransactionStatus.PermanentFailure;
-                }
-
-                // TODO: Handle concurrent updates
-                await session.StoreAsync(transactionDocument, changeVector, transactionDocumentId, cancellationToken).ConfigureAwait(false);
-                await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            }
-        }
-
-        private async Task PerformRollbackStepAsync(
-            string transactionId,
-            Func<OrderTransaction, StepDetails> stepSelector,
-            Func<CancellationToken, Task> rollbackInvoker,
-            CancellationToken cancellationToken)
-        {
-            await documentStore
+            await DocumentStore
                 .ExecuteInConcurrentSessionAsync(async (session, ct) =>
                 {
-                    // TODO: Rethink whether re-executing everything just because the document update fails is OK (spoiler: it is as long as the rollback steps are idempotent and won't fail for more than 1 tries but should solve it generally.)
                     var transactionDocumentId = DocumentIdHelper.GetDocumentId<OrderTransaction>(session, transactionId);
                     var transactionDocument = await session.LoadAsync<OrderTransaction>(transactionDocumentId, ct).ConfigureAwait(false);
 
-                    var changeVector = session.Advanced.GetChangeVectorFor(transactionDocument);
-                    var stepDetails = stepSelector(transactionDocument);
-                    var stepStatus = stepDetails.StepStatus;
-
-                    if (stepStatus == StepStatus.RolledBack || stepStatus == StepStatus.NotStarted)
+                    if (transactionDocument.TransactionStatus == TransactionStatus.RolledBack)
                     {
                         return;
                     }
 
-                    try
-                    {
-                        await rollbackInvoker(ct).ConfigureAwait(false);
+                    var changeVector = session.Advanced.GetChangeVectorFor(transactionDocument);
 
-                        stepDetails.StepStatus = StepStatus.RolledBack;
-                    }
-                    catch
-                    {
-                        ++stepDetails.RollbackAttempts;
-
-                        if (stepDetails.RollbackAttempts > MaxRollbackAttemptsPerStep)
-                        {
-                            stepDetails.StepStatus = StepStatus.RollbackFailed;
-                            transactionDocument.TransactionStatus = TransactionStatus.RollbackFailed;
-                        }
-
-                        // TODO: Retry with delay
-                    }
+                    transactionDocument.TransactionStatus = TransactionStatus.RolledBack;
 
                     await session.StoreAsync(transactionDocument, changeVector, transactionDocumentId, ct).ConfigureAwait(false);
                     await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -283,50 +176,6 @@ namespace SagaDemo.OrderAPI.Orchestrators
                 .ConfigureAwait(false);
         }
 
-        public async Task FinalizeTransactionAsync(string transactionId, CancellationToken cancellationToken)
-        {
-            using (var session = documentStore.OpenAsyncSession())
-            {
-                var transactionDocumentId = DocumentIdHelper.GetDocumentId<OrderTransaction>(session, transactionId);
-                var transactionDocument = await session.LoadAsync<OrderTransaction>(transactionDocumentId, cancellationToken).ConfigureAwait(false);
-
-                var changeVector = session.Advanced.GetChangeVectorFor(transactionDocument);
-
-                transactionDocument.TransactionStatus = TransactionStatus.Completed;
-
-                // TODO: Handle concurrency issues
-                await session.StoreAsync(transactionDocument, changeVector, transactionDocumentId, cancellationToken).ConfigureAwait(false);
-                await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            }
-        }
-
-        private async Task RollbackAsync(string transactionId, CancellationToken cancellationToken)
-        {
-            await RollbackLoyaltyPointsConsumptionAsync(transactionId, cancellationToken).ConfigureAwait(false);
-            await RollbackInventoryReservationAsync(transactionId, cancellationToken).ConfigureAwait(false);
-            await RollbackDeliveryCreationAsync(transactionId, cancellationToken).ConfigureAwait(false);
-
-            await documentStore
-                .ExecuteInConcurrentSessionAsync(async (session, ct) =>
-                {
-                    var transactionDocumentId = DocumentIdHelper.GetDocumentId<OrderTransaction>(session, transactionId);
-                    var transactionDocument = await session.LoadAsync<OrderTransaction>(transactionDocumentId, ct).ConfigureAwait(false);
-
-                    if (transactionDocument.TransactionStatus == TransactionStatus.RolledBack)
-                    {
-                        return;
-                    }
-
-                    var changeVector = session.Advanced.GetChangeVectorFor(transactionDocument);
-
-                    transactionDocument.TransactionStatus = TransactionStatus.RolledBack;
-
-                    await session.StoreAsync(transactionDocument, changeVector, transactionDocumentId, ct).ConfigureAwait(false);
-                    await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                }, cancellationToken)
-                .ConfigureAwait(false);
-        }
-
         private async Task RollbackLoyaltyPointsConsumptionAsync(string transactionId, CancellationToken cancellationToken)
         {
             await PerformRollbackStepAsync(
@@ -366,15 +215,6 @@ namespace SagaDemo.OrderAPI.Orchestrators
                 },
                 cancellationToken)
                 .ConfigureAwait(false);
-        }
-
-        private enum StepResult
-        {
-            Successful,
-
-            Retry,
-
-            Abort
         }
     }
 }
