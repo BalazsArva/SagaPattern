@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Raven.Client.Documents;
 using Raven.Client.Documents.Session;
 
 namespace SagaDemo.Common.DataAccess.RavenDb.Utilities
@@ -34,8 +35,27 @@ namespace SagaDemo.Common.DataAccess.RavenDb.Utilities
             if (!documentId.StartsWith(prefix))
             {
                 throw new ArgumentException(
-                    $"An invalid document Id has been encountered while trying to convert the document identifier to numeric identifies.\n" +
-                    $"A valid document identifier must start with '{prefix}' to be considered valid.\n" +
+                    $"An invalid document Id has been encountered while trying to convert the document identifier to entity identifier.\n" +
+                    $"A valid document identifier must start with '{prefix}'.\n" +
+                    $"The attempted value was '{documentId}'.");
+            }
+
+            return documentId.Substring(prefixLength);
+        }
+
+        public static string GetEntityId<TEntity>(IDocumentStore documentStore, string documentId)
+        {
+            var separator = documentStore.Conventions.IdentityPartsSeparator;
+            var collectionName = documentStore.Conventions.GetCollectionName(typeof(TEntity));
+
+            var prefix = collectionName + separator;
+            var prefixLength = prefix.Length;
+
+            if (!documentId.StartsWith(prefix))
+            {
+                throw new ArgumentException(
+                    $"An invalid document Id has been encountered while trying to convert the document identifier to entity identifier.\n" +
+                    $"A valid document identifier must start with '{prefix}'.\n" +
                     $"The attempted value was '{documentId}'.");
             }
 

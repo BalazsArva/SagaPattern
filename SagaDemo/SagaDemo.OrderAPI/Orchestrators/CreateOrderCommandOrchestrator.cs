@@ -13,7 +13,6 @@ using SagaDemo.LoyaltyPointsAPI.ApiClient;
 using SagaDemo.OrderAPI.Entitites;
 using SagaDemo.OrderAPI.Mappers;
 using SagaDemo.OrderAPI.Operations.Commands;
-using SagaDemo.OrderAPI.Providers;
 
 namespace SagaDemo.OrderAPI.Orchestrators
 {
@@ -22,14 +21,12 @@ namespace SagaDemo.OrderAPI.Orchestrators
         private const int BadRequestStatusCode = 400;
         private const int ConflictStatusCode = 409;
 
-        private readonly IGuidProvider guidProvider;
         private readonly ILoyaltyPointsApiClient loyaltyPointsApiClient;
         private readonly ICatalogApiClient catalogApiClient;
         private readonly IReservationsApiClient reservationsApiClient;
         private readonly IDeliveryApiClient deliveryApiClient;
 
         public CreateOrderCommandOrchestrator(
-            IGuidProvider guidProvider,
             IDocumentStore documentStore,
             ILoyaltyPointsApiClient loyaltyPointsApiClient,
             ICatalogApiClient catalogApiClient,
@@ -37,7 +34,6 @@ namespace SagaDemo.OrderAPI.Orchestrators
             IDeliveryApiClient deliveryApiClient)
             : base(documentStore)
         {
-            this.guidProvider = guidProvider ?? throw new ArgumentNullException(nameof(guidProvider));
             this.loyaltyPointsApiClient = loyaltyPointsApiClient ?? throw new ArgumentNullException(nameof(loyaltyPointsApiClient));
             this.catalogApiClient = catalogApiClient ?? throw new ArgumentNullException(nameof(catalogApiClient));
             this.deliveryApiClient = deliveryApiClient ?? throw new ArgumentNullException(nameof(deliveryApiClient));
@@ -47,8 +43,8 @@ namespace SagaDemo.OrderAPI.Orchestrators
         public async Task HandleAsync(CreateOrderCommand command, CancellationToken cancellationToken)
         {
             var totalCost = 0;
-            var transactionId = guidProvider.GenerateGuidString();
             var userId = command.UserId;
+            var transactionId = DocumentIdHelper.GetEntityId<OrderTransaction>(DocumentStore, command.TransactionId);
 
             // TODO: Consider batching this somehow.
             // TODO: Error handling for the API call.

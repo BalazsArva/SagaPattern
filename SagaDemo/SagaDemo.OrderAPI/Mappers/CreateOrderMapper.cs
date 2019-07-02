@@ -17,6 +17,7 @@ namespace SagaDemo.OrderAPI.Mappers
 
             return new CreateOrderCommand
             {
+                TransactionId = transaction.Id,
                 UserId = transaction.OrderDetails.UserId,
                 Order = new Order
                 {
