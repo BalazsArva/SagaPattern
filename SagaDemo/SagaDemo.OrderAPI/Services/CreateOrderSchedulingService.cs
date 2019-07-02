@@ -49,14 +49,16 @@ namespace SagaDemo.OrderAPI.Services
 
             using (var session = documentStore.OpenAsyncSession())
             {
-                var timeoutLimit = DateTime.UtcNow.AddMinutes(-DefaultLockExpiryMinutes);
+                var utcNow = DateTime.UtcNow;
+                var timeoutLimit = utcNow.AddMinutes(-DefaultLockExpiryMinutes);
 
                 itemsToProcess = await session
                     .Query<OrderTransaction>()
                     .Statistics(out queryStatistics)
                     .Where(t =>
                         (t.TransactionStatus == TransactionStatus.NotStarted || t.TransactionStatus == TransactionStatus.InProgress) &&
-                        (t.UtcDateTimeLockAcquired == null || t.UtcDateTimeLockAcquired.Value < timeoutLimit))
+                        (t.UtcDateTimeLockAcquired == null || t.UtcDateTimeLockAcquired.Value < timeoutLimit) &&
+                        (t.UtcDoNotExecuteBefore == null || t.UtcDoNotExecuteBefore.Value <= utcNow))
                     .Take(DefaultPollingBatchSize)
                     .Select(t => t.Id)
                     .ToListAsync(cancellationToken)

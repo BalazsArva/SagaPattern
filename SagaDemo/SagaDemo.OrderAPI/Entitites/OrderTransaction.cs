@@ -8,6 +8,8 @@ namespace SagaDemo.OrderAPI.Entitites
 
         public DateTime? UtcDateTimeLockAcquired { get; set; }
 
+        public DateTime? UtcDoNotExecuteBefore { get; set; }
+
         public TransactionStatus TransactionStatus { get; set; }
 
         public StepDetails LoyaltyPointsConsumptionStepDetails { get; set; }

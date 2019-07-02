@@ -19,6 +19,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
 {
     public class CreateOrderCommandOrchestrator : ICreateOrderCommandOrchestrator
     {
+        private const int DefaultRetryDelaySeconds = 15;
         private const int MaxAttemptsPerStep = 10;
         private const int MaxRollbackAttemptsPerStep = 10;
         private const int BadRequestStatusCode = 400;
@@ -67,7 +68,26 @@ namespace SagaDemo.OrderAPI.Orchestrators
             await ReserveItemsAsync(transactionId, command, cancellationToken).ConfigureAwait(false);
             await CreateDeliveryRequestAsync(transactionId, command, cancellationToken).ConfigureAwait(false);
 
-            await FinalizeTransactionAsync(transactionId, cancellationToken).ConfigureAwait(false);
+            var transactionStatus = await GetTransactionStatusAsync(transactionId, cancellationToken).ConfigureAwait(false);
+            if (transactionStatus == TransactionStatus.PermanentFailure)
+            {
+                await RollbackAsync(transactionId, cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                await FinalizeTransactionAsync(transactionId, cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        private async Task<TransactionStatus> GetTransactionStatusAsync(string transactionId, CancellationToken cancellationToken)
+        {
+            using (var session = documentStore.OpenAsyncSession())
+            {
+                var transactionDocumentId = DocumentIdHelper.GetDocumentId<OrderTransaction>(session, transactionId);
+                var transactionDocument = await session.LoadAsync<OrderTransaction>(transactionDocumentId, cancellationToken).ConfigureAwait(false);
+
+                return transactionDocument.TransactionStatus;
+            }
         }
 
         private async Task PerformTransactionStepAsync(
@@ -93,39 +113,47 @@ namespace SagaDemo.OrderAPI.Orchestrators
                     return;
                 }
 
+                if (transactionDocument.TransactionStatus != TransactionStatus.NotStarted ||
+                    transactionDocument.TransactionStatus != TransactionStatus.InProgress)
+                {
+                    return;
+                }
+
                 stepDetails.StepStatus = StepStatus.InProgress;
+                StepResult stepResult;
 
                 try
                 {
-                    var stepResult = await stepInvoker(cancellationToken).ConfigureAwait(false);
-
-                    if (stepResult == StepResult.Successful)
-                    {
-                        stepDetails.StepStatus = StepStatus.Completed;
-                    }
-                    else if (stepResult == StepResult.Abort)
-                    {
-                        stepDetails.StepStatus = StepStatus.PermanentFailure;
-                        transactionDocument.TransactionStatus = TransactionStatus.PermanentFailure;
-
-                        // TODO: Rollback
-                    }
-                    else
-                    {
-                        stepDetails.StepStatus = StepStatus.TemporalFailure;
-                        // TODO: Retry with delay, check max retry count
-                    }
+                    stepResult = await stepInvoker(cancellationToken).ConfigureAwait(false);
                 }
                 catch
                 {
+                    stepResult = StepResult.Retry;
+                }
+
+                if (stepResult == StepResult.Retry)
+                {
                     stepDetails.StepStatus = StepStatus.TemporalFailure;
+                    transactionDocument.UtcDoNotExecuteBefore = DateTime.UtcNow.AddSeconds(DefaultRetryDelaySeconds);
                     ++stepDetails.Attempts;
 
                     if (stepDetails.Attempts > MaxAttemptsPerStep)
                     {
                         stepDetails.StepStatus = StepStatus.PermanentFailure;
-                        transactionDocument.TransactionStatus = TransactionStatus.PermanentFailure;
                     }
+                }
+                else if (stepResult == StepResult.Abort)
+                {
+                    stepDetails.StepStatus = StepStatus.PermanentFailure;
+                }
+                else
+                {
+                    stepDetails.StepStatus = StepStatus.Completed;
+                }
+
+                if (stepDetails.StepStatus == StepStatus.PermanentFailure)
+                {
+                    transactionDocument.TransactionStatus = TransactionStatus.PermanentFailure;
                 }
 
                 // TODO: Handle concurrent updates
@@ -272,7 +300,6 @@ namespace SagaDemo.OrderAPI.Orchestrators
             }
         }
 
-        // TODO: use this where necessary (currently has 0 references)
         private async Task RollbackAsync(string transactionId, CancellationToken cancellationToken)
         {
             await RollbackLoyaltyPointsConsumptionAsync(transactionId, cancellationToken).ConfigureAwait(false);
