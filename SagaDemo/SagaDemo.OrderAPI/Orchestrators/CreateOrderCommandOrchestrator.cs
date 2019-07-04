@@ -62,15 +62,24 @@ namespace SagaDemo.OrderAPI.Orchestrators
             await ConsumeLoyaltyPointsAsync(transactionId, totalCost, userId, cancellationToken).ConfigureAwait(false);
             await ReserveItemsAsync(transactionId, command, cancellationToken).ConfigureAwait(false);
 
-            // TODO: This should only be executed if the other two operations are successful
-            await CreateDeliveryRequestAsync(transactionId, command, cancellationToken).ConfigureAwait(false);
+            var (transactionDocument, changeVector) = await GetTransactionByIdAsync(transactionId, cancellationToken).ConfigureAwait(false);
+            if (transactionDocument.InventoryReservationStepDetails.StepStatus == StepStatus.Completed &&
+                transactionDocument.LoyaltyPointsConsumptionStepDetails.StepStatus == StepStatus.Completed)
+            {
+                await CreateDeliveryRequestAsync(transactionId, command, cancellationToken).ConfigureAwait(false);
+            }
 
-            var transactionStatus = await GetTransactionStatusAsync(transactionId, cancellationToken).ConfigureAwait(false);
-            if (transactionStatus == TransactionStatus.PermanentFailure)
+            (transactionDocument, changeVector) = await GetTransactionByIdAsync(transactionId, cancellationToken).ConfigureAwait(false);
+            if (transactionDocument.TransactionStatus == TransactionStatus.PermanentFailure)
             {
                 await RollbackAsync(transactionId, cancellationToken).ConfigureAwait(false);
+
+                return;
             }
-            else
+
+            if (transactionDocument.DeliveryCreationStepDetails.StepStatus == StepStatus.Completed &&
+                transactionDocument.InventoryReservationStepDetails.StepStatus == StepStatus.Completed &&
+                transactionDocument.LoyaltyPointsConsumptionStepDetails.StepStatus == StepStatus.Completed)
             {
                 await FinalizeTransactionAsync(transactionId, cancellationToken).ConfigureAwait(false);
             }

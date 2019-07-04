@@ -10,13 +10,6 @@ namespace SagaDemo.OrderAPI.Orchestrators
 {
     public abstract class TransactionOrchestratorBase<TTransaction> where TTransaction : TransactionBase
     {
-        protected enum StepResult
-        {
-            Successful,
-            Retry,
-            Abort
-        }
-
         public const int DefaultRetryDelaySeconds = 15;
         public const int MaxAttemptsPerStep = 10;
         public const int MaxRollbackAttemptsPerStep = 10;
@@ -28,14 +21,16 @@ namespace SagaDemo.OrderAPI.Orchestrators
             DocumentStore = documentStore ?? throw new ArgumentNullException(nameof(documentStore));
         }
 
-        protected async Task<TransactionStatus> GetTransactionStatusAsync(string transactionId, CancellationToken cancellationToken)
+        protected async Task<(TTransaction transaction, string changeVector)> GetTransactionByIdAsync(string transactionId, CancellationToken cancellationToken)
         {
             using (var session = DocumentStore.OpenAsyncSession())
             {
                 var transactionDocumentId = DocumentIdHelper.GetDocumentId<TTransaction>(session, transactionId);
                 var transactionDocument = await session.LoadAsync<TTransaction>(transactionDocumentId, cancellationToken).ConfigureAwait(false);
 
-                return transactionDocument.TransactionStatus;
+                var changeVector = session.Advanced.GetChangeVectorFor(transactionDocument);
+
+                return (transactionDocument, changeVector);
             }
         }
 
@@ -53,7 +48,6 @@ namespace SagaDemo.OrderAPI.Orchestrators
                 var changeVector = session.Advanced.GetChangeVectorFor(transactionDocument);
                 var stepDetails = stepSelector(transactionDocument);
 
-                // TODO: Rethink whether PermanentFailure should be included here (since when in that state, the rollback still needs to be done).
                 if (stepDetails.StepStatus == StepStatus.Completed ||
                     stepDetails.StepStatus == StepStatus.PermanentFailure ||
                     stepDetails.StepStatus == StepStatus.RollbackFailed ||
@@ -120,7 +114,6 @@ namespace SagaDemo.OrderAPI.Orchestrators
             await DocumentStore
                 .ExecuteInConcurrentSessionAsync(async (session, ct) =>
                 {
-                    // TODO: Rethink whether re-executing everything just because the document update fails is OK (spoiler: it is as long as the rollback steps are idempotent and won't fail for more than 1 tries but should solve it generally.)
                     var transactionDocumentId = DocumentIdHelper.GetDocumentId<TTransaction>(session, transactionId);
                     var transactionDocument = await session.LoadAsync<TTransaction>(transactionDocumentId, ct).ConfigureAwait(false);
 
