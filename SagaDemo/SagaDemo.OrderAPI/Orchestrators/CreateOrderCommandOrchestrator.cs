@@ -81,7 +81,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
                 transactionDocument.InventoryReservationStepDetails.StepStatus == StepStatus.Completed &&
                 transactionDocument.LoyaltyPointsConsumptionStepDetails.StepStatus == StepStatus.Completed)
             {
-                await FinalizeTransactionAsync(transactionId, cancellationToken).ConfigureAwait(false);
+                await CompleteTransactionAsync(transactionId, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -161,8 +161,9 @@ namespace SagaDemo.OrderAPI.Orchestrators
             await RollbackInventoryReservationAsync(transactionId, cancellationToken).ConfigureAwait(false);
             await RollbackDeliveryCreationAsync(transactionId, cancellationToken).ConfigureAwait(false);
 
+            // TODO: Consider patching here (but should consider what happens if 2 nodes work process this at the same time and one of them completes the transaction and the other rolls back)
             await DocumentStore
-                .ExecuteInConcurrentSessionAsync(async (session, ct) =>
+                .RetryOnConcurrencyErrorAsync(async (session, ct) =>
                 {
                     var transactionDocumentId = DocumentIdHelper.GetDocumentId<OrderTransaction>(session, transactionId);
                     var transactionDocument = await session.LoadAsync<OrderTransaction>(transactionDocumentId, ct).ConfigureAwait(false);

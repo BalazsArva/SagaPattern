@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Raven.Client.Documents;
-using SagaDemo.Common.DataAccess.RavenDb.Extensions;
 using SagaDemo.Common.DataAccess.RavenDb.Utilities;
 using SagaDemo.OrderAPI.Entitites;
 
@@ -13,6 +14,9 @@ namespace SagaDemo.OrderAPI.Orchestrators
         public const int DefaultRetryDelaySeconds = 15;
         public const int MaxAttemptsPerStep = 10;
         public const int MaxRollbackAttemptsPerStep = 10;
+
+        private static readonly PropertyInfo RollbackAttemptsPropertyInfo = typeof(StepDetails).GetProperty(nameof(StepDetails.RollbackAttempts));
+        private static readonly PropertyInfo StepStatusPropertyInfo = typeof(StepDetails).GetProperty(nameof(StepDetails.StepStatus));
 
         public IDocumentStore DocumentStore { get; }
 
@@ -107,63 +111,65 @@ namespace SagaDemo.OrderAPI.Orchestrators
 
         protected async Task PerformRollbackStepAsync(
             string transactionId,
-            Func<TTransaction, StepDetails> stepSelector,
+            Expression<Func<TTransaction, StepDetails>> stepSelector,
             Func<CancellationToken, Task> rollbackInvoker,
             CancellationToken cancellationToken)
-        {
-            await DocumentStore
-                .ExecuteInConcurrentSessionAsync(async (session, ct) =>
-                {
-                    var transactionDocumentId = DocumentIdHelper.GetDocumentId<TTransaction>(session, transactionId);
-                    var transactionDocument = await session.LoadAsync<TTransaction>(transactionDocumentId, ct).ConfigureAwait(false);
-
-                    var changeVector = session.Advanced.GetChangeVectorFor(transactionDocument);
-                    var stepDetails = stepSelector(transactionDocument);
-                    var stepStatus = stepDetails.StepStatus;
-
-                    if (stepStatus == StepStatus.RolledBack || stepStatus == StepStatus.NotStarted)
-                    {
-                        return;
-                    }
-
-                    try
-                    {
-                        await rollbackInvoker(ct).ConfigureAwait(false);
-
-                        stepDetails.StepStatus = StepStatus.RolledBack;
-                    }
-                    catch
-                    {
-                        ++stepDetails.RollbackAttempts;
-
-                        if (stepDetails.RollbackAttempts > MaxRollbackAttemptsPerStep)
-                        {
-                            stepDetails.StepStatus = StepStatus.RollbackFailed;
-                            transactionDocument.TransactionStatus = TransactionStatus.RollbackFailed;
-                        }
-
-                        // TODO: Retry with delay
-                    }
-
-                    await session.StoreAsync(transactionDocument, changeVector, transactionDocumentId, ct).ConfigureAwait(false);
-                    await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                }, cancellationToken)
-                .ConfigureAwait(false);
-        }
-
-        protected async Task FinalizeTransactionAsync(string transactionId, CancellationToken cancellationToken)
         {
             using (var session = DocumentStore.OpenAsyncSession())
             {
                 var transactionDocumentId = DocumentIdHelper.GetDocumentId<TTransaction>(session, transactionId);
                 var transactionDocument = await session.LoadAsync<TTransaction>(transactionDocumentId, cancellationToken).ConfigureAwait(false);
 
-                var changeVector = session.Advanced.GetChangeVectorFor(transactionDocument);
+                var stepDetails = stepSelector.Compile()(transactionDocument);
+                var stepStatus = stepDetails.StepStatus;
+                var rollbackAttempts = stepDetails.RollbackAttempts;
+                var transactionStatus = transactionDocument.TransactionStatus;
 
-                transactionDocument.TransactionStatus = TransactionStatus.Completed;
+                if (stepStatus == StepStatus.RolledBack || stepStatus == StepStatus.NotStarted)
+                {
+                    return;
+                }
 
-                // TODO: Handle concurrency issues
-                await session.StoreAsync(transactionDocument, changeVector, transactionDocumentId, cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    await rollbackInvoker(cancellationToken).ConfigureAwait(false);
+
+                    stepStatus = StepStatus.RolledBack;
+                }
+                catch
+                {
+                    ++rollbackAttempts;
+
+                    if (rollbackAttempts > MaxRollbackAttemptsPerStep)
+                    {
+                        stepStatus = StepStatus.RollbackFailed;
+                        transactionStatus = TransactionStatus.RollbackFailed;
+                    }
+                }
+
+                var rollbackAttemptsMemberExpression = Expression.MakeMemberAccess(stepSelector, RollbackAttemptsPropertyInfo);
+                var stepStatusMemberExpression = Expression.MakeMemberAccess(stepSelector, StepStatusPropertyInfo);
+
+                var rollbackAttemptsMemberAccessor = Expression.Lambda<Func<TTransaction, int>>(rollbackAttemptsMemberExpression, stepSelector.Parameters);
+                var stepStatusMemberAccessor = Expression.Lambda<Func<TTransaction, StepStatus>>(stepStatusMemberExpression, stepSelector.Parameters);
+
+                session.Advanced.Patch(transactionDocument, t => t.TransactionStatus, transactionStatus);
+                session.Advanced.Patch(transactionDocument, rollbackAttemptsMemberAccessor, rollbackAttempts);
+                session.Advanced.Patch(transactionDocument, stepStatusMemberAccessor, stepStatus);
+
+                await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        protected async Task CompleteTransactionAsync(string transactionId, CancellationToken cancellationToken)
+        {
+            using (var session = DocumentStore.OpenAsyncSession())
+            {
+                var transactionDocumentId = DocumentIdHelper.GetDocumentId<TTransaction>(session, transactionId);
+                var transactionDocument = await session.LoadAsync<TTransaction>(transactionDocumentId, cancellationToken).ConfigureAwait(false);
+
+                session.Advanced.Patch(transactionDocument, t => t.TransactionStatus, TransactionStatus.Completed);
+
                 await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }

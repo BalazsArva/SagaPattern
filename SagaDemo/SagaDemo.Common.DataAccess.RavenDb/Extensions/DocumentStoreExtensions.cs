@@ -9,7 +9,7 @@ namespace SagaDemo.Common.DataAccess.RavenDb.Extensions
 {
     public static class DocumentStoreExtensions
     {
-        public static async Task ExecuteInConcurrentSessionAsync(this IDocumentStore documentStore, Func<IAsyncDocumentSession, CancellationToken, Task> operationExecutor, CancellationToken cancellationToken)
+        public static async Task RetryOnConcurrencyErrorAsync(this IDocumentStore documentStore, Func<IAsyncDocumentSession, CancellationToken, Task> operationExecutor, CancellationToken cancellationToken)
         {
             while (true)
             {
