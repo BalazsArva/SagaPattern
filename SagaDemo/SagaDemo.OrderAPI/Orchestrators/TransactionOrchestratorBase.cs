@@ -16,31 +16,30 @@ namespace SagaDemo.OrderAPI.Orchestrators
         public const int MaxRollbackAttemptsPerStep = 10;
 
         private static readonly PropertyInfo RollbackAttemptsPropertyInfo = typeof(StepDetails).GetProperty(nameof(StepDetails.RollbackAttempts));
+        private static readonly PropertyInfo AttemptsPropertyInfo = typeof(StepDetails).GetProperty(nameof(StepDetails.Attempts));
         private static readonly PropertyInfo StepStatusPropertyInfo = typeof(StepDetails).GetProperty(nameof(StepDetails.StepStatus));
 
         public IDocumentStore DocumentStore { get; }
 
-        public TransactionOrchestratorBase(IDocumentStore documentStore)
+        protected TransactionOrchestratorBase(IDocumentStore documentStore)
         {
             DocumentStore = documentStore ?? throw new ArgumentNullException(nameof(documentStore));
         }
 
-        protected async Task<(TTransaction transaction, string changeVector)> GetTransactionByIdAsync(string transactionId, CancellationToken cancellationToken)
+        protected async Task<TTransaction> GetTransactionByIdAsync(string transactionId, CancellationToken cancellationToken)
         {
             using (var session = DocumentStore.OpenAsyncSession())
             {
                 var transactionDocumentId = DocumentIdHelper.GetDocumentId<TTransaction>(session, transactionId);
                 var transactionDocument = await session.LoadAsync<TTransaction>(transactionDocumentId, cancellationToken).ConfigureAwait(false);
 
-                var changeVector = session.Advanced.GetChangeVectorFor(transactionDocument);
-
-                return (transactionDocument, changeVector);
+                return transactionDocument;
             }
         }
 
         protected async Task PerformTransactionStepAsync(
             string transactionId,
-            Func<TTransaction, StepDetails> stepSelector,
+            Expression<Func<TTransaction, StepDetails>> stepSelector,
             Func<CancellationToken, Task<StepResult>> stepInvoker,
             CancellationToken cancellationToken)
         {
@@ -49,8 +48,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
                 var transactionDocumentId = DocumentIdHelper.GetDocumentId<TTransaction>(session, transactionId);
                 var transactionDocument = await session.LoadAsync<TTransaction>(transactionDocumentId, cancellationToken).ConfigureAwait(false);
 
-                var changeVector = session.Advanced.GetChangeVectorFor(transactionDocument);
-                var stepDetails = stepSelector(transactionDocument);
+                var stepDetails = stepSelector.Compile()(transactionDocument);
 
                 if (stepDetails.StepStatus == StepStatus.Completed ||
                     stepDetails.StepStatus == StepStatus.PermanentFailure ||
@@ -66,8 +64,9 @@ namespace SagaDemo.OrderAPI.Orchestrators
                     return;
                 }
 
-                stepDetails.StepStatus = StepStatus.InProgress;
                 StepResult stepResult;
+                var stepStatus = StepStatus.InProgress;
+                var attempts = stepDetails.Attempts;
 
                 try
                 {
@@ -80,31 +79,42 @@ namespace SagaDemo.OrderAPI.Orchestrators
 
                 if (stepResult == StepResult.Retry)
                 {
-                    stepDetails.StepStatus = StepStatus.TemporalFailure;
-                    transactionDocument.UtcDoNotExecuteBefore = DateTime.UtcNow.AddSeconds(DefaultRetryDelaySeconds);
-                    ++stepDetails.Attempts;
+                    ++attempts;
+                    stepStatus = StepStatus.TemporalFailure;
 
                     if (stepDetails.Attempts > MaxAttemptsPerStep)
                     {
-                        stepDetails.StepStatus = StepStatus.PermanentFailure;
+                        stepStatus = StepStatus.PermanentFailure;
                     }
                 }
                 else if (stepResult == StepResult.Abort)
                 {
-                    stepDetails.StepStatus = StepStatus.PermanentFailure;
+                    stepStatus = StepStatus.PermanentFailure;
                 }
                 else
                 {
-                    stepDetails.StepStatus = StepStatus.Completed;
+                    stepStatus = StepStatus.Completed;
                 }
 
-                if (stepDetails.StepStatus == StepStatus.PermanentFailure)
+                var attemptsMemberExpression = Expression.MakeMemberAccess(stepSelector, RollbackAttemptsPropertyInfo);
+                var stepStatusMemberExpression = Expression.MakeMemberAccess(stepSelector, StepStatusPropertyInfo);
+
+                var attemptsMemberAccessor = Expression.Lambda<Func<TTransaction, int>>(attemptsMemberExpression, stepSelector.Parameters);
+                var stepStatusMemberAccessor = Expression.Lambda<Func<TTransaction, StepStatus>>(stepStatusMemberExpression, stepSelector.Parameters);
+
+                session.Advanced.Patch(transactionDocument, attemptsMemberAccessor, attempts);
+                session.Advanced.Patch(transactionDocument, stepStatusMemberAccessor, stepStatus);
+
+                if (stepStatus == StepStatus.PermanentFailure)
                 {
-                    transactionDocument.TransactionStatus = TransactionStatus.PermanentFailure;
+                    session.Advanced.Patch(transactionDocument, t => t.TransactionStatus, TransactionStatus.PermanentFailure);
                 }
 
-                // TODO: Handle concurrent updates
-                await session.StoreAsync(transactionDocument, changeVector, transactionDocumentId, cancellationToken).ConfigureAwait(false);
+                if (stepStatus == StepStatus.TemporalFailure)
+                {
+                    session.Advanced.Patch(transactionDocument, t => t.UtcDoNotExecuteBefore, DateTime.UtcNow.AddSeconds(DefaultRetryDelaySeconds));
+                }
+
                 await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
@@ -156,6 +166,11 @@ namespace SagaDemo.OrderAPI.Orchestrators
                 session.Advanced.Patch(transactionDocument, t => t.TransactionStatus, transactionStatus);
                 session.Advanced.Patch(transactionDocument, rollbackAttemptsMemberAccessor, rollbackAttempts);
                 session.Advanced.Patch(transactionDocument, stepStatusMemberAccessor, stepStatus);
+
+                if (stepStatus != StepStatus.RolledBack)
+                {
+                    session.Advanced.Patch(transactionDocument, t => t.UtcDoNotExecuteBefore, DateTime.UtcNow.AddSeconds(DefaultRetryDelaySeconds));
+                }
 
                 await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
