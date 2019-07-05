@@ -27,7 +27,7 @@ namespace SagaDemo.OrderAPI.Services.Handlers.CommandHandlers
 
             using (var session = documentStore.OpenAsyncSession())
             {
-                var transactionDocumentId = DocumentIdHelper.GetDocumentId<OrderTransaction>(session, transactionId);
+                var transactionDocumentId = DocumentIdHelper.GetDocumentId<OrderTransaction>(documentStore, transactionId);
                 var transactionDocument = new OrderTransaction
                 {
                     Id = transactionDocumentId,

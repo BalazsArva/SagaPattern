@@ -30,7 +30,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
         {
             using (var session = DocumentStore.OpenAsyncSession())
             {
-                var transactionDocumentId = DocumentIdHelper.GetDocumentId<TTransaction>(session, transactionId);
+                var transactionDocumentId = DocumentIdHelper.GetDocumentId<TTransaction>(DocumentStore, transactionId);
                 var transactionDocument = await session.LoadAsync<TTransaction>(transactionDocumentId, cancellationToken).ConfigureAwait(false);
 
                 return transactionDocument;
@@ -45,7 +45,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
         {
             using (var session = DocumentStore.OpenAsyncSession())
             {
-                var transactionDocumentId = DocumentIdHelper.GetDocumentId<TTransaction>(session, transactionId);
+                var transactionDocumentId = DocumentIdHelper.GetDocumentId<TTransaction>(DocumentStore, transactionId);
                 var transactionDocument = await session.LoadAsync<TTransaction>(transactionDocumentId, cancellationToken).ConfigureAwait(false);
 
                 var stepDetails = stepSelector.Compile()(transactionDocument);
@@ -127,7 +127,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
         {
             using (var session = DocumentStore.OpenAsyncSession())
             {
-                var transactionDocumentId = DocumentIdHelper.GetDocumentId<TTransaction>(session, transactionId);
+                var transactionDocumentId = DocumentIdHelper.GetDocumentId<TTransaction>(DocumentStore, transactionId);
                 var transactionDocument = await session.LoadAsync<TTransaction>(transactionDocumentId, cancellationToken).ConfigureAwait(false);
 
                 var stepDetails = stepSelector.Compile()(transactionDocument);
@@ -180,7 +180,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
         {
             using (var session = DocumentStore.OpenAsyncSession())
             {
-                var transactionDocumentId = DocumentIdHelper.GetDocumentId<TTransaction>(session, transactionId);
+                var transactionDocumentId = DocumentIdHelper.GetDocumentId<TTransaction>(DocumentStore, transactionId);
                 var transactionDocument = await session.LoadAsync<TTransaction>(transactionDocumentId, cancellationToken).ConfigureAwait(false);
 
                 session.Advanced.Patch(transactionDocument, t => t.TransactionStatus, TransactionStatus.Completed);

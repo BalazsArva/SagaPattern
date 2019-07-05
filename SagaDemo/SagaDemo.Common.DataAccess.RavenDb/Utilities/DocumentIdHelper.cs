@@ -1,37 +1,22 @@
-﻿using System;
-using Raven.Client.Documents;
-using Raven.Client.Documents.Session;
+﻿using Raven.Client.Documents;
 
 namespace SagaDemo.Common.DataAccess.RavenDb.Utilities
 {
     public static class DocumentIdHelper
     {
-        public static string GetDocumentId<TEntity>(IAsyncDocumentSession session, string id)
+        public static string GetDocumentId<TEntity>(IDocumentStore documentStore, string entityId)
         {
-            // TODO: Consider definig this for DocumentStore instead of session
-            var separator = session.Advanced.DocumentStore.Conventions.IdentityPartsSeparator;
-            var collectionName = session.Advanced.DocumentStore.Conventions.GetCollectionName(typeof(TEntity));
-
-            return $"{collectionName}{separator}{id}";
-        }
-
-        public static string GetEntityId<TEntity>(IAsyncDocumentSession session, string documentId)
-        {
-            var separator = session.Advanced.DocumentStore.Conventions.IdentityPartsSeparator;
-            var collectionName = session.Advanced.DocumentStore.Conventions.GetCollectionName(typeof(TEntity));
+            var collectionName = documentStore.Conventions.GetCollectionName(typeof(TEntity));
+            var separator = documentStore.Conventions.IdentityPartsSeparator;
 
             var prefix = collectionName + separator;
-            var prefixLength = prefix.Length;
 
-            if (!documentId.StartsWith(prefix))
+            if (entityId.StartsWith(prefix))
             {
-                throw new ArgumentException(
-                    $"An invalid document Id has been encountered while trying to convert the document identifier to entity identifier.\n" +
-                    $"A valid document identifier must start with '{prefix}'.\n" +
-                    $"The attempted value was '{documentId}'.");
+                return entityId;
             }
 
-            return documentId.Substring(prefixLength);
+            return prefix + entityId;
         }
 
         public static string GetEntityId<TEntity>(IDocumentStore documentStore, string documentId)
@@ -44,10 +29,7 @@ namespace SagaDemo.Common.DataAccess.RavenDb.Utilities
 
             if (!documentId.StartsWith(prefix))
             {
-                throw new ArgumentException(
-                    $"An invalid document Id has been encountered while trying to convert the document identifier to entity identifier.\n" +
-                    $"A valid document identifier must start with '{prefix}'.\n" +
-                    $"The attempted value was '{documentId}'.");
+                return documentId;
             }
 
             return documentId.Substring(prefixLength);

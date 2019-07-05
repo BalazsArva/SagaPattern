@@ -28,7 +28,7 @@ namespace SagaDemo.DeliveryAPI.Handlers.CommandHandlers
             {
                 var deliveryDocument = new Delivery
                 {
-                    Id = DocumentIdHelper.GetDocumentId<Delivery>(session, command.TransactionId),
+                    Id = DocumentIdHelper.GetDocumentId<Delivery>(documentStore, command.TransactionId),
                     Status = DeliveryStatus.Created,
                     Address = new Address
                     {

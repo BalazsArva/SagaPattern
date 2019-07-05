@@ -10,7 +10,7 @@ namespace SagaDemo.DeliveryAPI.Extensions
     {
         public static Task<Delivery> LoadDeliveryAsync(this IAsyncDocumentSession session, string id, CancellationToken cancellationToken)
         {
-            var internalId = DocumentIdHelper.GetDocumentId<Delivery>(session, id);
+            var internalId = DocumentIdHelper.GetDocumentId<Delivery>(session.Advanced.DocumentStore, id);
 
             return session.LoadAsync<Delivery>(internalId, cancellationToken);
         }

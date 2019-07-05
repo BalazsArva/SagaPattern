@@ -88,7 +88,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
         {
             using (var session = DocumentStore.OpenAsyncSession())
             {
-                var transactionDocumentId = DocumentIdHelper.GetDocumentId<OrderTransaction>(session, transactionId);
+                var transactionDocumentId = DocumentIdHelper.GetDocumentId<OrderTransaction>(DocumentStore, transactionId);
                 var transactionDocument = await session.LoadAsync<OrderTransaction>(transactionDocumentId, cancellationToken).ConfigureAwait(false);
 
                 if (transactionDocument.OrderTotalStepDetails.StepStatus == StepStatus.Completed)
@@ -170,7 +170,7 @@ namespace SagaDemo.OrderAPI.Orchestrators
 
             using (var session = DocumentStore.OpenAsyncSession())
             {
-                var transactionDocumentId = DocumentIdHelper.GetDocumentId<OrderTransaction>(session, transactionId);
+                var transactionDocumentId = DocumentIdHelper.GetDocumentId<OrderTransaction>(DocumentStore, transactionId);
                 var transactionDocument = await session.LoadAsync<OrderTransaction>(transactionDocumentId, cancellationToken).ConfigureAwait(false);
 
                 if (transactionDocument.TransactionStatus == TransactionStatus.RolledBack)

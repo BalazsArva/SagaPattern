@@ -1,16 +1,16 @@
 ﻿using System;
-using Raven.Client.Documents.Session;
+using Raven.Client.Documents;
 using SagaDemo.Common.DataAccess.RavenDb.Utilities;
 
 namespace SagaDemo.DeliveryAPI.Mappers
 {
     public static class DeliveryMapper
     {
-        public static Operations.DataStructures.Delivery ToServiceContract(IAsyncDocumentSession session, Entities.Delivery deliveryEntity)
+        public static Operations.DataStructures.Delivery ToServiceContract(IDocumentStore documentStore, Entities.Delivery deliveryEntity)
         {
-            if (session == null)
+            if (documentStore == null)
             {
-                throw new ArgumentNullException(nameof(session));
+                throw new ArgumentNullException(nameof(documentStore));
             }
 
             if (deliveryEntity == null)
@@ -18,7 +18,7 @@ namespace SagaDemo.DeliveryAPI.Mappers
                 return null;
             }
 
-            var id = DocumentIdHelper.GetEntityId<Entities.Delivery>(session, deliveryEntity.Id);
+            var id = DocumentIdHelper.GetEntityId<Entities.Delivery>(documentStore, deliveryEntity.Id);
 
             return new Operations.DataStructures.Delivery(
                 id,
