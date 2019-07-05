@@ -43,7 +43,6 @@ namespace SagaDemo.OrderAPI.Services
 
         private async Task<bool> ProcessCommandsAsync(CancellationToken cancellationToken)
         {
-            // TODO: Consider scheduling items for rollback as well (maybe introduce a RollingBack status?)
             QueryStatistics queryStatistics;
             List<string> itemsToProcess;
 
