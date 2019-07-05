@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Session;
 
@@ -15,14 +13,6 @@ namespace SagaDemo.Common.DataAccess.RavenDb.Utilities
             var collectionName = session.Advanced.DocumentStore.Conventions.GetCollectionName(typeof(TEntity));
 
             return $"{collectionName}{separator}{id}";
-        }
-
-        public static IEnumerable<string> GetDocumentIds<TEntity>(IAsyncDocumentSession session, IEnumerable<string> ids)
-        {
-            var separator = session.Advanced.DocumentStore.Conventions.IdentityPartsSeparator;
-            var collectionName = session.Advanced.DocumentStore.Conventions.GetCollectionName(typeof(TEntity));
-
-            return ids.Select(id => $"{collectionName}{separator}{id}");
         }
 
         public static string GetEntityId<TEntity>(IAsyncDocumentSession session, string documentId)
